@@ -31,6 +31,9 @@ class MainActivity : AppCompatActivity() {
         gradingDoneButton.setOnClickListener {
             sendAction(Action.FinishGrading)
         }
+        celebratingRepeatButton.setOnClickListener {
+            sendAction(Action.Reload)
+        }
         if (savedInstanceState == null) {
             sendAction(
                 Action.Load(
@@ -81,12 +84,13 @@ class MainActivity : AppCompatActivity() {
                 revealView("Check your answers", gradingFrameLayout)
             }
             is Vision.Learning -> revealView("Find answers for these questions", null)
+            is Vision.Celebrating -> revealView("You aced it!", celebratingFrameLayout)
         }
     }
 
     private fun revealView(pageTitle: String, view: View?) {
         title = pageTitle
-        val views = listOf(quizzingRecyclerView, gradingFrameLayout)
+        val views = listOf(quizzingRecyclerView, gradingFrameLayout, celebratingFrameLayout)
         views.forEach {
             if (it == view) {
                 it.visibility = View.VISIBLE

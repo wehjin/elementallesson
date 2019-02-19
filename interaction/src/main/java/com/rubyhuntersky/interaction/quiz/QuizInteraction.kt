@@ -9,6 +9,7 @@ sealed class Vision {
     data class Quizzing(val topics: List<String>) : Vision()
     data class Grading(val knownChallenges: List<Challenge>) : Vision()
     data class Learning(val unknownChallenges: List<Challenge>) : Vision()
+    object Celebrating : Vision()
 }
 
 sealed class Action {
@@ -77,5 +78,11 @@ class QuizInteraction : BehaviorInteraction<Vision, Action>(
         }
     }
 
-    private fun setVisionToLearning() = setVision(Vision.Learning(unknown.toList()))
+    private fun setVisionToLearning() {
+        if (unknown.isEmpty()) {
+            setVision(Vision.Celebrating)
+        } else {
+            setVision(Vision.Learning(unknown.toList()))
+        }
+    }
 }
