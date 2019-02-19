@@ -10,6 +10,7 @@ import com.rubyhuntersky.data.Quiz
 import com.rubyhuntersky.interaction.quiz.Action
 import com.rubyhuntersky.interaction.quiz.QuizInteraction
 import com.rubyhuntersky.interaction.quiz.Vision
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.activity_main.*
@@ -20,8 +21,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         with(quizzingRecyclerView) {
-            layoutManager = LinearLayoutManager(this@MainActivity)
+            layoutManager = LinearLayoutManager(context)
             adapter = QuestionsRecyclerViewAdapter()
+        }
+        with(gradingRecyclerView) {
+            layoutManager = LinearLayoutManager(context)
+            adapter = AnswersRecyclerViewAdapter()
         }
         if (savedInstanceState == null) {
             sendAction(
@@ -39,7 +44,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        interaction.visionStream
+        interaction.visionStream.observeOn(AndroidSchedulers.mainThread())
             .doOnNext {
                 Log.d(this.javaClass.simpleName, "VISION: $it")
             }
@@ -53,24 +58,31 @@ class MainActivity : AppCompatActivity() {
         interaction.sendAction(action)
     }
 
-    private fun render(vision: Vision) = when (vision) {
-        Vision.Idle -> revealView(null)
-        is Vision.Quizzing -> {
-            val adapter = quizzingRecyclerView.adapter as QuestionsRecyclerViewAdapter
-            adapter.bind(
-                questions = vision.topics,
-                sendAnswer = { index, result ->
-                    sendAction(Action.AddAnswer(index, result))
-                }
-            )
-            revealView(quizzingRecyclerView)
+    private fun render(vision: Vision) {
+        return when (vision) {
+            Vision.Idle -> revealView(null)
+            is Vision.Quizzing -> {
+                val adapter = quizzingRecyclerView.adapter as QuestionsRecyclerViewAdapter
+                adapter.bind(
+                    items = vision.topics,
+                    sendAnswer = { index, result -> sendAction(Action.AddAnswer(index, result)) }
+                )
+                revealView(quizzingRecyclerView)
+            }
+            is Vision.Grading -> {
+                val adapter = gradingRecyclerView.adapter as AnswersRecyclerViewAdapter
+                adapter.bind(
+                    items = vision.knownChallenges,
+                    sendFail = { index -> sendAction(Action.FailAnswer(index)) }
+                )
+                revealView(gradingRecyclerView)
+            }
+            is Vision.Learning -> revealView(null)
         }
-        is Vision.Grading -> revealView(null)
-        is Vision.Learning -> revealView(null)
     }
 
     private fun revealView(view: View?) {
-        val views = listOf(quizzingRecyclerView as View)
+        val views = listOf(quizzingRecyclerView, gradingRecyclerView)
         views.forEach {
             if (it == view) {
                 it.visibility = View.VISIBLE

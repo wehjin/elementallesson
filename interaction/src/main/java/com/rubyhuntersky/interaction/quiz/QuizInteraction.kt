@@ -57,11 +57,7 @@ class QuizInteraction : BehaviorInteraction<Vision, Action>(
                 setVisionToGradingOrLearning()
             }
             Action.FinishGrading -> setVisionToLearning()
-            Action.Reload -> sendAction(
-                Action.Load(
-                    quiz
-                )
-            )
+            Action.Reload -> sendAction(Action.Load(quiz))
         }
     }
 
@@ -77,9 +73,9 @@ class QuizInteraction : BehaviorInteraction<Vision, Action>(
         if (known.isEmpty()) {
             setVisionToLearning()
         } else {
-            setVision(Vision.Grading(known))
+            setVision(Vision.Grading(known.toList()))
         }
     }
 
-    private fun setVisionToLearning() = setVision(Vision.Learning(unknown))
+    private fun setVisionToLearning() = setVision(Vision.Learning(unknown.toList()))
 }
