@@ -14,7 +14,7 @@ sealed class Vision {
 sealed class Action {
     object Quit : Action()
     data class Load(val quiz: Quiz) : Action()
-    data class AnswerChallenge(val index: Int, val isAnswerKnown: Boolean) : Action()
+    data class AddAnswer(val index: Int, val isAnswerKnown: Boolean) : Action()
     data class FailAnswer(val index: Int) : Action()
     object FinishGrading : Action()
     object Reload : Action()
@@ -44,7 +44,7 @@ class QuizInteraction : BehaviorInteraction<Vision, Action>(
                     setVisionToQuizzing()
                 }
             }
-            is Action.AnswerChallenge -> {
+            is Action.AddAnswer -> {
                 (if (action.isAnswerKnown) known else unknown).add(unanswered.removeAt(action.index))
                 if (unanswered.isEmpty()) {
                     setVisionToGradingOrLearning()

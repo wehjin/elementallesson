@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
                 layoutManager = LinearLayoutManager(this@MainActivity)
                 adapter = QuestionsRecyclerViewAdapter()
             }
-            interaction.sendAction(
+            sendAction(
                 Action.Load(
                     Quiz(
                         listOf(
@@ -46,11 +46,21 @@ class MainActivity : AppCompatActivity() {
             .subscribe(this@MainActivity::render).addTo(composite)
     }
 
+    private fun sendAction(action: Action) {
+        Log.d(this.javaClass.simpleName, "ACTION: $action")
+        interaction.sendAction(action)
+    }
+
     private fun render(vision: Vision) = when (vision) {
         Vision.Idle -> revealView(null)
         is Vision.Quizzing -> {
             val adapter = quizzingRecyclerView.adapter as QuestionsRecyclerViewAdapter
-            adapter.setQuestions(vision.topics)
+            adapter.bind(
+                questions = vision.topics,
+                sendAnswer = { index, result ->
+                    sendAction(Action.AddAnswer(index, result))
+                }
+            )
             revealView(quizzingRecyclerView)
         }
         is Vision.Grading -> revealView(null)

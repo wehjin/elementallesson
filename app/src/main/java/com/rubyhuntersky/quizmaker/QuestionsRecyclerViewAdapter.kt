@@ -7,8 +7,10 @@ import androidx.recyclerview.widget.RecyclerView
 class QuestionsRecyclerViewAdapter : RecyclerView.Adapter<QuestionViewHolder>() {
 
     private var adapterQuestions = mutableListOf<String>()
+    private var sendAnswer: (Int, Boolean) -> Unit = { _, _ -> Unit }
 
-    fun setQuestions(questions: List<String>) {
+    fun bind(questions: List<String>, sendAnswer: (Int, Boolean) -> Unit) {
+        this.sendAnswer = sendAnswer
         if (adapterQuestions != questions) {
             adapterQuestions.clear()
             adapterQuestions.addAll(questions)
@@ -27,6 +29,6 @@ class QuestionsRecyclerViewAdapter : RecyclerView.Adapter<QuestionViewHolder>() 
 
     override fun onBindViewHolder(holder: QuestionViewHolder, position: Int) {
         val question = adapterQuestions[position]
-        holder.bind(question)
+        holder.bind(question, { sendAnswer(position, true) }, { sendAnswer(position, false) })
     }
 }

@@ -20,8 +20,8 @@ class QuizInteractionTest {
         interaction.sendAction(Action.Load(quiz))
         interaction.visionStream.test().assertValue(Vision.Quizzing(listOf("a", "b")))
 
-        interaction.sendAction(Action.AnswerChallenge(0, true))
-        interaction.sendAction(Action.AnswerChallenge(0, false))
+        interaction.sendAction(Action.AddAnswer(0, true))
+        interaction.sendAction(Action.AddAnswer(0, false))
         interaction.visionStream.test().assertValue(Vision.Grading(listOf(a)))
 
         interaction.sendAction(Action.FinishGrading)
