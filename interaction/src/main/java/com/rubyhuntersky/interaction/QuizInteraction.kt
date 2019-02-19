@@ -1,14 +1,14 @@
 package com.rubyhuntersky.interaction
 
 import com.rubyhuntersky.data.Quiz
-import com.rubyhuntersky.data.QuizQuestion
+import com.rubyhuntersky.data.Challenge
 import com.rubyhuntersky.interaction.core.BehaviorInteraction
 
 sealed class Vision {
     object Idle : Vision()
     data class Quizzing(val topics: List<String>) : Vision()
-    data class Grading(val knownQuizQuestions: List<QuizQuestion>) : Vision()
-    data class Learning(val unknownQuizQuestions: List<QuizQuestion>) : Vision()
+    data class Grading(val knownChallenges: List<Challenge>) : Vision()
+    data class Learning(val unknownChallenges: List<Challenge>) : Vision()
 }
 
 sealed class Action {
@@ -23,16 +23,16 @@ sealed class Action {
 class QuizInteraction : BehaviorInteraction<Vision, Action>(Vision.Idle, Action.Quit) {
 
     private lateinit var quiz: Quiz
-    private val unanswered = mutableListOf<QuizQuestion>()
-    private val known = mutableListOf<QuizQuestion>()
-    private val unknown = mutableListOf<QuizQuestion>()
+    private val unanswered = mutableListOf<Challenge>()
+    private val known = mutableListOf<Challenge>()
+    private val unknown = mutableListOf<Challenge>()
 
     override fun sendAction(action: Action) {
         when (action) {
             Action.Quit -> setVision(Vision.Idle)
             is Action.Load -> {
                 quiz = action.quiz
-                with(unanswered) { clear(); addAll(quiz.questions) }
+                with(unanswered) { clear(); addAll(quiz.challenges) }
                 known.clear()
                 unknown.clear()
                 if (unanswered.isEmpty()) {
@@ -58,7 +58,7 @@ class QuizInteraction : BehaviorInteraction<Vision, Action>(Vision.Idle, Action.
         }
     }
 
-    private fun setVisionToQuizzing() = setVision(Vision.Quizzing(unanswered.map(QuizQuestion::prompt)))
+    private fun setVisionToQuizzing() = setVision(Vision.Quizzing(unanswered.map(Challenge::question)))
 
     private fun setVisionToGradingOrLearning() {
         if (known.isEmpty()) {

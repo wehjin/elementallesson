@@ -1,11 +1,11 @@
 package com.rubyhuntersky.data
 
-data class QuizQuestion(
-    val prompt: String,
-    val target: String
+data class Challenge(
+    val question: String,
+    val answer: String
 )
 
 data class Quiz(
-    val questions: List<QuizQuestion>
+    val challenges: List<Challenge>
 )
 

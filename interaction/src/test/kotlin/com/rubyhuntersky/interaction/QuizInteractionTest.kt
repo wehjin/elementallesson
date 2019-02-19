@@ -1,7 +1,7 @@
 package com.rubyhuntersky.interaction
 
 import com.rubyhuntersky.data.Quiz
-import com.rubyhuntersky.data.QuizQuestion
+import com.rubyhuntersky.data.Challenge
 import org.junit.Test
 
 class QuizInteractionTest {
@@ -11,8 +11,8 @@ class QuizInteractionTest {
         val interaction = QuizInteraction()
         interaction.visionStream.test().assertValue(Vision.Idle)
 
-        val a = QuizQuestion("a", "A")
-        val b = QuizQuestion("b", "B")
+        val a = Challenge("a", "A")
+        val b = Challenge("b", "B")
         val quiz = Quiz(listOf(a, b))
         interaction.sendAction(Action.Load(quiz))
         interaction.visionStream.test().assertValue(Vision.Quizzing(listOf("a", "b")))
