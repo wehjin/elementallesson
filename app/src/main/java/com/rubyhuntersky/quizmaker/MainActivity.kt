@@ -28,6 +28,9 @@ class MainActivity : AppCompatActivity() {
             layoutManager = LinearLayoutManager(context)
             adapter = AnswersRecyclerViewAdapter()
         }
+        gradingDoneButton.setOnClickListener {
+            sendAction(Action.FinishGrading)
+        }
         if (savedInstanceState == null) {
             sendAction(
                 Action.Load(
@@ -60,14 +63,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun render(vision: Vision) {
         return when (vision) {
-            Vision.Idle -> revealView(null)
+            Vision.Idle -> revealView("Idle", null)
             is Vision.Quizzing -> {
                 val adapter = quizzingRecyclerView.adapter as QuestionsRecyclerViewAdapter
                 adapter.bind(
                     items = vision.topics,
                     sendAnswer = { index, result -> sendAction(Action.AddAnswer(index, result)) }
                 )
-                revealView(quizzingRecyclerView)
+                revealView("Answer these questions", quizzingRecyclerView)
             }
             is Vision.Grading -> {
                 val adapter = gradingRecyclerView.adapter as AnswersRecyclerViewAdapter
@@ -75,14 +78,15 @@ class MainActivity : AppCompatActivity() {
                     items = vision.knownChallenges,
                     sendFail = { index -> sendAction(Action.FailAnswer(index)) }
                 )
-                revealView(gradingRecyclerView)
+                revealView("Check your answers", gradingFrameLayout)
             }
-            is Vision.Learning -> revealView(null)
+            is Vision.Learning -> revealView("Find answers for these questions", null)
         }
     }
 
-    private fun revealView(view: View?) {
-        val views = listOf(quizzingRecyclerView, gradingRecyclerView)
+    private fun revealView(pageTitle: String, view: View?) {
+        title = pageTitle
+        val views = listOf(quizzingRecyclerView, gradingFrameLayout)
         views.forEach {
             if (it == view) {
                 it.visibility = View.VISIBLE
