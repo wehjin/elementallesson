@@ -19,17 +19,17 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        with(quizzingRecyclerView) {
+            layoutManager = LinearLayoutManager(this@MainActivity)
+            adapter = QuestionsRecyclerViewAdapter()
+        }
         if (savedInstanceState == null) {
-            with(quizzingRecyclerView) {
-                layoutManager = LinearLayoutManager(this@MainActivity)
-                adapter = QuestionsRecyclerViewAdapter()
-            }
             sendAction(
                 Action.Load(
                     Quiz(
                         listOf(
-                            Challenge("Day 4", "yokka"),
-                            Challenge("Day 14", "juuyokka")
+                            Challenge("4th day of the month", "yokka"),
+                            Challenge("14th day of the month", "juuyokka")
                         )
                     )
                 )
@@ -43,7 +43,9 @@ class MainActivity : AppCompatActivity() {
             .doOnNext {
                 Log.d(this.javaClass.simpleName, "VISION: $it")
             }
-            .subscribe(this@MainActivity::render).addTo(composite)
+            .subscribe(this@MainActivity::render) {
+                Log.e(this.javaClass.simpleName, "Vision stream error", it)
+            }.addTo(composite)
     }
 
     private fun sendAction(action: Action) {
