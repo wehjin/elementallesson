@@ -83,7 +83,7 @@ class MainActivity : AppCompatActivity() {
                 )
                 revealView("Check your answers", gradingFrameLayout)
             }
-            is Vision.Learning -> revealView("Find answers for these questions", null)
+            is Vision.Learning -> revealView("Write answers to these questions", null)
             is Vision.Celebrating -> revealView("You aced it!", celebratingFrameLayout)
         }
     }
