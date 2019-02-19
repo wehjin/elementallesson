@@ -2,6 +2,9 @@ package com.rubyhuntersky.interaction
 
 import com.rubyhuntersky.data.Quiz
 import com.rubyhuntersky.data.Challenge
+import com.rubyhuntersky.interaction.quiz.Action
+import com.rubyhuntersky.interaction.quiz.QuizInteraction
+import com.rubyhuntersky.interaction.quiz.Vision
 import org.junit.Test
 
 class QuizInteractionTest {
@@ -17,8 +20,8 @@ class QuizInteractionTest {
         interaction.sendAction(Action.Load(quiz))
         interaction.visionStream.test().assertValue(Vision.Quizzing(listOf("a", "b")))
 
-        interaction.sendAction(Action.AnswerQuestion(0, true))
-        interaction.sendAction(Action.AnswerQuestion(0, false))
+        interaction.sendAction(Action.AnswerChallenge(0, true))
+        interaction.sendAction(Action.AnswerChallenge(0, false))
         interaction.visionStream.test().assertValue(Vision.Grading(listOf(a)))
 
         interaction.sendAction(Action.FinishGrading)

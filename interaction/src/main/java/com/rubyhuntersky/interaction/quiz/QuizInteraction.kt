@@ -1,7 +1,7 @@
-package com.rubyhuntersky.interaction
+package com.rubyhuntersky.interaction.quiz
 
-import com.rubyhuntersky.data.Quiz
 import com.rubyhuntersky.data.Challenge
+import com.rubyhuntersky.data.Quiz
 import com.rubyhuntersky.interaction.core.BehaviorInteraction
 
 sealed class Vision {
@@ -14,13 +14,16 @@ sealed class Vision {
 sealed class Action {
     object Quit : Action()
     data class Load(val quiz: Quiz) : Action()
-    data class AnswerQuestion(val index: Int, val isAnswerKnown: Boolean) : Action()
-    data class FailedGrading(val index: Int) : Action()
+    data class AnswerChallenge(val index: Int, val isAnswerKnown: Boolean) : Action()
+    data class FailAnswer(val index: Int) : Action()
     object FinishGrading : Action()
     object Reload : Action()
 }
 
-class QuizInteraction : BehaviorInteraction<Vision, Action>(Vision.Idle, Action.Quit) {
+class QuizInteraction : BehaviorInteraction<Vision, Action>(
+    Vision.Idle,
+    Action.Quit
+) {
 
     private lateinit var quiz: Quiz
     private val unanswered = mutableListOf<Challenge>()
@@ -41,7 +44,7 @@ class QuizInteraction : BehaviorInteraction<Vision, Action>(Vision.Idle, Action.
                     setVisionToQuizzing()
                 }
             }
-            is Action.AnswerQuestion -> {
+            is Action.AnswerChallenge -> {
                 (if (action.isAnswerKnown) known else unknown).add(unanswered.removeAt(action.index))
                 if (unanswered.isEmpty()) {
                     setVisionToGradingOrLearning()
@@ -49,16 +52,26 @@ class QuizInteraction : BehaviorInteraction<Vision, Action>(Vision.Idle, Action.
                     setVisionToQuizzing()
                 }
             }
-            is Action.FailedGrading -> {
+            is Action.FailAnswer -> {
                 unknown.add(known.removeAt(action.index))
                 setVisionToGradingOrLearning()
             }
             Action.FinishGrading -> setVisionToLearning()
-            Action.Reload -> sendAction(Action.Load(quiz))
+            Action.Reload -> sendAction(
+                Action.Load(
+                    quiz
+                )
+            )
         }
     }
 
-    private fun setVisionToQuizzing() = setVision(Vision.Quizzing(unanswered.map(Challenge::question)))
+    private fun setVisionToQuizzing() = setVision(
+        Vision.Quizzing(
+            unanswered.map(
+                Challenge::question
+            )
+        )
+    )
 
     private fun setVisionToGradingOrLearning() {
         if (known.isEmpty()) {
