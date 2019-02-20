@@ -31,6 +31,13 @@ class MainActivity : AppCompatActivity() {
         gradingDoneButton.setOnClickListener {
             sendAction(Action.FinishGrading)
         }
+        with(studiesRecyclerView) {
+            layoutManager = LinearLayoutManager(context)
+            adapter = StudiesRecyclerViewAdapter()
+        }
+        studiesDoneButton.setOnClickListener {
+            sendAction(Action.Reload)
+        }
         celebratingRepeatButton.setOnClickListener {
             sendAction(Action.Reload)
         }
@@ -83,14 +90,20 @@ class MainActivity : AppCompatActivity() {
                 )
                 revealView("Check your answers", gradingFrameLayout)
             }
-            is Vision.Learning -> revealView("Write answers to these questions", null)
+            is Vision.Learning -> {
+                val adapter = studiesRecyclerView.adapter as StudiesRecyclerViewAdapter
+                adapter.bind(
+                    items = vision.unknownChallenges.map(Challenge::answer)
+                )
+                revealView("Learn these answers", studiesLinearLayout)
+            }
             is Vision.Celebrating -> revealView("You aced it!", celebratingFrameLayout)
         }
     }
 
     private fun revealView(pageTitle: String, view: View?) {
         title = pageTitle
-        val views = listOf(quizzingRecyclerView, gradingFrameLayout, celebratingFrameLayout)
+        val views = listOf(quizzingRecyclerView, gradingFrameLayout, studiesLinearLayout, celebratingFrameLayout)
         views.forEach {
             if (it == view) {
                 it.visibility = View.VISIBLE
