@@ -6,7 +6,6 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.rubyhuntersky.data.Challenge
-import com.rubyhuntersky.data.Quiz
 import com.rubyhuntersky.interaction.quiz.Action
 import com.rubyhuntersky.interaction.quiz.QuizInteraction
 import com.rubyhuntersky.interaction.quiz.Vision
@@ -42,16 +41,7 @@ class MainActivity : AppCompatActivity() {
             sendAction(Action.Reload)
         }
         if (savedInstanceState == null) {
-            sendAction(
-                Action.Load(
-                    Quiz(
-                        listOf(
-                            Challenge("4th day of the month", "yokka"),
-                            Challenge("14th day of the month", "juuyokka")
-                        )
-                    )
-                )
-            )
+            sendAction(Action.Load(GanbarooQuizGroup.daysOfTheMonth))
         }
     }
 

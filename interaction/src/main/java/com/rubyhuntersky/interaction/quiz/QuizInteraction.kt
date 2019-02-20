@@ -36,11 +36,15 @@ class QuizInteraction : BehaviorInteraction<Vision, Action>(
             Action.Quit -> setVision(Vision.Idle)
             is Action.Load -> {
                 quiz = action.quiz
-                with(unanswered) { clear(); addAll(quiz.challenges) }
+                with(unanswered) {
+                    clear()
+                    addAll(quiz.challenges)
+                    repeat(5) { shuffle() }
+                }
                 known.clear()
                 unknown.clear()
                 if (unanswered.isEmpty()) {
-                    setVision(Vision.Idle)
+                    setVision(Vision.Celebrating)
                 } else {
                     setVisionToQuizzing()
                 }
@@ -62,13 +66,9 @@ class QuizInteraction : BehaviorInteraction<Vision, Action>(
         }
     }
 
-    private fun setVisionToQuizzing() = setVision(
-        Vision.Quizzing(
-            unanswered.map(
-                Challenge::question
-            )
-        )
-    )
+    private fun setVisionToQuizzing() {
+        setVision(Vision.Quizzing(unanswered.map(Challenge::question)))
+    }
 
     private fun setVisionToGradingOrLearning() {
         if (known.isEmpty()) {
@@ -82,6 +82,7 @@ class QuizInteraction : BehaviorInteraction<Vision, Action>(
         if (unknown.isEmpty()) {
             setVision(Vision.Celebrating)
         } else {
+            repeat(5) { unknown.shuffle() }
             setVision(Vision.Learning(unknown.toList()))
         }
     }
