@@ -27,4 +27,10 @@ object GanbarooQuizGroup {
             Challenge("29th day of the month", "nijuukunichi")
         )
     )
+
+    val other = Quiz(
+        listOf(
+            Challenge("holiday", "yasumi")
+        )
+    )
 }
