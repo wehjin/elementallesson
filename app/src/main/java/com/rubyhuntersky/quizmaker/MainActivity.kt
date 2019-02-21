@@ -19,9 +19,23 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        setupViews()
+        if (savedInstanceState == null) {
+            sendAction(Action.Load(GanbarooQuizGroup))
+        }
+    }
+
+    private fun setupViews() {
+        with(pickingRecyclerView) {
+            layoutManager = LinearLayoutManager(context)
+            adapter = QuizTitlesRecyclerViewAdapter()
+        }
         with(quizzingRecyclerView) {
             layoutManager = LinearLayoutManager(context)
             adapter = QuestionsRecyclerViewAdapter()
+        }
+        quizzingRestartButton.setOnClickListener {
+            sendAction(Action.Reload)
         }
         with(gradingRecyclerView) {
             layoutManager = LinearLayoutManager(context)
@@ -39,9 +53,6 @@ class MainActivity : AppCompatActivity() {
         }
         celebratingRepeatButton.setOnClickListener {
             sendAction(Action.Reload)
-        }
-        if (savedInstanceState == null) {
-            sendAction(Action.Load(GanbarooQuizGroup.daysOfTheMonth))
         }
     }
 
@@ -64,27 +75,30 @@ class MainActivity : AppCompatActivity() {
     private fun render(vision: Vision) {
         return when (vision) {
             Vision.Idle -> revealView("Idle", null)
+            is Vision.Picking -> {
+                val adapter = pickingRecyclerView.adapter as QuizTitlesRecyclerViewAdapter
+                adapter.bind(vision.titles) { index ->
+                    sendAction(Action.SelectQuiz(index))
+                }
+                revealView("Select a quiz", pickingRecyclerView)
+            }
             is Vision.Quizzing -> {
                 val adapter = quizzingRecyclerView.adapter as QuestionsRecyclerViewAdapter
-                adapter.bind(
-                    items = vision.topics,
-                    sendAnswer = { index, result -> sendAction(Action.AddAnswer(index, result)) }
-                )
-                revealView("Answer these questions", quizzingRecyclerView)
+                adapter.bind(vision.topics) { index, result ->
+                    sendAction(Action.AddAnswer(index, result))
+                }
+                revealView("Answer these questions", quizzingLinearLayout)
             }
             is Vision.Grading -> {
                 val adapter = gradingRecyclerView.adapter as AnswersRecyclerViewAdapter
-                adapter.bind(
-                    items = vision.knownChallenges,
-                    sendFail = { index -> sendAction(Action.FailAnswer(index)) }
-                )
+                adapter.bind(vision.knownChallenges) { index ->
+                    sendAction(Action.FailAnswer(index))
+                }
                 revealView("Check your answers", gradingFrameLayout)
             }
             is Vision.Learning -> {
                 val adapter = studiesRecyclerView.adapter as StudiesRecyclerViewAdapter
-                adapter.bind(
-                    items = vision.unknownChallenges.map(Challenge::answer)
-                )
+                adapter.bind(vision.unknownChallenges.map(Challenge::answer))
                 revealView("Learn these answers", studiesLinearLayout)
             }
             is Vision.Celebrating -> revealView("You aced it!", celebratingFrameLayout)
@@ -93,8 +107,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun revealView(pageTitle: String, view: View?) {
         title = pageTitle
-        val views = listOf(quizzingRecyclerView, gradingFrameLayout, studiesLinearLayout, celebratingFrameLayout)
-        views.forEach {
+        listOf(
+            pickingRecyclerView,
+            quizzingLinearLayout,
+            gradingFrameLayout,
+            studiesLinearLayout,
+            celebratingFrameLayout
+        ).forEach {
             if (it == view) {
                 it.visibility = View.VISIBLE
             } else {

@@ -1,7 +1,8 @@
 package com.rubyhuntersky.interaction
 
-import com.rubyhuntersky.data.Quiz
 import com.rubyhuntersky.data.Challenge
+import com.rubyhuntersky.data.NamedQuiz
+import com.rubyhuntersky.data.QuizGroup
 import com.rubyhuntersky.interaction.quiz.Action
 import com.rubyhuntersky.interaction.quiz.QuizInteraction
 import com.rubyhuntersky.interaction.quiz.Vision
@@ -9,22 +10,40 @@ import org.junit.Test
 
 class QuizInteractionTest {
 
+    private val a = Challenge("a", "A")
+    private val b = Challenge("b", "B")
+    private val quizGroup = object : QuizGroup {
+        override val name: String = "QuizGroup"
+        override val quizzes: List<NamedQuiz> = listOf(NamedQuiz("Quiz1", listOf(a, b)))
+    }
+
+
     @Test
     fun happy() {
         val interaction = QuizInteraction()
-        interaction.visionStream.test().assertValue(Vision.Idle)
+        interaction.visionStream.test().assertValue(
+            Vision.Idle
+        )
 
-        val a = Challenge("a", "A")
-        val b = Challenge("b", "B")
-        val quiz = Quiz(listOf(a, b))
-        interaction.sendAction(Action.Load(quiz))
-        interaction.visionStream.test().assertValue(Vision.Quizzing(listOf("a", "b")))
+        interaction.sendAction(Action.Load(quizGroup))
+        interaction.visionStream.test().assertValue(
+            Vision.Picking(quizGroup.quizzes.map(NamedQuiz::name))
+        )
+
+        interaction.sendAction(Action.SelectQuiz(0))
+        interaction.visionStream.test().assertValue {
+            it is Vision.Quizzing && it.topics.toSet() == setOf("a", "b")
+        }
 
         interaction.sendAction(Action.AddAnswer(0, true))
         interaction.sendAction(Action.AddAnswer(0, false))
-        interaction.visionStream.test().assertValue(Vision.Grading(listOf(a)))
+        interaction.visionStream.test().assertValue {
+            it is Vision.Grading && it.knownChallenges.size == 1
+        }
 
         interaction.sendAction(Action.FinishGrading)
-        interaction.visionStream.test().assertValue(Vision.Learning(listOf(b)))
+        interaction.visionStream.test().assertValue {
+            it is Vision.Learning && it.unknownChallenges.size == 1
+        }
     }
 }
