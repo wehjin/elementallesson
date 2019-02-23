@@ -17,7 +17,6 @@ class QuizInteractionTest {
         override val quizzes: List<NamedQuiz> = listOf(NamedQuiz("Quiz1", listOf(a, b)))
     }
 
-
     @Test
     fun happy() {
         val interaction = QuizInteraction()

@@ -15,11 +15,10 @@ sourceCompatibility = "7"
 targetCompatibility = "7"
 
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     api 'com.github.wehjin:interaction-core:72948a2d7b'
     implementation 'junit:junit:4.12'
-    api project(':data')
 }
 
 compileKotlin {

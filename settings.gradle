@@ -1,1 +1,1 @@
-include ':app', ':interaction'
+include ':app', ':interaction', ':data'
