@@ -12,6 +12,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.view_quiz.*
+import java.util.*
 
 class QuizActivity : AppCompatActivity() {
 
@@ -38,11 +39,11 @@ class QuizActivity : AppCompatActivity() {
             adapter = StudiesRecyclerViewAdapter()
         }
         studiesDoneButton.setOnClickListener {
-            sendAction(Action.Quit)
+            sendAction(Action.Finish(Date()))
             finish()
         }
         celebratingRepeatButton.setOnClickListener {
-            sendAction(Action.Quit)
+            sendAction(Action.Finish(Date()))
             finish()
         }
     }
