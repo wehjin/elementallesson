@@ -47,7 +47,6 @@ class SelectQuizInteraction(
     }
 
     private fun setVisionToSelecting(learner: Learner) {
-        println("LEARNER: $learner")
         performances = learner.performances.sortedBy { it.performedOn }
         setVision(Vision.Selecting(performances.map {
             QuizDisplay(
