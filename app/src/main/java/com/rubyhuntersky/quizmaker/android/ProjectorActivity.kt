@@ -9,6 +9,7 @@ abstract class ProjectorActivity<V : Any, A : Any>(
     private val projector: Projector<V, A>
 ) : AppCompatActivity() {
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ActivityRegistry.activeActivity = this
@@ -25,3 +26,4 @@ abstract class ProjectorActivity<V : Any, A : Any>(
         super.onStop()
     }
 }
+

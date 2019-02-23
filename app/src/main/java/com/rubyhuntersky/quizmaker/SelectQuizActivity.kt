@@ -10,6 +10,7 @@ import com.rubyhuntersky.interaction.selectquiz.SelectQuizInteraction
 import com.rubyhuntersky.interaction.selectquiz.Vision
 import com.rubyhuntersky.quizmaker.android.Projector
 import com.rubyhuntersky.quizmaker.android.ProjectorActivity
+import com.rubyhuntersky.quizmaker.android.findViewByIdInLayout
 
 class SelectQuizActivity : ProjectorActivity<Vision, Action>(
     Projector("SelectQuizActivity", interaction = SelectQuizInteraction(LearnerBook, QuizPortal).apply { reset() })
@@ -26,15 +27,13 @@ class SelectQuizActivity : ProjectorActivity<Vision, Action>(
                 vision as? Vision.Selecting
 
             override fun render(vision: Vision.Selecting, sendAction: (Action) -> Unit, activity: AppCompatActivity) {
-                val recyclerView = activity.findViewById(R.id.selectQuizRecyclerView)
-                    ?: run {
-                        activity.setContentView(R.layout.view_select_quiz_selecting)
-                        activity.findViewById<RecyclerView>(R.id.selectQuizRecyclerView)
-                            .apply {
-                                layoutManager = LinearLayoutManager(activity)
-                                adapter = QuizTitlesRecyclerViewAdapter()
-                            }
-                    }
+                val recyclerView = activity.findViewByIdInLayout<RecyclerView>(
+                    viewId = R.id.selectQuizRecyclerView,
+                    layoutId = R.layout.view_select_quiz_selecting
+                ) {
+                    it.layoutManager = LinearLayoutManager(activity)
+                    it.adapter = QuizTitlesRecyclerViewAdapter()
+                }
                 (recyclerView.adapter as QuizTitlesRecyclerViewAdapter)
                     .bind(
                         titles = vision.quizzes.map(QuizDisplay::quizName),
