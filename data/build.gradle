@@ -18,7 +18,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     api 'com.github.wehjin:interaction-core:72948a2d7b'
-    implementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.12'
 }
 
 compileKotlin {
