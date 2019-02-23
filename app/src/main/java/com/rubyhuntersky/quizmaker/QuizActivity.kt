@@ -6,37 +6,25 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.rubyhuntersky.data.Challenge
-import com.rubyhuntersky.data.GanbarooPublisher
 import com.rubyhuntersky.interaction.quiz.Action
-import com.rubyhuntersky.interaction.quiz.QuizInteraction
 import com.rubyhuntersky.interaction.quiz.Vision
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.view_quiz.*
 
-class MainActivity : AppCompatActivity() {
+class QuizActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.view_quiz)
         setupViews()
-        if (savedInstanceState == null) {
-            sendAction(Action.Load(GanbarooPublisher))
-        }
     }
 
     private fun setupViews() {
-        with(pickingRecyclerView) {
-            layoutManager = LinearLayoutManager(context)
-            adapter = QuizTitlesRecyclerViewAdapter()
-        }
         with(quizzingRecyclerView) {
             layoutManager = LinearLayoutManager(context)
             adapter = QuestionsRecyclerViewAdapter()
-        }
-        quizzingRestartButton.setOnClickListener {
-            sendAction(Action.Reload)
         }
         with(gradingRecyclerView) {
             layoutManager = LinearLayoutManager(context)
@@ -50,39 +38,34 @@ class MainActivity : AppCompatActivity() {
             adapter = StudiesRecyclerViewAdapter()
         }
         studiesDoneButton.setOnClickListener {
-            sendAction(Action.Reload)
+            sendAction(Action.Quit)
+            finish()
         }
         celebratingRepeatButton.setOnClickListener {
-            sendAction(Action.Reload)
+            sendAction(Action.Quit)
+            finish()
         }
     }
 
     override fun onStart() {
         super.onStart()
-        interaction.visionStream.observeOn(AndroidSchedulers.mainThread())
+        QuizPortal.interaction.visionStream.observeOn(AndroidSchedulers.mainThread())
             .doOnNext {
                 Log.d(this.javaClass.simpleName, "VISION: $it")
             }
-            .subscribe(this@MainActivity::render) {
+            .subscribe(this@QuizActivity::render) {
                 Log.e(this.javaClass.simpleName, "Vision stream error", it)
             }.addTo(composite)
     }
 
     private fun sendAction(action: Action) {
         Log.d(this.javaClass.simpleName, "ACTION: $action")
-        interaction.sendAction(action)
+        QuizPortal.interaction.sendAction(action)
     }
 
     private fun render(vision: Vision) {
         return when (vision) {
             Vision.Idle -> revealView("Idle", null)
-            is Vision.Picking -> {
-                val adapter = pickingRecyclerView.adapter as QuizTitlesRecyclerViewAdapter
-                adapter.bind(vision.titles) { index ->
-                    sendAction(Action.SelectQuiz(index))
-                }
-                revealView("Select a quiz", pickingRecyclerView)
-            }
             is Vision.Quizzing -> {
                 val adapter = quizzingRecyclerView.adapter as QuestionsRecyclerViewAdapter
                 adapter.bind(vision.topics) { index, result ->
@@ -109,7 +92,6 @@ class MainActivity : AppCompatActivity() {
     private fun revealView(pageTitle: String, view: View?) {
         title = pageTitle
         listOf(
-            pickingRecyclerView,
             quizzingLinearLayout,
             gradingFrameLayout,
             studiesLinearLayout,
@@ -128,9 +110,5 @@ class MainActivity : AppCompatActivity() {
     override fun onStop() {
         composite.clear()
         super.onStop()
-    }
-
-    companion object {
-        private val interaction = QuizInteraction()
     }
 }

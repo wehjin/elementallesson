@@ -5,12 +5,7 @@
     android:id="@+id/mainFrame"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/pickingRecyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+    tools:context=".QuizActivity">
 
     <LinearLayout
         android:id="@+id/quizzingLinearLayout"
@@ -24,22 +19,6 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:background="#eee" />
-
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:elevation="2dp">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/quizzingRestartButton"
-                style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_margin="8dp"
-                android:text="Restart"
-                app:icon="@drawable/ic_arrow_back_black_24dp" />
-        </FrameLayout>
     </LinearLayout>
 
     <LinearLayout

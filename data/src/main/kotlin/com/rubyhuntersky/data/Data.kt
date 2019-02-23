@@ -18,6 +18,14 @@ data class Learner(
                 Performance(performedOn, quizId, quizName)
             }.toSet()
 
+    fun addPerformance(quizId: String, performedOn: Date): Learner =
+        Learner(
+            quizMap,
+            performedOnMap.toMutableMap().apply { put(quizId, performedOn) }
+        )
+
+    fun findQuiz(id: String): Quiz? = quizMap[id]
+
     fun addQuiz(name: String, challenges: List<Challenge>, optionalId: String? = null): Learner {
         val id = optionalId ?: Random.nextLong().toString()
         return Learner(
@@ -29,12 +37,6 @@ data class Learner(
             }
         )
     }
-
-    fun addPerformance(quizId: String, performedOn: Date): Learner =
-        Learner(
-            quizMap,
-            performedOnMap.toMutableMap().apply { put(quizId, performedOn) }
-        )
 }
 
 data class Performance(
@@ -54,10 +56,6 @@ data class NamedQuiz(
     val challenges: List<Challenge>
 )
 
-data class ChallengeList(
-    val challenges: List<Challenge>
-)
-
 data class Challenge(
     val question: String,
     val answer: String
@@ -67,5 +65,3 @@ interface Publisher {
     val name: String
     val quizzes: List<NamedQuiz>
 }
-
-fun NamedQuiz.toQuiz(): ChallengeList = ChallengeList(challenges)

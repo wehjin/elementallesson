@@ -17,7 +17,7 @@ targetCompatibility = "7"
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    api 'com.github.wehjin:interaction-core:72948a2d7b'
+    api 'com.github.wehjin:interaction-core:2e1b710249'
     api project(':data')
     testImplementation 'junit:junit:4.12'
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0"

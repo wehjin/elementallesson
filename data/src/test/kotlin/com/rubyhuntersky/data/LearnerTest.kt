@@ -26,6 +26,12 @@ class LearnerTest {
     }
 
     @Test
+    fun findQuiz() {
+        val quiz = addQuiz.findQuiz("1")
+        assertEquals(Quiz("1", "my quiz", listOf(challenge)), quiz)
+    }
+
+    @Test
     fun addQuiz() {
         assertEquals(
             setOf(Quiz("1", "my quiz", listOf(challenge))),

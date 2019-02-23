@@ -1,35 +1,31 @@
 package com.rubyhuntersky.interaction
 
 import com.rubyhuntersky.data.Challenge
-import com.rubyhuntersky.data.NamedQuiz
-import com.rubyhuntersky.data.Publisher
+import com.rubyhuntersky.data.Learner
+import com.rubyhuntersky.data.Performance
+import com.rubyhuntersky.interaction.core.BehaviorBook
 import com.rubyhuntersky.interaction.quiz.Action
 import com.rubyhuntersky.interaction.quiz.QuizInteraction
 import com.rubyhuntersky.interaction.quiz.Vision
+import org.junit.Assert.assertEquals
 import org.junit.Test
+import java.util.*
 
-class ChallengeListInteractionTest {
+class QuizInteractionTest {
 
     private val a = Challenge("a", "A")
     private val b = Challenge("b", "B")
-    private val quizGroup = object : Publisher {
-        override val name: String = "QuizGroup"
-        override val quizzes: List<NamedQuiz> = listOf(NamedQuiz("Quiz1", listOf(a, b)))
-    }
+    private val learnerBook =
+        BehaviorBook(Learner().addQuiz("Quiz", listOf(a, b), "quiz"))
+
 
     @Test
     fun happy() {
-        val interaction = QuizInteraction()
+        val interaction = QuizInteraction(learnerBook)
         interaction.visionStream.test().assertValue(
             Vision.Idle
         )
-
-        interaction.sendAction(Action.Load(quizGroup))
-        interaction.visionStream.test().assertValue(
-            Vision.Picking(quizGroup.quizzes.map(NamedQuiz::name))
-        )
-
-        interaction.sendAction(Action.SelectQuiz(0))
+        interaction.sendAction(Action.Load("quiz"))
         interaction.visionStream.test().assertValue {
             it is Vision.Quizzing && it.topics.toSet() == setOf("a", "b")
         }
@@ -44,5 +40,15 @@ class ChallengeListInteractionTest {
         interaction.visionStream.test().assertValue {
             it is Vision.Learning && it.unknownChallenges.size == 1
         }
+
+        val now = Date(12345667)
+        interaction.sendAction(Action.Finish(now))
+        interaction.visionStream.test().assertValue {
+            it is Vision.Idle
+        }
+        assertEquals(
+            Performance(now, "quiz", "Quiz"),
+            learnerBook.value.performances.first()
+        )
     }
 }
