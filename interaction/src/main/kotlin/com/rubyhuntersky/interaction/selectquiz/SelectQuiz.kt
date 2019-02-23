@@ -31,19 +31,17 @@ class SelectQuizInteraction(
 
     override fun sendAction(action: Action) {
         when (action) {
-            is Action.Read -> setVisionToReading()
+            is Action.Read -> {
+                setVision(Vision.Reading)
+                composite.clear()
+                learnerBook.reader
+                    .subscribe(this::setVisionToSelecting, this::printError)
+                    .addTo(composite)
+            }
             is Action.Select -> (vision as? Vision.Selecting)?.let {
                 quizPortal.jump(performances[action.index].quizId)
             }
         }
-    }
-
-    private fun setVisionToReading() {
-        setVision(Vision.Reading)
-        composite.clear()
-        learnerBook.reader
-            .subscribe(this::setVisionToSelecting, this::printError)
-            .addTo(composite)
     }
 
     private fun setVisionToSelecting(learner: Learner) {

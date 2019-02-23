@@ -51,8 +51,9 @@ data class Quiz(
     val challenges: List<Challenge>
 )
 
-data class NamedQuiz(
+data class PublishedQuiz(
     val name: String,
+    val publishedOn: Date,
     val challenges: List<Challenge>
 )
 
@@ -63,5 +64,5 @@ data class Challenge(
 
 interface Publisher {
     val name: String
-    val quizzes: List<NamedQuiz>
+    val quizzes: List<PublishedQuiz>
 }
