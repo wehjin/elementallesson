@@ -22,7 +22,7 @@ object GanbarooPublisher : Publisher {
                 , "Harajuku district".."Harajuku"
                 , "chopsticks".."hashi"
                 , "book".."hon"
-                , "bookstore".."hoya"
+                , "bookstore".."honya"
                 , "England".."Igirisu"
                 , "jazz".."jazu"
                 , "shopping".."kaimono"
