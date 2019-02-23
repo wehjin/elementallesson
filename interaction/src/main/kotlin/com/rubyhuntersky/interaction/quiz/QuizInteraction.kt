@@ -1,9 +1,6 @@
 package com.rubyhuntersky.interaction.quiz
 
-import com.rubyhuntersky.data.Challenge
-import com.rubyhuntersky.data.NamedQuiz
-import com.rubyhuntersky.data.Quiz
-import com.rubyhuntersky.data.QuizGroup
+import com.rubyhuntersky.data.*
 import com.rubyhuntersky.interaction.core.BehaviorInteraction
 
 sealed class Vision {
@@ -17,7 +14,7 @@ sealed class Vision {
 
 sealed class Action {
     object Quit : Action()
-    data class Load(val quizGroup: QuizGroup) : Action()
+    data class Load(val publisher: Publisher) : Action()
     data class SelectQuiz(val quizIndex: Int) : Action()
     data class AddAnswer(val index: Int, val isAnswerKnown: Boolean) : Action()
     data class FailAnswer(val index: Int) : Action()
@@ -27,8 +24,8 @@ sealed class Action {
 
 class QuizInteraction : BehaviorInteraction<Vision, Action>(Vision.Idle, Action.Quit) {
 
-    private lateinit var quizGroup: QuizGroup
-    private lateinit var selectedQuiz: Quiz
+    private lateinit var publisher: Publisher
+    private lateinit var selectedChallengeList: ChallengeList
     private val unanswered = mutableListOf<Challenge>()
     private val known = mutableListOf<Challenge>()
     private val unknown = mutableListOf<Challenge>()
@@ -38,15 +35,15 @@ class QuizInteraction : BehaviorInteraction<Vision, Action>(Vision.Idle, Action.
             Action.Quit ->
                 setVision(Vision.Idle)
             is Action.Load -> {
-                quizGroup = action.quizGroup
-                setVision(Vision.Picking(quizGroup.quizzes.map(NamedQuiz::name)))
+                publisher = action.publisher
+                setVision(Vision.Picking(publisher.quizzes.map(NamedQuiz::name)))
             }
             is Action.SelectQuiz ->
                 if (vision is Vision.Picking) {
-                    selectedQuiz = quizGroup.quizzes[action.quizIndex].toQuiz()
+                    selectedChallengeList = publisher.quizzes[action.quizIndex].toQuiz()
                     with(unanswered) {
                         clear()
-                        addAll(selectedQuiz.challenges)
+                        addAll(selectedChallengeList.challenges)
                         repeat(5) { shuffle() }
                     }
                     known.clear()
@@ -76,7 +73,7 @@ class QuizInteraction : BehaviorInteraction<Vision, Action>(Vision.Idle, Action.
                     setVisionToLearning()
                 }
             Action.Reload ->
-                sendAction(Action.Load(quizGroup))
+                sendAction(Action.Load(publisher))
         }
     }
 

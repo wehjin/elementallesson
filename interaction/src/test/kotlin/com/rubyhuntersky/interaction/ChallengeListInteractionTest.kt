@@ -2,17 +2,17 @@ package com.rubyhuntersky.interaction
 
 import com.rubyhuntersky.data.Challenge
 import com.rubyhuntersky.data.NamedQuiz
-import com.rubyhuntersky.data.QuizGroup
+import com.rubyhuntersky.data.Publisher
 import com.rubyhuntersky.interaction.quiz.Action
 import com.rubyhuntersky.interaction.quiz.QuizInteraction
 import com.rubyhuntersky.interaction.quiz.Vision
 import org.junit.Test
 
-class QuizInteractionTest {
+class ChallengeListInteractionTest {
 
     private val a = Challenge("a", "A")
     private val b = Challenge("b", "B")
-    private val quizGroup = object : QuizGroup {
+    private val quizGroup = object : Publisher {
         override val name: String = "QuizGroup"
         override val quizzes: List<NamedQuiz> = listOf(NamedQuiz("Quiz1", listOf(a, b)))
     }

@@ -6,6 +6,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.rubyhuntersky.data.Challenge
+import com.rubyhuntersky.data.GanbarooPublisher
 import com.rubyhuntersky.interaction.quiz.Action
 import com.rubyhuntersky.interaction.quiz.QuizInteraction
 import com.rubyhuntersky.interaction.quiz.Vision
@@ -21,7 +22,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setupViews()
         if (savedInstanceState == null) {
-            sendAction(Action.Load(GanbarooQuizGroup))
+            sendAction(Action.Load(GanbarooPublisher))
         }
     }
 

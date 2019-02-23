@@ -1,10 +1,6 @@
-package com.rubyhuntersky.quizmaker
+package com.rubyhuntersky.data
 
-import com.rubyhuntersky.data.Challenge
-import com.rubyhuntersky.data.NamedQuiz
-import com.rubyhuntersky.data.QuizGroup
-
-object GanbarooQuizGroup : QuizGroup {
+object GanbarooPublisher : Publisher {
     override val name: String = "Ganbaroo"
 
     override val quizzes = listOf(
