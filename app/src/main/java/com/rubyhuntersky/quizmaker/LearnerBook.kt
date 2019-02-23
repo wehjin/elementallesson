@@ -13,7 +13,7 @@ object LearnerBook : Book<Learner> {
             .fold(
                 initial = Learner(),
                 operation = { learner, quiz ->
-                    learner.addQuiz(quiz.name, quiz.challenges)
+                    learner.addQuiz(quiz.name, quiz.challenges, "${quiz.name}::${GanbarooPublisher.name}")
                 }
             )
     )
