@@ -1,8 +1,13 @@
 package com.rubyhuntersky.data
 
+data class Course(
+    val name: String,
+    val lessons: Set<Lesson>
+)
+
 val chapter10CourseMaterial = CourseMaterial(
     name = "Ganbaroo1 Chapter 10",
-    lessons = setOf(
+    lessons = listOf(
         LessonMaterial(
             prompt = "someone else's house",
             response = "おたく",
