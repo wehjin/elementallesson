@@ -1,29 +1,35 @@
 package com.rubyhuntersky.data
 
+import kotlinx.serialization.Serializable
 import java.time.Duration
 import java.time.LocalDateTime
 
+
+@Serializable
 data class Lesson(
     val material: LessonMaterial,
-    val hardDate: LocalDateTime = LocalDateTime.now() - Duration.ofMinutes(1),
-    val easyDate: LocalDateTime? = null
+    @Serializable(with = LocalDateTimeSerializer::class)
+    val struggleTime: LocalDateTime = LocalDateTime.now() - Duration.ofMinutes(1),
+    @Serializable(with = LocalDateTimeSerializer::class)
+    val easyTime: LocalDateTime? = null
 ) {
-    val nextQuizDate: LocalDateTime
+    val wakeTime: LocalDateTime
         get() {
-            val easy = easyDate
-            return if (easy == null || easy < hardDate) {
-                hardDate + Duration.ofMinutes(1)
+            return if (easyTime == null || easyTime < struggleTime) {
+                struggleTime + Duration.ofMinutes(1)
             } else {
-                val simmer = Duration.between(hardDate, easy) + Duration.ofHours(2)
+                val rested = Duration.between(struggleTime, easyTime) + Duration.ofHours(2)
                 when {
-                    simmer > Duration.ofDays(32) -> easy + Duration.ofDays(64)
-                    simmer > Duration.ofDays(16) -> easy + Duration.ofDays(32)
-                    simmer > Duration.ofDays(8) -> easy + Duration.ofDays(16)
-                    simmer > Duration.ofDays(4) -> easy + Duration.ofDays(8)
-                    simmer > Duration.ofDays(2) -> easy + Duration.ofDays(4)
-                    simmer > Duration.ofDays(1) -> easy + Duration.ofDays(2)
-                    else -> easy + Duration.ofDays(1)
+                    rested > Duration.ofDays(32) -> easyTime + Duration.ofDays(64)
+                    rested > Duration.ofDays(16) -> easyTime + Duration.ofDays(32)
+                    rested > Duration.ofDays(8) -> easyTime + Duration.ofDays(16)
+                    rested > Duration.ofDays(4) -> easyTime + Duration.ofDays(8)
+                    rested > Duration.ofDays(2) -> easyTime + Duration.ofDays(4)
+                    rested > Duration.ofDays(1) -> easyTime + Duration.ofDays(2)
+                    else -> easyTime + Duration.ofDays(1)
                 } - Duration.ofHours(2)
             }
         }
+
+    fun setEasy(time: LocalDateTime) = copy(easyTime = time)
 }

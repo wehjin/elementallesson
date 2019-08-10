@@ -12,7 +12,7 @@ internal class LessonTest {
         val easy = LocalDateTime.now()
         val hard = easy - Duration.ofHours(1)
         val lesson = Lesson(chapter10CourseMaterial.lessons.first(), hard, easy)
-        assertEquals(easy + Duration.ofHours(22), lesson.nextQuizDate)
+        assertEquals(easy + Duration.ofHours(22), lesson.wakeTime)
     }
 
     @Test
@@ -20,7 +20,7 @@ internal class LessonTest {
         val easy = LocalDateTime.now()
         val hard = easy - Duration.ofHours(24)
         val lesson = Lesson(chapter10CourseMaterial.lessons.first(), hard, easy)
-        assertEquals(easy + Duration.ofHours(46), lesson.nextQuizDate)
+        assertEquals(easy + Duration.ofHours(46), lesson.wakeTime)
     }
 
     @Test
@@ -28,6 +28,6 @@ internal class LessonTest {
         val easy = LocalDateTime.now()
         val hard = easy - Duration.ofHours(48)
         val lesson = Lesson(chapter10CourseMaterial.lessons.first(), hard, easy)
-        assertEquals(easy + Duration.ofHours(94), lesson.nextQuizDate)
+        assertEquals(easy + Duration.ofHours(94), lesson.wakeTime)
     }
 }
