@@ -8,6 +8,14 @@ import java.time.LocalDateTime
 internal class CourseTest {
 
     @Test
+    internal fun startsWithActiveLessons() {
+        val now = LocalDateTime.now()
+        val course = Course.start(chapter10CourseMaterial, now)
+        val activeLessons = course.toActiveLessons(now)
+        assertEquals(course.lessons.size, activeLessons.size)
+    }
+
+    @Test
     internal fun lessonBecomesInactiveAfterEasy() {
         val now = LocalDateTime.now()
         val course = Course.start(chapter10CourseMaterial, now - Duration.ofHours(1))

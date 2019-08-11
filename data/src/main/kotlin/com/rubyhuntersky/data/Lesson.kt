@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 data class Lesson(
     val material: LessonMaterial,
     @Serializable(with = LocalDateTimeSerializer::class)
-    val struggleTime: LocalDateTime = LocalDateTime.now() - Duration.ofMinutes(1),
+    val struggleTime: LocalDateTime = LocalDateTime.now() - Duration.ofMinutes(2),
     @Serializable(with = LocalDateTimeSerializer::class)
     val easyTime: LocalDateTime? = null
 ) {
