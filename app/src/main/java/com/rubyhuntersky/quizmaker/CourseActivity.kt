@@ -23,39 +23,45 @@ class CourseActivity : FragmentActivity(), CoroutineScope {
     private val job = Job()
     override val coroutineContext: CoroutineContext = Main + job
 
+    private val legend = launchLegend()
+
     @ExperimentalCoroutinesApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val story = Costory(ConflatedBroadcastChannel<ViewCourseMdl>(), Channel<ViewCourseMsg>())
+        launchRenderer(legend)
+    }
+
+    private fun launchLegend(): Legend<ViewCourseMdl, ViewCourseMsg> {
+        val legend = Legend(ConflatedBroadcastChannel<ViewCourseMdl>(), Channel<ViewCourseMsg>())
         launch {
             var mdl = ViewCourseMdl(Course.start(chapter10CourseMaterial, LocalDateTime.now()))
-            story.mdls.send(mdl)
-            for (msg in story.msgs) {
+                .also { legend.mdls.send(it) }
+            for (msg in legend.msgs) {
                 mdl = when (msg) {
-                    is ViewCourseMsg.Quit -> mdl.also { story.msgs.close() }
-                }.also {
-                    story.mdls.send(it)
-                }
+                    is ViewCourseMsg.Quit -> mdl.also { legend.msgs.close() }
+                }.also { legend.mdls.send(it) }
             }
-            story.mdls.close()
         }
+        return legend
+    }
+
+    private fun launchRenderer(legend: Legend<ViewCourseMdl, ViewCourseMsg>) {
         launch {
-            val mdls = story.mdls.openSubscription()
+            val mdls = legend.mdls.openSubscription()
             val actionChannelId = Random.nextLong()
             val actionChannel = Channel<Any>().also { ChannelLookup[actionChannelId] = it }
             while (!isDestroyed && !mdls.isClosedForReceive) {
                 select<Unit> {
                     mdls.onReceive { renderCourse(it.course, actionChannelId) }
                     actionChannel.onReceive { action ->
-                        (action as? Long)?.let { actionCode ->
+                        (action as? Long)?.let<Long, Unit> { actionCode ->
                             val msg = if (actionCode == FirstStepFragment.Action.NO_GO) ViewCourseMsg.Quit else null
-                            msg?.let { story.msgs.send(it) }
+                            msg?.let { legend.msgs.send(it) }
                         }
                     }
                 }
             }
-            ChannelLookup[actionChannelId] = null
-            actionChannel.close()
+            actionChannel.close().also { ChannelLookup[actionChannelId] = null }
             dropRenderings()
         }
     }
