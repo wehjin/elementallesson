@@ -15,7 +15,7 @@ val chapter10CourseMaterial = CourseMaterial(
             prompt = "someone else's house",
             response = "おたく",
             promptColor = "_ _ _ までおくりましょうか。",
-            responseColor = "Let me take you home."
+            responseColor = "Let me take you home.\nおたく までおくりましょうか。"
         ),
         LessonMaterial(prompt = "sound", response = "おと"),
         LessonMaterial(prompt = "adult", response = "大人（おとな）"),

@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 data class Lesson(
     val material: LessonMaterial,
     @Serializable(with = LocalDateTimeSerializer::class)
-    val struggleTime: LocalDateTime = LocalDateTime.now() - Duration.ofMinutes(2),
+    val hardTime: LocalDateTime = LocalDateTime.now() - Duration.ofMinutes(2),
     @Serializable(with = LocalDateTimeSerializer::class)
     val easyTime: LocalDateTime? = null
 ) {
@@ -18,18 +18,21 @@ data class Lesson(
     val response get() = material.response
     val responseColor get() = material.responseColor
 
+    fun setEasy(time: LocalDateTime) = copy(easyTime = time)
+    fun setHard(time: LocalDateTime) = copy(hardTime = time)
+
     val lastSeen: LocalDateTime?
         get() {
             val easy = easyTime
-            return if (easy == null) null else if (easy.isBefore(struggleTime)) struggleTime else easy
+            return if (easy == null) null else if (easy.isBefore(hardTime)) hardTime else easy
         }
 
     val wakeTime: LocalDateTime
         get() {
-            return if (easyTime == null || easyTime < struggleTime) {
-                struggleTime + Duration.ofMinutes(1)
+            return if (easyTime == null || easyTime < hardTime) {
+                hardTime + Duration.ofMinutes(1)
             } else {
-                val rested = Duration.between(struggleTime, easyTime) + Duration.ofHours(2)
+                val rested = Duration.between(hardTime, easyTime) + Duration.ofHours(2)
                 when {
                     rested > Duration.ofDays(32) -> easyTime + Duration.ofDays(64)
                     rested > Duration.ofDays(16) -> easyTime + Duration.ofDays(32)
@@ -41,6 +44,4 @@ data class Lesson(
                 } - Duration.ofHours(2)
             }
         }
-
-    fun setEasy(time: LocalDateTime) = copy(easyTime = time)
 }

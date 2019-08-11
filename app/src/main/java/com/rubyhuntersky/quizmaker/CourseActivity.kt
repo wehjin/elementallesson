@@ -42,8 +42,24 @@ class CourseActivity : FragmentActivity(), CoroutineScope {
                 is ViewCourseMsg.CancelLesson -> mdl.copy(activeLesson = null, isCheckingAnswer = false)
                 is ViewCourseMsg.CheckAnswer -> mdl.copy(isCheckingAnswer = true)
                 is ViewCourseMsg.BackToLesson -> mdl.copy(isCheckingAnswer = false)
-                is ViewCourseMsg.RecordHard -> mdl
-                is ViewCourseMsg.RecordEasy -> mdl
+                is ViewCourseMsg.RecordHard -> {
+                    mdl.activeLesson?.let {
+                        val newLesson = it.setHard(LocalDateTime.now())
+                        val newCourse = mdl.course.update(newLesson)
+                        val newActiveLessons = newCourse.getActiveLessons(LocalDateTime.now())
+                        val newActiveLesson = if (newActiveLessons.isEmpty()) null else newActiveLessons.random()
+                        mdl.copy(course = newCourse, activeLesson = newActiveLesson, isCheckingAnswer = false)
+                    } ?: mdl
+                }
+                is ViewCourseMsg.RecordEasy -> {
+                    mdl.activeLesson?.let {
+                        val newLesson = it.setEasy(LocalDateTime.now())
+                        val newCourse = mdl.course.update(newLesson)
+                        val newActiveLessons = newCourse.getActiveLessons(LocalDateTime.now())
+                        val newActiveLesson = if (newActiveLessons.isEmpty()) null else newActiveLessons.random()
+                        mdl.copy(course = newCourse, activeLesson = newActiveLesson, isCheckingAnswer = false)
+                    } ?: mdl
+                }
             }
             mdls.send(mdl)
         }
@@ -143,11 +159,11 @@ class CourseActivity : FragmentActivity(), CoroutineScope {
                     guidance = GuidanceStylist.Guidance(
                         course.title,
                         course.subtitle ?: "",
-                        "Lessons: ${course.getActiveLessons(LocalDateTime.now()).size}",
+                        "Lessons Remaining: ${course.getActiveLessons(LocalDateTime.now()).size}",
                         context.getDrawable(R.drawable.ic_launcher_background)
                     ),
                     buttons = listOf(
-                        Button("Lesson", event = "continueCourse", hasNext = true),
+                        Button("Go", event = "continueCourse", hasNext = true),
                         Button("Cancel", event = "cancelCourse", hasNext = false)
                     ),
                     events = events
@@ -169,7 +185,7 @@ class CourseActivity : FragmentActivity(), CoroutineScope {
                     ),
                     buttons = listOf(
                         Button(
-                            "Check Answer",
+                            "Check My Answer",
                             event = CHECK_ANSWER,
                             hasNext = true,
                             subtext = "Try writing or saying it in a sentence."
@@ -194,16 +210,14 @@ class CourseActivity : FragmentActivity(), CoroutineScope {
                 Msg.SetView(
                     guidance = GuidanceStylist.Guidance(
                         lesson.response,
-                        lesson.responseColor?.let {
-                            "${lesson.responseColor}\n${lesson.promptColor}"
-                        } ?: "",
+                        lesson.responseColor ?: "",
                         lesson.prompt,
                         null
                     ),
                     buttons = listOf(
                         Button("Back", event = BACK_TO_LESSON),
                         Button("Hard", event = WAS_HARD, subtext = "Repeat soon."),
-                        Button("Easy", event = WAS_EASY, subtext = "Review after a while.")
+                        Button("Easy", event = WAS_EASY, subtext = "Repeat after I've forgotten.")
                     ),
                     events = events
                 )
