@@ -11,7 +11,6 @@ import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.select
 import java.time.LocalDateTime
@@ -22,7 +21,18 @@ class CourseActivity : FragmentActivity(), CoroutineScope {
     private val job = Job()
     override val coroutineContext: CoroutineContext = Main + job
 
-    private val legend = launchLegend()
+    private val legend = legendOf<ViewCourseMdl, ViewCourseMsg> { mdls, msgs ->
+        var mdl = ViewCourseMdl(Course.start(chapter10CourseMaterial, LocalDateTime.now()))
+        mdls.send(mdl)
+        for (msg in msgs) {
+            mdl = when (msg) {
+                is ViewCourseMsg.Quit -> mdl.also { msgs.close() }
+            }
+            mdls.send(mdl)
+        }
+        mdls.close()
+        finish()
+    }
 
     @ExperimentalCoroutinesApi
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,48 +41,37 @@ class CourseActivity : FragmentActivity(), CoroutineScope {
     }
 
     override fun onBackPressed() {
-        launch { legend.msgs.send(ViewCourseMsg.Quit) }
+        launch { legend.send(ViewCourseMsg.Quit) }
         super.onBackPressed()
-    }
-
-    private fun launchLegend(): Legend<ViewCourseMdl, ViewCourseMsg> {
-        val legend = Legend(ConflatedBroadcastChannel<ViewCourseMdl>(), Channel<ViewCourseMsg>())
-        launch {
-            var mdl = ViewCourseMdl(Course.start(chapter10CourseMaterial, LocalDateTime.now()))
-                .also { legend.mdls.send(it) }
-            for (msg in legend.msgs) {
-                mdl = when (msg) {
-                    is ViewCourseMsg.Quit -> mdl.also { legend.msgs.close() }
-                }.also { legend.mdls.send(it) }
-            }
-            legend.mdls.close()
-            finish()
-        }
-        return legend
     }
 
     private fun launchRenderer(legend: Legend<ViewCourseMdl, ViewCourseMsg>) {
         launch {
-            val models = legend.mdls.openSubscription()
-            val events = Channel<String>()
-            while (!isDestroyed && !models.isClosedForReceive && !events.isClosedForReceive) {
+            val legendMdls = legend.toMdls()
+            val viewEvts = Channel<String>()
+            while (!isDestroyed && !legendMdls.isClosedForReceive && !viewEvts.isClosedForReceive) {
                 select<Unit> {
-                    models.onReceive { mdl ->
-                        renderCourse(mdl.course, events)
+                    legendMdls.onReceive { mdl ->
+                        val course = mdl.course
+                        renderCourse(course, viewEvts)
                     }
-                    events.onReceive { event ->
+                    viewEvts.onReceive { event ->
                         when (event) {
                             "continueCourse" -> Unit
-                            "cancelCourse" -> legend.msgs.send(ViewCourseMsg.Quit)
+                            "cancelCourse" -> legend.send(ViewCourseMsg.Quit)
                         }
                     }
                 }
             }
-            events.close()
-            models.cancel()
-            GuidedStepSupportFragment.getCurrentGuidedStepSupportFragment(supportFragmentManager)
-                ?.finishGuidedStepSupportFragments()
+            stopRendering()
+            viewEvts.close()
+            legendMdls.cancel()
         }
+    }
+
+    private fun stopRendering() {
+        GuidedStepSupportFragment.getCurrentGuidedStepSupportFragment(supportFragmentManager)
+            ?.finishGuidedStepSupportFragments()
     }
 
     private suspend fun renderCourse(course: Course, events: Channel<String>) {
