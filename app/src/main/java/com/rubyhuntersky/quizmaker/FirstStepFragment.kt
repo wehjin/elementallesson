@@ -8,7 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
@@ -17,12 +17,9 @@ class FirstStepFragment : GuidedStepSupportFragment(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Main + Job()
 
-    private lateinit var actionChannel: Channel<Any>
+    var evts: SendChannel<Long>? = null
 
     override fun onCreateGuidance(savedInstanceState: Bundle?): Guidance {
-        val channelId = arguments!!.getLong(CHANNEL_ID)
-        actionChannel = ChannelLookup[channelId]!!
-
         val title = arguments!!.getString(TITLE)!!
         val subtitle = arguments!!.getString(SUBTITLE)
         val count = arguments!!.getInt(COUNT)
@@ -54,7 +51,7 @@ class FirstStepFragment : GuidedStepSupportFragment(), CoroutineScope {
     }
 
     override fun onGuidedActionClicked(action: GuidedAction) {
-        launch { actionChannel.send(action.id) }
+        launch { evts?.send(action.id - 1) }
     }
 
     companion object {
@@ -62,17 +59,17 @@ class FirstStepFragment : GuidedStepSupportFragment(), CoroutineScope {
         private const val TITLE = "title"
         private const val SUBTITLE = "subtitle"
         private const val COUNT = "count"
-        private const val CHANNEL_ID = "channel"
 
-        fun build(title: String, subtitle: String?, count: Int, actionChannelId: Long): FirstStepFragment {
+        fun build(title: String, subtitle: String?, count: Int): FirstStepFragment {
             return FirstStepFragment()
                 .apply {
-                    arguments = Bundle().apply {
-                        putString(TITLE, title)
-                        putString(SUBTITLE, subtitle)
-                        putInt(COUNT, count)
-                        putLong(CHANNEL_ID, actionChannelId)
-                    }
+                    val bundle = Bundle()
+                        .apply {
+                            putString(TITLE, title)
+                            putString(SUBTITLE, subtitle)
+                            putInt(COUNT, count)
+                        }
+                    arguments = bundle
                 }
         }
     }

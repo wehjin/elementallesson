@@ -1,6 +1,5 @@
 package com.rubyhuntersky.quizmaker
 
-import android.R
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
 import androidx.leanback.app.GuidedStepSupportFragment
@@ -16,7 +15,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.select
 import java.time.LocalDateTime
 import kotlin.coroutines.CoroutineContext
-import kotlin.random.Random
 
 @ExperimentalCoroutinesApi
 class CourseActivity : FragmentActivity(), CoroutineScope {
@@ -24,11 +22,36 @@ class CourseActivity : FragmentActivity(), CoroutineScope {
     override val coroutineContext: CoroutineContext = Main + job
 
     private val legend = launchLegend()
+    private val evts = Channel<Any>()
 
     @ExperimentalCoroutinesApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         launchRenderer(legend)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        supportFragmentManager.fragments.forEach {
+            if (it is FirstStepFragment) it.evts = evts
+        }
+    }
+
+    override fun onBackPressed() {
+        launch { legend.msgs.send(ViewCourseMsg.Quit) }
+        super.onBackPressed()
+    }
+
+    override fun onStop() {
+        supportFragmentManager.fragments.forEach {
+            if (it is FirstStepFragment) it.evts = null
+        }
+        super.onStop()
+    }
+
+    override fun onDestroy() {
+        evts.close()
+        super.onDestroy()
     }
 
     private fun launchLegend(): Legend<ViewCourseMdl, ViewCourseMsg> {
@@ -41,6 +64,8 @@ class CourseActivity : FragmentActivity(), CoroutineScope {
                     is ViewCourseMsg.Quit -> mdl.also { legend.msgs.close() }
                 }.also { legend.mdls.send(it) }
             }
+            legend.mdls.close()
+            finish()
         }
         return legend
     }
@@ -48,37 +73,27 @@ class CourseActivity : FragmentActivity(), CoroutineScope {
     private fun launchRenderer(legend: Legend<ViewCourseMdl, ViewCourseMsg>) {
         launch {
             val mdls = legend.mdls.openSubscription()
-            val actionChannelId = Random.nextLong()
-            val actionChannel = Channel<Any>().also { ChannelLookup[actionChannelId] = it }
-            while (!isDestroyed && !mdls.isClosedForReceive) {
+            while (!isDestroyed && !mdls.isClosedForReceive && !evts.isClosedForReceive) {
                 select<Unit> {
-                    mdls.onReceive { renderCourse(it.course, actionChannelId) }
-                    actionChannel.onReceive { action ->
-                        (action as? Long)?.let<Long, Unit> { actionCode ->
-                            val msg = if (actionCode == FirstStepFragment.Action.NO_GO) ViewCourseMsg.Quit else null
-                            msg?.let { legend.msgs.send(it) }
+                    evts.onReceive { action ->
+                        if (1L == action) {
+                            legend.msgs.send(ViewCourseMsg.Quit)
                         }
+                    }
+                    mdls.onReceive { mdl ->
+                        val fragment = FirstStepFragment.build(
+                            title = mdl.course.title,
+                            subtitle = mdl.course.subtitle,
+                            count = mdl.course.getActiveLessons(LocalDateTime.now()).size
+                        ).also { it.evts = evts }
+                        GuidedStepSupportFragment.add(supportFragmentManager, fragment, android.R.id.content)
                     }
                 }
             }
-            actionChannel.close().also { ChannelLookup[actionChannelId] = null }
-            dropRenderings()
+            evts.close()
+            GuidedStepSupportFragment.getCurrentGuidedStepSupportFragment(supportFragmentManager)
+                ?.finishGuidedStepSupportFragments()
         }
     }
 
-    private fun renderCourse(course: Course, actionChannelId: Long) {
-        dropRenderings()
-        val fragment = FirstStepFragment.build(
-            title = course.title,
-            subtitle = course.subtitle,
-            count = course.getActiveLessons(LocalDateTime.now()).size,
-            actionChannelId = actionChannelId
-        )
-        GuidedStepSupportFragment.addAsRoot(this@CourseActivity, fragment, R.id.content)
-    }
-
-    private fun dropRenderings() {
-        GuidedStepSupportFragment.getCurrentGuidedStepSupportFragment(supportFragmentManager)
-            ?.finishGuidedStepSupportFragments()
-    }
 }
