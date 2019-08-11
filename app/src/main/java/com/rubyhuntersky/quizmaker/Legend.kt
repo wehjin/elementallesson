@@ -20,6 +20,7 @@ class Legend<MdlT : Any, MsgT : Any> : CoroutineScope {
     fun toMdls() = mdlBroadcast.openSubscription()
 
     suspend fun send(msg: MsgT) = msgChannel.send(msg)
+    fun offer(msg: MsgT) = msgChannel.offer(msg)
 
     internal fun run(block: suspend (mdls: SendChannel<MdlT>, msgs: Channel<MsgT>) -> Unit) {
         job = launch { block(mdlBroadcast, msgChannel) }

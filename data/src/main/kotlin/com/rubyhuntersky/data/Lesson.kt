@@ -15,6 +15,8 @@ data class Lesson(
 ) {
     val prompt get() = material.prompt
     val promptColor get() = material.promptColor
+    val response get() = material.response
+    val responseColor get() = material.responseColor
 
     val lastSeen: LocalDateTime?
         get() {

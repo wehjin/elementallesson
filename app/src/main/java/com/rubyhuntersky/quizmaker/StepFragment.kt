@@ -37,7 +37,7 @@ open class StepFragment : GuidedStepSupportFragment(), CoroutineScope {
     data class Button(
         val text: String,
         val event: String,
-        val hasNext: Boolean,
+        val hasNext: Boolean = false,
         val subtext: String? = null
     )
 
