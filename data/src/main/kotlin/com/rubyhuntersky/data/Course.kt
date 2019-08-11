@@ -6,7 +6,8 @@ import java.time.LocalDateTime
 
 @Serializable
 data class Course(
-    val name: String,
+    val title: String,
+    val subtitle: String?,
     val lessons: Set<Lesson>
 ) {
 
@@ -25,10 +26,9 @@ data class Course(
 
     companion object {
         fun start(courseMaterial: CourseMaterial, time: LocalDateTime) = Course(
-            name = courseMaterial.name,
-            lessons = courseMaterial.lessons.map {
-                Lesson(it, time - Duration.ofMinutes(2))
-            }.toSet()
+            title = courseMaterial.title,
+            subtitle = courseMaterial.subtitle,
+            lessons = courseMaterial.lessons.map { Lesson(it, time - Duration.ofMinutes(2)) }.toSet()
         )
     }
 }

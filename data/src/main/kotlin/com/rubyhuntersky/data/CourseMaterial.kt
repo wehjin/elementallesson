@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CourseMaterial(
-    val name: String,
+    val title: String,
+    val subtitle: String? = null,
     val lessons: List<LessonMaterial>
 )

@@ -8,7 +8,8 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 val chapter10CourseMaterial = CourseMaterial(
-    name = "Ganbaroo1 Chapter 10",
+    title = "Chapter 10",
+    subtitle = "Ganbaroo 1",
     lessons = listOf(
         LessonMaterial(
             prompt = "someone else's house",

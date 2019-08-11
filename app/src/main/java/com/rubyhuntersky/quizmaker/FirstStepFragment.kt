@@ -16,8 +16,8 @@ class FirstStepFragment : GuidedStepSupportFragment() {
         val activeLessons = course.toActiveLessons(now())
 
         return Guidance(
-            "Course",
-            course.name,
+            course.title,
+            course.subtitle,
             "Lessons: ${activeLessons.size}",
             activity!!.getDrawable(R.drawable.ic_launcher_background)
         )
