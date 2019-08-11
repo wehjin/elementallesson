@@ -5,7 +5,11 @@ import androidx.fragment.app.FragmentActivity
 import androidx.leanback.app.GuidedStepSupportFragment
 import androidx.leanback.widget.GuidanceStylist
 import com.rubyhuntersky.data.Course
+import com.rubyhuntersky.data.Lesson
 import com.rubyhuntersky.data.chapter10CourseMaterial
+import com.rubyhuntersky.quizmaker.CourseActivity.LessonFragment.Companion.CANCEL_LESSON_EVENT
+import com.rubyhuntersky.quizmaker.CourseActivity.LessonFragment.Companion.REVEAL_ANSWER_EVENT
+import com.rubyhuntersky.quizmaker.StepFragment.Button
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -27,6 +31,15 @@ class CourseActivity : FragmentActivity(), CoroutineScope {
         for (msg in msgs) {
             mdl = when (msg) {
                 is ViewCourseMsg.Quit -> mdl.also { msgs.close() }
+                is ViewCourseMsg.StartLesson -> {
+                    val activeLessons = mdl.course.getActiveLessons(LocalDateTime.now())
+                    if (activeLessons.isEmpty()) {
+                        mdl
+                    } else {
+                        mdl.copy(activeLesson = activeLessons.random())
+                    }
+                }
+                is ViewCourseMsg.CancelLesson -> mdl.copy(activeLesson = null)
             }
             mdls.send(mdl)
         }
@@ -41,31 +54,35 @@ class CourseActivity : FragmentActivity(), CoroutineScope {
     }
 
     override fun onBackPressed() {
-        launch { legend.send(ViewCourseMsg.Quit) }
-        super.onBackPressed()
+        if (existingLessonFragment != null) {
+            launch { legend.send(ViewCourseMsg.CancelLesson) }
+        } else {
+            launch { legend.send(ViewCourseMsg.Quit) }
+        }
     }
 
     private fun launchRenderer(legend: Legend<ViewCourseMdl, ViewCourseMsg>) {
         launch {
-            val legendMdls = legend.toMdls()
-            val viewEvts = Channel<String>()
-            while (!isDestroyed && !legendMdls.isClosedForReceive && !viewEvts.isClosedForReceive) {
+            val models = legend.toMdls()
+            val events = Channel<String>()
+            while (!isDestroyed && !models.isClosedForReceive && !events.isClosedForReceive) {
                 select<Unit> {
-                    legendMdls.onReceive { mdl ->
-                        val course = mdl.course
-                        renderCourse(course, viewEvts)
+                    models.onReceive { mdl ->
+                        renderCourse(mdl.course, events)
+                        renderLesson(mdl.activeLesson, events)
                     }
-                    viewEvts.onReceive { event ->
+                    events.onReceive { event ->
                         when (event) {
-                            "continueCourse" -> Unit
+                            "continueCourse" -> legend.send(ViewCourseMsg.StartLesson)
                             "cancelCourse" -> legend.send(ViewCourseMsg.Quit)
+                            CANCEL_LESSON_EVENT -> legend.send(ViewCourseMsg.CancelLesson)
                         }
                     }
                 }
             }
             stopRendering()
-            viewEvts.close()
-            legendMdls.cancel()
+            events.close()
+            models.cancel()
         }
     }
 
@@ -75,22 +92,73 @@ class CourseActivity : FragmentActivity(), CoroutineScope {
     }
 
     private suspend fun renderCourse(course: Course, events: Channel<String>) {
-        val guidance = GuidanceStylist.Guidance(
-            course.title,
-            course.subtitle ?: "",
-            "Lessons: ${course.getActiveLessons(LocalDateTime.now()).size}",
-            getDrawable(R.drawable.ic_launcher_background)
+        courseFragment.control.send(
+            StepFragment.Msg.SetView(
+                guidance = GuidanceStylist.Guidance(
+                    course.title,
+                    course.subtitle ?: "",
+                    "Lessons: ${course.getActiveLessons(LocalDateTime.now()).size}",
+                    getDrawable(R.drawable.ic_launcher_background)
+                ),
+                buttons = listOf(
+                    Button("Lesson", event = "continueCourse", hasNext = true),
+                    Button("Cancel", event = "cancelCourse", hasNext = false)
+                ),
+                events = events
+            )
         )
-        val buttons = listOf(
-            StepFragment.Button("Start", event = "continueCourse", hasNext = true),
-            StepFragment.Button("Cancel", event = "cancelCourse", hasNext = false)
-        )
-        courseFragment.control.send(StepFragment.Msg.SetView(guidance, buttons, events))
     }
 
-    private val courseFragment: StepFragment
-        get() = (GuidedStepSupportFragment.getCurrentGuidedStepSupportFragment(supportFragmentManager) as? StepFragment)
-            ?: StepFragment().also {
-                GuidedStepSupportFragment.add(supportFragmentManager, it, android.R.id.content)
-            }
+    private suspend fun renderLesson(
+        lesson: Lesson?,
+        events: Channel<String>
+    ) {
+        if (lesson == null) {
+            existingCourseFragment?.popBackStackToGuidedStepSupportFragment(CourseFragment::class.java, 0)
+        } else {
+            lessonFragment.control.send(
+                StepFragment.Msg.SetView(
+                    guidance = GuidanceStylist.Guidance(
+                        lesson.prompt,
+                        lesson.promptColor ?: "",
+                        lesson.lastSeen?.let { "Last seen: $it" } ?: "",
+                        null
+                    ),
+                    buttons = listOf(
+                        Button(
+                            "Check Answer",
+                            event = REVEAL_ANSWER_EVENT,
+                            hasNext = true,
+                            subtext = "Try writing or saying it in a sentence."
+                        ),
+                        Button("Back", event = CANCEL_LESSON_EVENT, hasNext = false)
+                    ),
+                    events = events
+                )
+            )
+        }
+    }
+
+    private val courseFragment: CourseFragment
+        get() = existingCourseFragment
+            ?: CourseFragment().also { GuidedStepSupportFragment.add(supportFragmentManager, it, android.R.id.content) }
+
+    private val existingCourseFragment: CourseFragment?
+        get() = supportFragmentManager.fragments.firstOrNull { it is CourseFragment } as? CourseFragment
+
+    private val lessonFragment: LessonFragment
+        get() = existingLessonFragment
+            ?: LessonFragment().also { GuidedStepSupportFragment.add(supportFragmentManager, it, android.R.id.content) }
+
+    private val existingLessonFragment: LessonFragment?
+        get() = supportFragmentManager.fragments.firstOrNull { it is LessonFragment } as? LessonFragment
+
+    class LessonFragment : StepFragment() {
+        companion object {
+            const val REVEAL_ANSWER_EVENT = "revealAnswer"
+            const val CANCEL_LESSON_EVENT = "cancelLesson"
+        }
+    }
+
+    class CourseFragment : StepFragment()
 }

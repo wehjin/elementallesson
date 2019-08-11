@@ -13,6 +13,15 @@ data class Lesson(
     @Serializable(with = LocalDateTimeSerializer::class)
     val easyTime: LocalDateTime? = null
 ) {
+    val prompt get() = material.prompt
+    val promptColor get() = material.promptColor
+
+    val lastSeen: LocalDateTime?
+        get() {
+            val easy = easyTime
+            return if (easy == null) null else if (easy.isBefore(struggleTime)) struggleTime else easy
+        }
+
     val wakeTime: LocalDateTime
         get() {
             return if (easyTime == null || easyTime < struggleTime) {

@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
 @ExperimentalCoroutinesApi
-class StepFragment : GuidedStepSupportFragment(), CoroutineScope {
+open class StepFragment : GuidedStepSupportFragment(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Main + Job()
 
@@ -82,7 +82,7 @@ class StepFragment : GuidedStepSupportFragment(), CoroutineScope {
             actions = buttons.mapIndexed { i, button ->
                 GuidedAction.Builder(activity)
                     .id((i + 1).toLong())
-                    .title(button.text)
+                    .title(button.text.toUpperCase())
                     .description(button.subtext)
                     .hasNext(button.hasNext)
                     .build()
@@ -103,4 +103,6 @@ class StepFragment : GuidedStepSupportFragment(), CoroutineScope {
         super.onStop()
         launch { channel.send(Msg.SetViewEnabled(false)) }
     }
+
+
 }
