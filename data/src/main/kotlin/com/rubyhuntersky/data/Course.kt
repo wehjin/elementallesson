@@ -11,7 +11,7 @@ data class Course(
     val lessons: Set<Lesson>
 ) {
 
-    fun toActiveLessons(time: LocalDateTime): Set<Lesson> = lessons.filter {
+    fun getActiveLessons(time: LocalDateTime): Set<Lesson> = lessons.filter {
         val wakeTime = it.wakeTime
         val isActive = wakeTime.isBefore(time)
         isActive
