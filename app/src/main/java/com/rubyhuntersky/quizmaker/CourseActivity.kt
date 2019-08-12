@@ -124,7 +124,7 @@ class CourseActivity : FragmentActivity(), CoroutineScope, AppScope {
                     ),
                     buttons = listOf(
                         Button("Go", event = START_LESSON, hasNext = true),
-                        Button("Cancel", event = CANCEL_COURSE, hasNext = false),
+                        Button("Close", event = CANCEL_COURSE, hasNext = false),
                         Button("Reset", event = RESET_COURSE, hasNext = false)
                     ),
                     events = events
