@@ -14,7 +14,6 @@ val chapter10CourseMaterial = CourseMaterial(
         LessonMaterial(
             prompt = "someone else's house",
             response = "おたく",
-            promptColor = "> May I escort you home?",
             responseColor = "May I escort you home?\nおたくまでおくりましょうか。"
         ),
         LessonMaterial(prompt = "sound", response = "おと"),

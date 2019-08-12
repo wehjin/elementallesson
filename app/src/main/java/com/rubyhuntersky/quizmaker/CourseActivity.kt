@@ -66,6 +66,7 @@ class CourseActivity : FragmentActivity(), CoroutineScope, AppScope {
                     events.onReceive { event ->
                         when (event) {
                             CourseFragment.CANCEL_COURSE -> finish()
+                            CourseFragment.RESET_COURSE -> legend.offer(ViewCourseMsg.Reset)
                             CourseFragment.START_LESSON -> legend.offer(ViewCourseMsg.StartLesson)
                             LessonFragment.CANCEL_LESSON -> legend.offer(ViewCourseMsg.CancelLesson)
                             LessonFragment.CHECK_ANSWER -> legend.offer(ViewCourseMsg.CheckAnswer)
@@ -123,7 +124,8 @@ class CourseActivity : FragmentActivity(), CoroutineScope, AppScope {
                     ),
                     buttons = listOf(
                         Button("Go", event = START_LESSON, hasNext = true),
-                        Button("Cancel", event = CANCEL_COURSE, hasNext = false)
+                        Button("Cancel", event = CANCEL_COURSE, hasNext = false),
+                        Button("Reset", event = RESET_COURSE, hasNext = false)
                     ),
                     events = events
                 )
@@ -131,8 +133,9 @@ class CourseActivity : FragmentActivity(), CoroutineScope, AppScope {
         }
 
         companion object {
-            const val CANCEL_COURSE = "cancelCourse"
             const val START_LESSON = "startLesson"
+            const val CANCEL_COURSE = "cancelCourse"
+            const val RESET_COURSE = "resetCourse"
         }
     }
 

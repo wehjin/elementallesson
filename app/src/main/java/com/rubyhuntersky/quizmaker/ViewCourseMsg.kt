@@ -1,6 +1,7 @@
 package com.rubyhuntersky.quizmaker
 
 sealed class ViewCourseMsg {
+    object Reset : ViewCourseMsg()
     object StartLesson : ViewCourseMsg()
     object CancelLesson : ViewCourseMsg()
     object CheckAnswer : ViewCourseMsg()

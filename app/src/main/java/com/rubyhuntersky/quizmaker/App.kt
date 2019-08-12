@@ -41,6 +41,12 @@ class App : Application(), CoroutineScope {
                     for (msg in msgs) {
                         Log.d("CourseLegend", "MSG: $msg, MDL: $mdl")
                         mdl = when (msg) {
+                            is ViewCourseMsg.Reset -> {
+                                val newCourse = Course.start(chapter10CourseMaterial, LocalDateTime.now()).also {
+                                    storeChannel.send(StoreMsg.WriteCourse(it))
+                                }
+                                ViewCourseMdl(newCourse)
+                            }
                             is ViewCourseMsg.StartLesson -> {
                                 val activeLessons = mdl.course.getActiveLessons(LocalDateTime.now())
                                 if (activeLessons.isEmpty()) {
