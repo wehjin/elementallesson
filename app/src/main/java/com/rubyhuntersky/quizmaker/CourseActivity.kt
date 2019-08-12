@@ -8,7 +8,6 @@ import androidx.leanback.app.GuidedStepSupportFragment
 import androidx.leanback.widget.GuidanceStylist
 import com.rubyhuntersky.data.Course
 import com.rubyhuntersky.data.Lesson
-import com.rubyhuntersky.data.chapter10CourseMaterial
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -20,64 +19,24 @@ import java.time.LocalDateTime
 import kotlin.coroutines.CoroutineContext
 
 @ExperimentalCoroutinesApi
-class CourseActivity : FragmentActivity(), CoroutineScope {
+class CourseActivity : FragmentActivity(), CoroutineScope, AppScope {
     private val job = Job()
     override val coroutineContext: CoroutineContext = Main + job
 
-    private val legend = legendOf<ViewCourseMdl, ViewCourseMsg> { mdls, msgs ->
-        var mdl = ViewCourseMdl(Course.start(chapter10CourseMaterial, LocalDateTime.now()))
-        mdls.send(mdl)
-        for (msg in msgs) {
-            Log.d("CourseLegend", "MSG: $msg, MDL: $mdl")
-            mdl = when (msg) {
-                is ViewCourseMsg.Quit -> mdl.also { msgs.close() }
-                is ViewCourseMsg.StartLesson -> {
-                    val activeLessons = mdl.course.getActiveLessons(LocalDateTime.now())
-                    if (activeLessons.isEmpty()) {
-                        mdl
-                    } else {
-                        mdl.copy(activeLesson = activeLessons.random(), isCheckingAnswer = false)
-                    }
-                }
-                is ViewCourseMsg.CancelLesson -> mdl.copy(activeLesson = null, isCheckingAnswer = false)
-                is ViewCourseMsg.CheckAnswer -> mdl.copy(isCheckingAnswer = true)
-                is ViewCourseMsg.BackToLesson -> mdl.copy(isCheckingAnswer = false)
-                is ViewCourseMsg.RecordHard -> {
-                    mdl.activeLesson?.let {
-                        val newLesson = it.setHard(LocalDateTime.now())
-                        val newCourse = mdl.course.update(newLesson)
-                        val newActiveLessons = newCourse.getActiveLessons(LocalDateTime.now())
-                        val newActiveLesson = if (newActiveLessons.isEmpty()) null else newActiveLessons.random()
-                        mdl.copy(course = newCourse, activeLesson = newActiveLesson, isCheckingAnswer = false)
-                    } ?: mdl
-                }
-                is ViewCourseMsg.RecordEasy -> {
-                    mdl.activeLesson?.let {
-                        val newLesson = it.setEasy(LocalDateTime.now())
-                        val newCourse = mdl.course.update(newLesson)
-                        val newActiveLessons = newCourse.getActiveLessons(LocalDateTime.now())
-                        val newActiveLesson = if (newActiveLessons.isEmpty()) null else newActiveLessons.random()
-                        mdl.copy(course = newCourse, activeLesson = newActiveLesson, isCheckingAnswer = false)
-                    } ?: mdl
-                }
-            }
-            mdls.send(mdl)
-        }
-        mdls.close()
-        finish()
-    }
+    private val viewCourse
+        get() = app.viewCourse
 
     @ExperimentalCoroutinesApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        launchRenderer(legend)
+        launchRenderer(viewCourse)
     }
 
     override fun onBackPressed() {
         when {
-            getCurrentFragment<AnswerFragment>() != null -> launch { legend.send(ViewCourseMsg.BackToLesson) }
-            getCurrentFragment<LessonFragment>() != null -> launch { legend.send(ViewCourseMsg.CancelLesson) }
-            else -> launch { legend.send(ViewCourseMsg.Quit) }
+            getCurrentFragment<AnswerFragment>() != null -> launch { viewCourse.send(ViewCourseMsg.BackToLesson) }
+            getCurrentFragment<LessonFragment>() != null -> launch { viewCourse.send(ViewCourseMsg.CancelLesson) }
+            else -> finish()
         }
     }
 
@@ -106,24 +65,24 @@ class CourseActivity : FragmentActivity(), CoroutineScope {
                     }
                     events.onReceive { event ->
                         when (event) {
-                            "continueCourse" -> legend.offer(ViewCourseMsg.StartLesson)
-                            "cancelCourse" -> legend.offer(ViewCourseMsg.Quit)
+                            CourseFragment.CANCEL_COURSE -> finish()
+                            CourseFragment.START_LESSON -> legend.offer(ViewCourseMsg.StartLesson)
                             LessonFragment.CANCEL_LESSON -> legend.offer(ViewCourseMsg.CancelLesson)
                             LessonFragment.CHECK_ANSWER -> legend.offer(ViewCourseMsg.CheckAnswer)
-                            AnswerFragment.BACK_TO_LESSON -> legend.offer(ViewCourseMsg.BackToLesson)
-                            AnswerFragment.WAS_HARD -> legend.offer(ViewCourseMsg.RecordHard)
-                            AnswerFragment.WAS_EASY -> legend.offer(ViewCourseMsg.RecordEasy)
+                            AnswerFragment.CANCEL_ANSWER -> legend.offer(ViewCourseMsg.BackToLesson)
+                            AnswerFragment.ANSWER_HARD -> legend.offer(ViewCourseMsg.RecordHard)
+                            AnswerFragment.ANSWER_EASY -> legend.offer(ViewCourseMsg.RecordEasy)
                         }
                     }
                 }
             }
-            stopRendering()
+            dropFragments()
             events.close()
             models.cancel()
         }
     }
 
-    private fun stopRendering() {
+    private fun dropFragments() {
         GuidedStepSupportFragment.getCurrentGuidedStepSupportFragment(supportFragmentManager)
             ?.finishGuidedStepSupportFragments()
     }
@@ -163,12 +122,17 @@ class CourseActivity : FragmentActivity(), CoroutineScope {
                         context.getDrawable(R.drawable.ic_launcher_background)
                     ),
                     buttons = listOf(
-                        Button("Go", event = "continueCourse", hasNext = true),
-                        Button("Cancel", event = "cancelCourse", hasNext = false)
+                        Button("Go", event = START_LESSON, hasNext = true),
+                        Button("Cancel", event = CANCEL_COURSE, hasNext = false)
                     ),
                     events = events
                 )
             )
+        }
+
+        companion object {
+            const val CANCEL_COURSE = "cancelCourse"
+            const val START_LESSON = "startLesson"
         }
     }
 
@@ -215,9 +179,9 @@ class CourseActivity : FragmentActivity(), CoroutineScope {
                         null
                     ),
                     buttons = listOf(
-                        Button("Back", event = BACK_TO_LESSON),
-                        Button("Hard", event = WAS_HARD, subtext = "Repeat soon."),
-                        Button("Easy", event = WAS_EASY, subtext = "Repeat after I've forgotten.")
+                        Button("Back", event = CANCEL_ANSWER),
+                        Button("Hard", event = ANSWER_HARD, subtext = "Repeat soon."),
+                        Button("Easy", event = ANSWER_EASY, subtext = "Repeat after I've forgotten.")
                     ),
                     events = events
                 )
@@ -225,9 +189,9 @@ class CourseActivity : FragmentActivity(), CoroutineScope {
         }
 
         companion object {
-            const val WAS_EASY = "recordEasy"
-            const val WAS_HARD = "recordHard"
-            const val BACK_TO_LESSON = "backToLesson"
+            const val ANSWER_EASY = "recordEasy"
+            const val ANSWER_HARD = "recordHard"
+            const val CANCEL_ANSWER = "backToLesson"
         }
     }
 }
