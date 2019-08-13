@@ -57,7 +57,12 @@ val chapter10CourseMaterial = CourseMaterial(
         LessonMaterial(prompt = "explain", response = "せつめい（を）する", responseColor = "irregular verb"),
         LessonMaterial(prompt = "consult", response = "そうだん（を）する", responseColor = "irregular verb"),
         LessonMaterial(prompt = "practice", response = "れんしゅう（を）する", responseColor = "irregular verb"),
-        LessonMaterial(prompt = "contact", response = "れんらく（を）する", responseColor = "irregular verb"),
+        LessonMaterial(
+            prompt = "contact",
+            promptColor = "verb",
+            response = "れんらく（を）する",
+            responseColor = "irregular verb"
+        ),
         LessonMaterial(prompt = "important", response = "大せつ", responseColor = "na adjective\nたいせつ"),
         LessonMaterial(prompt = "hard", response = "大へん", responseColor = "na adjective\nたいへん"),
         LessonMaterial(prompt = "no good; bad", response = "だめ", responseColor = "na adjective"),
