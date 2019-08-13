@@ -1,0 +1,1 @@
+Repetition iteration app for a small set of Japanese words.
