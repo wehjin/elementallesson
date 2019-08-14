@@ -77,7 +77,7 @@ val chapter10CourseMaterial = CourseMaterial(
         LessonMaterial(prompt = "but", response = "だけど"),
         LessonMaterial(prompt = "next; next time", response = "つぎに"),
         LessonMaterial(prompt = "all together", response = "みんなで"),
-        LessonMaterial(prompt = "of course", response = "もしろん")
+        LessonMaterial(prompt = "of course", response = "もちろん")
     )
 )
 
