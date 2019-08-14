@@ -13,3 +13,5 @@ api.json
 /build
 /captures
 .externalNativeBuild
+/fastlane/report.xml
+/fastlane/README.md
