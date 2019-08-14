@@ -8,16 +8,15 @@ import androidx.leanback.app.GuidedStepSupportFragment
 import androidx.leanback.widget.GuidanceStylist
 import com.rubyhuntersky.data.Course
 import com.rubyhuntersky.data.Lesson
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.Main
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.selects.select
 import java.time.LocalDateTime
 import kotlin.coroutines.CoroutineContext
 
+@InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 class CourseActivity : FragmentActivity(), CoroutineScope, AppScope {
     private val job = Job()
@@ -29,7 +28,19 @@ class CourseActivity : FragmentActivity(), CoroutineScope, AppScope {
     @ExperimentalCoroutinesApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        launchRenderer(viewCourse)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        models = viewCourse.toMdls()
+        launchRenderer(models, viewCourse)
+    }
+
+    private lateinit var models: ReceiveChannel<ViewCourseMdl>
+
+    override fun onStop() {
+        models.cancel()
+        super.onStop()
     }
 
     override fun onBackPressed() {
@@ -40,28 +51,30 @@ class CourseActivity : FragmentActivity(), CoroutineScope, AppScope {
         }
     }
 
-    private fun launchRenderer(legend: Legend<ViewCourseMdl, ViewCourseMsg>) {
+    private fun launchRenderer(models: ReceiveChannel<ViewCourseMdl>, legend: Legend<ViewCourseMdl, ViewCourseMsg>) {
+        Log.d(TAG, "Launchihng renderer.")
         launch {
-            val models = legend.toMdls()
             val events = Channel<String>()
             while (!isDestroyed && !models.isClosedForReceive && !events.isClosedForReceive) {
                 select<Unit> {
-                    models.onReceive { mdl ->
-                        if (mdl.activeLesson != null && mdl.isCheckingAnswer) {
-                            requireAnswerFragment().setSight(mdl.activeLesson, events)
-                        } else if (mdl.activeLesson != null) {
-                            getCurrentFragment<AnswerFragment>()?.let {
-                                Log.d("CourseLegend", "Popping to lesson.")
-                                it.popBackStackToGuidedStepSupportFragment(LessonFragment::class.java, 0)
+                    models.onReceiveOrClosed { maybeMdl ->
+                        maybeMdl.valueOrNull?.let { mdl ->
+                            if (mdl.activeLesson != null && mdl.isCheckingAnswer) {
+                                requireAnswerFragment().setSight(mdl.activeLesson, events)
+                            } else if (mdl.activeLesson != null) {
+                                getCurrentFragment<AnswerFragment>()?.let {
+                                    Log.d("CourseLegend", "Popping to lesson.")
+                                    it.popBackStackToGuidedStepSupportFragment(LessonFragment::class.java, 0)
+                                }
+                                requireLessonFragment().setSight(mdl.activeLesson, events)
+                            } else {
+                                getCurrentFragment<LessonFragment>()?.let {
+                                    Log.d("CourseLegend", "Popping to course.")
+                                    it.popBackStackToGuidedStepSupportFragment(CourseFragment::class.java, 0)
+                                }
+                                requireCourseFragment().setSight(mdl.course, events, this@CourseActivity)
                             }
-                            requireLessonFragment().setSight(mdl.activeLesson, events)
-                        } else {
-                            getCurrentFragment<LessonFragment>()?.let {
-                                Log.d("CourseLegend", "Popping to course.")
-                                it.popBackStackToGuidedStepSupportFragment(CourseFragment::class.java, 0)
-                            }
-                            requireCourseFragment().setSight(mdl.course, events, this@CourseActivity)
-                        }
+                        } ?: Unit
                     }
                     events.onReceive { event ->
                         when (event) {
@@ -77,15 +90,8 @@ class CourseActivity : FragmentActivity(), CoroutineScope, AppScope {
                     }
                 }
             }
-            dropFragments()
-            events.close()
-            models.cancel()
+            Log.d(TAG, "Exiting renderer.")
         }
-    }
-
-    private fun dropFragments() {
-        GuidedStepSupportFragment.getCurrentGuidedStepSupportFragment(supportFragmentManager)
-            ?.finishGuidedStepSupportFragments()
     }
 
     private fun requireCourseFragment(): CourseFragment = getCurrentFragment()
