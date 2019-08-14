@@ -126,7 +126,7 @@ class CourseActivity : FragmentActivity(), CoroutineScope, AppScope {
                         course.title,
                         course.subtitle ?: "",
                         "Lessons Remaining: ${course.getActiveLessons(LocalDateTime.now()).size}",
-                        context.getDrawable(R.drawable.ic_launcher_background)
+                        context.getDrawable(R.mipmap.ic_launcher)
                     ),
                     buttons = listOf(
                         Button("Go", event = START_LESSON, hasNext = true),
