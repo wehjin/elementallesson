@@ -1,8 +1,5 @@
 package com.rubyhuntersky.data.material
 
-import com.rubyhuntersky.data.material.CourseMaterial
-import com.rubyhuntersky.data.material.LessonMaterial
-
 object Sem1Chap10CourseMaterial : CourseMaterial {
     override val title = "Chapter 10"
     override val subtitle = "Ganbaroo 1"
