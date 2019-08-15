@@ -3,7 +3,7 @@ package com.rubyhuntersky.quizmaker
 import android.app.Application
 import android.util.Log
 import com.rubyhuntersky.data.Course
-import com.rubyhuntersky.data.Sem1Chap10CourseMaterial
+import com.rubyhuntersky.data.material.Sem1Chap10CourseMaterial
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job

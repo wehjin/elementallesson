@@ -1,5 +1,6 @@
 package com.rubyhuntersky.data
 
+import com.rubyhuntersky.data.material.Sem1Chap10CourseMaterial
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test

@@ -1,4 +1,4 @@
-package com.rubyhuntersky.data
+package com.rubyhuntersky.data.material
 
 interface CourseMaterial {
     val title: String
