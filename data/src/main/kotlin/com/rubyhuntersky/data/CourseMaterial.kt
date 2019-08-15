@@ -1,10 +1,7 @@
 package com.rubyhuntersky.data
 
-import kotlinx.serialization.Serializable
-
-@Serializable
-data class CourseMaterial(
-    val title: String,
-    val subtitle: String? = null,
+interface CourseMaterial {
+    val title: String
+    val subtitle: String?
     val lessons: List<LessonMaterial>
-)
+}
