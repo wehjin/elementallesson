@@ -7,7 +7,6 @@ interface DegreeMaterial {
 object JapaneseDegreeMaterial : DegreeMaterial {
     override val courses: List<CourseMaterial> = listOf(
         Sem1Chap10CourseMaterial,
-        Sem1Chap10CourseMaterial,
         Sem1Chap10CourseMaterial
     )
 }

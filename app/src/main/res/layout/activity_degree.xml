@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/degree_browse_fragment"
-    android:name="com.rubyhuntersky.quizmaker.android.DegreeBrowseFragment"
+    android:id="@+id/fragment_degree"
+    android:name="com.rubyhuntersky.quizmaker.android.DegreeFragment"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" />
+    android:layout_height="match_parent" />

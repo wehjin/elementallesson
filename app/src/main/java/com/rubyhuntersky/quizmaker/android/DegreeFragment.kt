@@ -5,8 +5,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.leanback.app.BrowseSupportFragment
-import androidx.leanback.widget.*
+import androidx.leanback.app.VerticalGridSupportFragment
+import androidx.leanback.widget.ArrayObjectAdapter
+import androidx.leanback.widget.ImageCardView
+import androidx.leanback.widget.Presenter
+import androidx.leanback.widget.VerticalGridPresenter
 import com.rubyhuntersky.data.material.CourseMaterial
 import com.rubyhuntersky.data.material.JapaneseDegreeMaterial
 import com.rubyhuntersky.quizmaker.AppScope
@@ -16,22 +19,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlin.coroutines.CoroutineContext
 
-class DegreeBrowseFragment : BrowseSupportFragment(), CoroutineScope, AppScope {
+class DegreeFragment : VerticalGridSupportFragment(), CoroutineScope, AppScope {
     override fun getApplication(): Application = activity!!.application
     private val job = Job()
     override val coroutineContext: CoroutineContext = Dispatchers.Main + job
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        title = "Japanese"
-        adapter = categoryRowAdapter
-        selectedPosition = 0
-    }
-
-    private val categoryRowAdapter: ArrayObjectAdapter by lazy {
-        ArrayObjectAdapter(ListRowPresenter()).apply {
-            add(ListRow(HeaderItem("Courses"), coursesAdapter))
-        }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        adapter = coursesAdapter
+        title = "Courses"
+        gridPresenter = VerticalGridPresenter().apply { numberOfColumns = 4 }
     }
 
     private val coursesAdapter: ArrayObjectAdapter by lazy {
@@ -39,7 +36,6 @@ class DegreeBrowseFragment : BrowseSupportFragment(), CoroutineScope, AppScope {
             addAll(0, JapaneseDegreeMaterial.courses)
         }
     }
-
 
     class CourseCardPresenter : Presenter() {
 
