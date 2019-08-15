@@ -1,9 +1,9 @@
 package com.rubyhuntersky.data
 
-object Semester1CourseMaterial : CourseMaterial {
-    override val title = "JAPA 1"
-    override val subtitle: String? = null
-    override val lessons: List<LessonMaterial> = listOf(
+object Sem1Chap10CourseMaterial : CourseMaterial {
+    override val title = "Chapter 10"
+    override val subtitle = "Ganbaroo 1"
+    override val lessons = listOf(
         LessonMaterial(
             level = 10,
             prompt = "someone else's house",

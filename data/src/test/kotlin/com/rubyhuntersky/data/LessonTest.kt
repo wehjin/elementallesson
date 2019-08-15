@@ -13,19 +13,19 @@ internal class LessonTest {
     private val morePast = now - Duration.ofMinutes(20)
 
     private val newLesson = Lesson(
-        Semester1CourseMaterial.lessons.first(),
+        Sem1Chap10CourseMaterial.lessons.first(),
         hardTime = past,
         easyTime = null
     )
 
     private val attemptedLesson = Lesson(
-        Semester1CourseMaterial.lessons.first(),
+        Sem1Chap10CourseMaterial.lessons.first(),
         hardTime = past,
         easyTime = morePast
     )
 
     private val learnedLesson = Lesson(
-        Semester1CourseMaterial.lessons.first(),
+        Sem1Chap10CourseMaterial.lessons.first(),
         hardTime = morePast,
         easyTime = past
     )
@@ -41,7 +41,7 @@ internal class LessonTest {
     internal fun lessonLearnedOnceRepeatsAfterAbout1Day() {
         val easy = LocalDateTime.now()
         val hard = easy - Duration.ofHours(1)
-        val lesson = Lesson(Semester1CourseMaterial.lessons.first(), hard, easy)
+        val lesson = Lesson(Sem1Chap10CourseMaterial.lessons.first(), hard, easy)
         assertEquals(easy + Duration.ofHours(22), lesson.wakeTime)
     }
 
@@ -49,7 +49,7 @@ internal class LessonTest {
     internal fun lessonReconfirmedAfter24HoursRepeatsInAbout2Days() {
         val easy = LocalDateTime.now()
         val hard = easy - Duration.ofHours(24)
-        val lesson = Lesson(Semester1CourseMaterial.lessons.first(), hard, easy)
+        val lesson = Lesson(Sem1Chap10CourseMaterial.lessons.first(), hard, easy)
         assertEquals(easy + Duration.ofHours(46), lesson.wakeTime)
     }
 
@@ -57,7 +57,7 @@ internal class LessonTest {
     internal fun lessonReconfirmedAfter2DaysRepeatsInAbout4Days() {
         val easy = LocalDateTime.now()
         val hard = easy - Duration.ofHours(48)
-        val lesson = Lesson(Semester1CourseMaterial.lessons.first(), hard, easy)
+        val lesson = Lesson(Sem1Chap10CourseMaterial.lessons.first(), hard, easy)
         assertEquals(easy + Duration.ofHours(94), lesson.wakeTime)
     }
 }

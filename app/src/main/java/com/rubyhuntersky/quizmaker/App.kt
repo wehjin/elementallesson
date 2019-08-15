@@ -3,7 +3,7 @@ package com.rubyhuntersky.quizmaker
 import android.app.Application
 import android.util.Log
 import com.rubyhuntersky.data.Course
-import com.rubyhuntersky.data.chapter10CourseMaterial
+import com.rubyhuntersky.data.Sem1Chap10CourseMaterial
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -42,7 +42,7 @@ class App : Application(), CoroutineScope {
                         Log.d("CourseLegend", "MSG: $msg, MDL: $mdl")
                         mdl = when (msg) {
                             is ViewCourseMsg.Reset -> {
-                                val newCourse = Course.start(chapter10CourseMaterial, LocalDateTime.now()).also {
+                                val newCourse = Course.start(Sem1Chap10CourseMaterial, LocalDateTime.now()).also {
                                     storeChannel.send(StoreMsg.WriteCourse(it))
                                 }
                                 ViewCourseMdl(newCourse)
@@ -110,7 +110,7 @@ class App : Application(), CoroutineScope {
         super.onCreate()
         launch {
             val courseFile = File(filesDir, "activeCourse")
-            var course = CourseStore.read(courseFile) ?: Course.start(chapter10CourseMaterial, LocalDateTime.now())
+            var course = CourseStore.read(courseFile) ?: Course.start(Sem1Chap10CourseMaterial, LocalDateTime.now())
             while (!storeChannel.isClosedForReceive) {
                 when (val msg = storeChannel.receive()) {
                     is StoreMsg.ReadCourse -> msg.receive(course)
