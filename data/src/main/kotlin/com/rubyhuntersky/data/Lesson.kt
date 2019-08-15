@@ -1,6 +1,6 @@
 package com.rubyhuntersky.data
 
-import com.rubyhuntersky.data.material.LessonMaterial
+import com.rubyhuntersky.data.material.core.LessonMaterial
 import kotlinx.serialization.Serializable
 import java.time.Duration
 import java.time.LocalDateTime

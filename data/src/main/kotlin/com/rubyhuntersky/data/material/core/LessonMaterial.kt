@@ -1,4 +1,4 @@
-package com.rubyhuntersky.data.material
+package com.rubyhuntersky.data.material.core
 
 import kotlinx.serialization.Serializable
 

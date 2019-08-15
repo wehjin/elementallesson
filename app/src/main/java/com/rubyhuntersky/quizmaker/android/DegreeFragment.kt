@@ -10,8 +10,8 @@ import androidx.leanback.widget.ArrayObjectAdapter
 import androidx.leanback.widget.ImageCardView
 import androidx.leanback.widget.Presenter
 import androidx.leanback.widget.VerticalGridPresenter
-import com.rubyhuntersky.data.material.CourseMaterial
-import com.rubyhuntersky.data.material.JapaneseDegreeMaterial
+import com.rubyhuntersky.data.material.BasicDegreeMaterial
+import com.rubyhuntersky.data.material.core.CourseMaterial
 import com.rubyhuntersky.quizmaker.AppScope
 import com.rubyhuntersky.quizmaker.R
 import kotlinx.coroutines.CoroutineScope
@@ -33,7 +33,7 @@ class DegreeFragment : VerticalGridSupportFragment(), CoroutineScope, AppScope {
 
     private val coursesAdapter: ArrayObjectAdapter by lazy {
         ArrayObjectAdapter(CourseCardPresenter()).apply {
-            addAll(0, JapaneseDegreeMaterial.courses)
+            addAll(0, BasicDegreeMaterial.courses)
         }
     }
 

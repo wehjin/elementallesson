@@ -1,8 +1,11 @@
 package com.rubyhuntersky.data.material
 
+import com.rubyhuntersky.data.material.core.CourseMaterial
+import com.rubyhuntersky.data.material.core.LessonMaterial
+
 object Sem1Chap10CourseMaterial : CourseMaterial {
     override val title = "Chapter 10"
-    override val subtitle = "Ganbaroo 1"
+    override val subtitle = "Semester 1"
     override val lessons = listOf(
         LessonMaterial(
             level = 10,
@@ -197,11 +200,19 @@ object Sem1Chap10CourseMaterial : CourseMaterial {
             responseColor = "na adjective"
         ),
         LessonMaterial(level = 10, prompt = "always", response = "いつも"),
-        LessonMaterial(level = 10, prompt = "without fail; surely", response = "かならず"),
+        LessonMaterial(
+            level = 10,
+            prompt = "without fail; surely",
+            response = "かならず"
+        ),
         LessonMaterial(level = 10, prompt = "properly", response = "ちゃんと"),
         LessonMaterial(level = 10, prompt = "yet", response = "まだ"),
         LessonMaterial(level = 10, prompt = "already", response = "もう"),
-        LessonMaterial(level = 10, prompt = "okay; OK; alright", response = "オーケー"),
+        LessonMaterial(
+            level = 10,
+            prompt = "okay; OK; alright",
+            response = "オーケー"
+        ),
         LessonMaterial(
             level = 10,
             prompt = "Let's study hard.",
