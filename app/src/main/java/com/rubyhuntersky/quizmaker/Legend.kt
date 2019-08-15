@@ -7,28 +7,58 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.launch
-import kotlin.coroutines.CoroutineContext
 
 @ExperimentalCoroutinesApi
-class Legend<MdlT : Any, MsgT : Any> : CoroutineScope {
+class Legend<MdlT : Any, MsgT : Any> {
 
-    override val coroutineContext: CoroutineContext = Job()
     private val mdlBroadcast = ConflatedBroadcastChannel<MdlT>()
     private val msgChannel = Channel<MsgT>()
     private lateinit var job: Job
 
-    fun toMdls() = mdlBroadcast.openSubscription()
+    fun run(scope: CoroutineScope, block: suspend (mdls: SendChannel<MdlT>, msgs: Channel<MsgT>) -> Unit) {
+        job = scope.launch { block(mdlBroadcast, msgChannel) }
+    }
 
-    suspend fun send(msg: MsgT) = msgChannel.send(msg)
+    fun startMdls() = mdlBroadcast.openSubscription()
+
     fun offer(msg: MsgT) = msgChannel.offer(msg)
+    suspend fun send(msg: MsgT) = msgChannel.send(msg)
 
-    internal fun run(block: suspend (mdls: SendChannel<MdlT>, msgs: Channel<MsgT>) -> Unit) {
-        job = launch { block(mdlBroadcast, msgChannel) }
+    fun cancel() {
+        msgChannel.close()
+        job.cancel()
     }
 }
 
 
+@Suppress("EXPERIMENTAL_API_USAGE")
+interface LegendScope : CoroutineScope
+
 @ExperimentalCoroutinesApi
-fun <MdlT : Any, MsgT : Any> legendOf(
-    block: suspend (mdls: SendChannel<MdlT>, msgs: Channel<MsgT>) -> Unit
-) = Legend<MdlT, MsgT>().apply { run(block) }
+inline fun <reified MdlT : Any, reified MsgT : Any> LegendScope.startLegend(
+    name: String = "unit",
+    noinline block: suspend (mdls: SendChannel<MdlT>, msgs: Channel<MsgT>) -> MdlT
+): Legend<MdlT, MsgT> {
+    val key = name.toNamedLegendKey<MdlT, MsgT>()
+    namedLegends[key]?.cancel()
+    return Legend<MdlT, MsgT>().also { legend ->
+        namedLegends[key] = legend
+        legend.run(this) { mdls, msgs ->
+            block(mdls, msgs)
+            namedLegends.remove(key, legend)
+        }
+    }
+}
+
+inline fun <reified MdlT : Any, reified MsgT : Any> String.toNamedLegendKey(): Triple<String, Class<MdlT>, Class<MsgT>> =
+    Triple(this, MdlT::class.java, MsgT::class.java)
+
+@ExperimentalCoroutinesApi
+val namedLegends = mutableMapOf<Triple<String, Class<*>, Class<*>>, Legend<*, *>>()
+
+@ExperimentalCoroutinesApi
+inline fun <reified MdlT : Any, reified MsgT : Any> LegendScope.findLegend(name: String = "unit"): Legend<MdlT, MsgT>? {
+    val key = name.toNamedLegendKey<MdlT, MsgT>()
+    @Suppress("UNCHECKED_CAST")
+    return namedLegends[key] as? Legend<MdlT, MsgT>
+}

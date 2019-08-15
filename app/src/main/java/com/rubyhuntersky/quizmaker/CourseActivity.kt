@@ -18,12 +18,11 @@ import kotlin.coroutines.CoroutineContext
 
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
-class CourseActivity : FragmentActivity(), CoroutineScope, AppScope {
+class CourseActivity : FragmentActivity(), CoroutineScope, AppScope, LegendScope {
     private val job = Job()
     override val coroutineContext: CoroutineContext = Main + job
 
-    private val viewCourse
-        get() = app.viewCourse
+    private val legend = findLegend<ViewCourseMdl, ViewCourseMsg>()!!
 
     @ExperimentalCoroutinesApi
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,8 +31,8 @@ class CourseActivity : FragmentActivity(), CoroutineScope, AppScope {
 
     override fun onStart() {
         super.onStart()
-        models = viewCourse.toMdls()
-        launchRenderer(models, viewCourse)
+        models = legend.startMdls()
+        launchRenderer(models, legend)
     }
 
     private lateinit var models: ReceiveChannel<ViewCourseMdl>
@@ -45,8 +44,8 @@ class CourseActivity : FragmentActivity(), CoroutineScope, AppScope {
 
     override fun onBackPressed() {
         when {
-            getCurrentFragment<AnswerFragment>() != null -> launch { viewCourse.send(ViewCourseMsg.BackToLesson) }
-            getCurrentFragment<LessonFragment>() != null -> launch { viewCourse.send(ViewCourseMsg.CancelLesson) }
+            getCurrentFragment<AnswerFragment>() != null -> launch { legend.send(ViewCourseMsg.BackToLesson) }
+            getCurrentFragment<LessonFragment>() != null -> launch { legend.send(ViewCourseMsg.CancelLesson) }
             else -> finish()
         }
     }
