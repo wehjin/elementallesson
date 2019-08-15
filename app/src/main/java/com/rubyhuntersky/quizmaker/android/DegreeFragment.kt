@@ -1,6 +1,7 @@
 package com.rubyhuntersky.quizmaker.android
 
 import android.app.Application
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,12 +14,13 @@ import androidx.leanback.widget.VerticalGridPresenter
 import com.rubyhuntersky.data.material.BasicDegreeMaterial
 import com.rubyhuntersky.data.material.core.CourseMaterial
 import com.rubyhuntersky.quizmaker.AppScope
+import com.rubyhuntersky.quizmaker.CourseActivity
 import com.rubyhuntersky.quizmaker.R
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
+@ExperimentalCoroutinesApi
+@InternalCoroutinesApi
 class DegreeFragment : VerticalGridSupportFragment(), CoroutineScope, AppScope {
     override fun getApplication(): Application = activity!!.application
     private val job = Job()
@@ -29,6 +31,12 @@ class DegreeFragment : VerticalGridSupportFragment(), CoroutineScope, AppScope {
         adapter = coursesAdapter
         title = "Courses"
         gridPresenter = VerticalGridPresenter().apply { numberOfColumns = 4 }
+
+        setOnItemViewClickedListener { _, item, _, _ ->
+            val courseMaterial = item as CourseMaterial
+            val intent = Intent(context, CourseActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private val coursesAdapter: ArrayObjectAdapter by lazy {
