@@ -153,7 +153,7 @@ class CourseActivity : FragmentActivity(), CoroutineScope, AppScope {
                     guidance = GuidanceStylist.Guidance(
                         lesson.prompt,
                         lesson.promptColor ?: "",
-                        lesson.lastSeen?.let { "Last seen: $it" } ?: "",
+                        lesson.learnedTime?.let { "Last seen: $it" } ?: "",
                         null
                     ),
                     buttons = listOf(

@@ -21,11 +21,8 @@ data class Lesson(
     fun setEasy(time: LocalDateTime) = copy(easyTime = time)
     fun setHard(time: LocalDateTime) = copy(hardTime = time)
 
-    val lastSeen: LocalDateTime?
-        get() {
-            val easy = easyTime
-            return if (easy == null) null else if (easy.isBefore(hardTime)) hardTime else easy
-        }
+    val learnedTime: LocalDateTime?
+        get() = easyTime?.let { easy -> if (easy.isAfter(hardTime)) easy else null }
 
     val wakeTime: LocalDateTime
         get() {
