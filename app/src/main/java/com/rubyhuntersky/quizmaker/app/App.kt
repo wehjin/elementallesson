@@ -15,18 +15,6 @@ import java.io.File
 import java.time.LocalDateTime
 import kotlin.coroutines.CoroutineContext
 
-interface AppScope {
-    fun getApplication(): Application
-}
-
-@ExperimentalCoroutinesApi
-val AppScope.app: App
-    get() = getApplication() as App
-
-@Suppress("unused")
-val AppScope.TAG: String
-    get() = this::class.java.simpleName
-
 @ExperimentalCoroutinesApi
 class App : Application(), CoroutineScope, LegendScope {
 
@@ -43,7 +31,10 @@ class App : Application(), CoroutineScope, LegendScope {
                 Log.d("CourseLegend", "MSG: $msg, MDL: $mdl")
                 mdl = when (msg) {
                     is ViewCourseMsg.Reset -> {
-                        val newCourse = Course.start(Sem1Chap10CourseMaterial, LocalDateTime.now()).also {
+                        val newCourse = Course.start(
+                            Sem1Chap10CourseMaterial,
+                            LocalDateTime.now()
+                        ).also {
                             storeChannel.send(StoreMsg.WriteCourse(it))
                         }
                         ViewCourseMdl(newCourse)
@@ -111,7 +102,11 @@ class App : Application(), CoroutineScope, LegendScope {
         super.onCreate()
         launch {
             val courseFile = File(filesDir, "activeCourse")
-            var course = CourseStore.read(courseFile) ?: Course.start(Sem1Chap10CourseMaterial, LocalDateTime.now())
+            var course = CourseStore.read(courseFile)
+                ?: Course.start(
+                    Sem1Chap10CourseMaterial,
+                    LocalDateTime.now()
+                )
             while (!storeChannel.isClosedForReceive) {
                 when (val msg = storeChannel.receive()) {
                     is StoreMsg.ReadCourse -> msg.response.send(course)
@@ -129,4 +124,3 @@ class App : Application(), CoroutineScope, LegendScope {
         super.onTerminate()
     }
 }
-
