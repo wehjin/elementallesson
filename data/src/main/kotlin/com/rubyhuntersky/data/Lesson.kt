@@ -14,13 +14,28 @@ data class Lesson(
     @Serializable(with = LocalDateTimeSerializer::class)
     val easyTime: LocalDateTime? = null
 ) {
+    val isLearned: Boolean
+        get() = learnedTime != null
+
+    fun isAwake(time: LocalDateTime): Boolean {
+        val isAsleep = wakeTime.isAfter(time)
+        return !isAsleep
+    }
+
     val prompt get() = material.prompt
     val promptColor get() = material.promptColor
     val response get() = material.response
     val responseColor get() = material.responseColor
 
-    fun setEasy(time: LocalDateTime) = copy(easyTime = time)
-    fun setHard(time: LocalDateTime) = copy(hardTime = time)
+    fun setEasy(time: LocalDateTime): Lesson {
+        return if (easyTime == null || easyTime.isBefore(hardTime)) {
+            copy(easyTime = time, hardTime = time)
+        } else {
+            copy(easyTime = time)
+        }
+    }
+
+    fun setHard(time: LocalDateTime): Lesson = copy(hardTime = time, easyTime = null)
 
     val learnedTime: LocalDateTime?
         get() = easyTime?.let { easy -> if (easy.isAfter(hardTime)) easy else null }

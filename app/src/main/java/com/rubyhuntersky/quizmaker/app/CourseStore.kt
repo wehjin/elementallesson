@@ -1,4 +1,4 @@
-package com.rubyhuntersky.quizmaker
+package com.rubyhuntersky.quizmaker.app
 
 import com.rubyhuntersky.data.Course
 import kotlinx.serialization.json.Json

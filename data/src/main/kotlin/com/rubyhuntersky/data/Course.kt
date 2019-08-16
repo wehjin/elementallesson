@@ -12,13 +12,10 @@ data class Course(
     val lessons: Set<Lesson>
 ) {
 
-    fun getActiveLessons(time: LocalDateTime): Set<Lesson> = lessons.filter {
-        val wakeTime = it.wakeTime
-        val isActive = wakeTime.isBefore(time)
-        isActive
-    }.toSet()
+    fun lessonList(time: LocalDateTime): List<Lesson> = toActiveOrderedLessons(lessons, time)
+    fun getActiveLessons(time: LocalDateTime): Set<Lesson> = lessons.filter { it.isAwake(time) }.toSet()
 
-    fun update(lesson: Lesson): Course = copy(
+    fun replaceLesson(lesson: Lesson): Course = copy(
         lessons = lessons.toMutableSet()
             .also { lessons ->
                 lessons.removeIf { it.material == lesson.material }
@@ -31,5 +28,19 @@ data class Course(
             subtitle = courseMaterial.subtitle,
             lessons = courseMaterial.lessons.map { Lesson(it, time - Duration.ofMinutes(2)) }.toSet()
         )
+
+        fun toActiveOrderedLessons(lessons: Iterable<Lesson>, time: LocalDateTime): List<Lesson> {
+            return lessons.filter { it.isAwake(time) }
+                .sortedWith(Comparator { a, b ->
+                    val aIsLearned = a.isLearned
+                    val bIsLearned = b.isLearned
+                    when {
+                        aIsLearned && !bIsLearned -> -1
+                        bIsLearned && !aIsLearned -> 1
+                        else -> a.material.level.compareTo(b.material.level)
+                    }
+                })
+                .let { if (it.size > 30) it.subList(0, 30) else it }
+        }
     }
 }

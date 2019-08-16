@@ -10,6 +10,8 @@ import com.rubyhuntersky.data.Course
 import com.rubyhuntersky.data.Lesson
 import com.rubyhuntersky.quizmaker.app.AppScope
 import com.rubyhuntersky.quizmaker.app.TAG
+import com.rubyhuntersky.quizmaker.viewcourse.ViewCourseMdl
+import com.rubyhuntersky.quizmaker.viewcourse.ViewCourseMsg
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.channels.Channel
@@ -48,38 +50,43 @@ class CourseActivity : FragmentActivity(), CoroutineScope, AppScope, LegendScope
         when {
             getCurrentFragment<AnswerFragment>() != null -> launch { legend.send(ViewCourseMsg.BackToLesson) }
             getCurrentFragment<LessonFragment>() != null -> launch { legend.send(ViewCourseMsg.CancelLesson) }
-            else -> finish()
+            else -> launch { legend.send(ViewCourseMsg.Cancel) }
         }
     }
 
     private fun launchRenderer(models: ReceiveChannel<ViewCourseMdl>, legend: Legend<ViewCourseMdl, ViewCourseMsg>) {
-        Log.d(TAG, "Launchihng renderer.")
+        Log.d(TAG, "Launching renderer.")
         launch {
             val events = Channel<String>()
             while (!isDestroyed && !models.isClosedForReceive && !events.isClosedForReceive) {
                 select<Unit> {
                     models.onReceiveOrClosed { maybeMdl ->
                         maybeMdl.valueOrNull?.let { mdl ->
-                            if (mdl.activeLesson != null && mdl.isCheckingAnswer) {
+                            if (mdl.activeCourse != null && mdl.activeLesson != null && mdl.isCheckingAnswer) {
                                 requireAnswerFragment().setSight(mdl.activeLesson, events)
-                            } else if (mdl.activeLesson != null) {
+                            } else if (mdl.activeCourse != null && mdl.activeLesson != null) {
                                 getCurrentFragment<AnswerFragment>()?.let {
                                     Log.d("CourseLegend", "Popping to lesson.")
                                     it.popBackStackToGuidedStepSupportFragment(LessonFragment::class.java, 0)
                                 }
                                 requireLessonFragment().setSight(mdl.activeLesson, events)
-                            } else {
+                            } else if (mdl.activeCourse != null) {
+                                Log.d(TAG, "Active course: ${mdl.activeCourse.title}")
                                 getCurrentFragment<LessonFragment>()?.let {
                                     Log.d("CourseLegend", "Popping to course.")
                                     it.popBackStackToGuidedStepSupportFragment(CourseFragment::class.java, 0)
                                 }
-                                requireCourseFragment().setSight(mdl.course, events, this@CourseActivity)
+                                requireCourseFragment().setSight(mdl.activeCourse, events, this@CourseActivity)
+                            } else {
+                                GuidedStepSupportFragment.getCurrentGuidedStepSupportFragment(supportFragmentManager)
+                                    ?.finishGuidedStepSupportFragments()
+                                this@CourseActivity.finish()
                             }
                         } ?: Unit
                     }
                     events.onReceive { event ->
                         when (event) {
-                            CourseFragment.CANCEL_COURSE -> finish()
+                            CourseFragment.CANCEL_COURSE -> legend.offer(ViewCourseMsg.Cancel)
                             CourseFragment.RESET_COURSE -> legend.offer(ViewCourseMsg.Reset)
                             CourseFragment.START_LESSON -> legend.offer(ViewCourseMsg.StartLesson)
                             LessonFragment.CANCEL_LESSON -> legend.offer(ViewCourseMsg.CancelLesson)

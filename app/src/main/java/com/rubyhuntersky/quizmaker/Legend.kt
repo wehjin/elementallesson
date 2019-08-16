@@ -25,7 +25,6 @@ class Legend<MdlT : Any, MsgT : Any> {
     suspend fun send(msg: MsgT) = msgChannel.send(msg)
 
     fun cancel() {
-        msgChannel.close()
         job.cancel()
     }
 }
