@@ -8,6 +8,8 @@ import androidx.leanback.app.GuidedStepSupportFragment
 import androidx.leanback.widget.GuidanceStylist
 import com.rubyhuntersky.data.Course
 import com.rubyhuntersky.data.Lesson
+import com.rubyhuntersky.quizmaker.app.AppScope
+import com.rubyhuntersky.quizmaker.app.TAG
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.channels.Channel

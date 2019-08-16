@@ -14,7 +14,7 @@
         android:required="false" />
 
     <application
-        android:name=".App"
+        android:name=".app.App"
         android:allowBackup="true"
         android:banner="@mipmap/jwords_banner"
         android:icon="@mipmap/ic_launcher"

@@ -2,6 +2,7 @@ package com.rubyhuntersky.quizmaker
 
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
+import com.rubyhuntersky.quizmaker.app.AppScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.Job
