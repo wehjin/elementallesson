@@ -52,7 +52,7 @@ object Sem1Chap01CourseMaterial : CourseMaterial {
         LessonMaterial(level = 1, prompt = "job; work", response = "(お)しごと"),
         LessonMaterial(level = 1, prompt = "City College", response = "シティーカレッジ"),
         LessonMaterial(level = 1, prompt = "Spain", response = "スペイン"),
-        LessonMaterial(level = 1, prompt = "store clerk", response = "てん’いん"),
+        LessonMaterial(level = 1, prompt = "store clerk", response = "てんいん", responseColor = "ten'in"),
         LessonMaterial(level = 1, prompt = "Tokyo Trading Co.", response = "とうきょうしょうじ"),
         LessonMaterial(level = 1, prompt = "friend", response = "ともだち"),
         LessonMaterial(level = 1, prompt = "my home; house", response = "うち"),
