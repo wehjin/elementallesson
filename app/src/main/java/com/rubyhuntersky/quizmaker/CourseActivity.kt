@@ -19,6 +19,7 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.selects.select
 import java.time.LocalDateTime
 import kotlin.coroutines.CoroutineContext
+import kotlin.math.min
 
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
@@ -128,19 +129,31 @@ class CourseActivity : FragmentActivity(), CoroutineScope, AppScope, LegendScope
 
     class CourseFragment : StepFragment() {
         suspend fun setSight(course: Course, events: Channel<String>, context: Context) {
+            val activeCount = course.getActiveLessons(LocalDateTime.now()).size
+            val firstButton = if (activeCount > 0) {
+                listOf(
+                    Button(
+                        "First ${min(activeCount, Course.maxLessonsPerSession)}",
+                        event = START_LESSON,
+                        hasNext = true
+                    )
+                )
+            } else {
+                emptyList()
+            }
+            val buttons = firstButton + listOf(
+                Button("Close", event = CANCEL_COURSE, hasNext = false),
+                Button("Reset", event = RESET_COURSE, hasNext = false)
+            )
             control.send(
                 Msg.SetView(
                     guidance = GuidanceStylist.Guidance(
                         course.title,
                         course.subtitle ?: "",
-                        "Lessons Remaining: ${course.getActiveLessons(LocalDateTime.now()).size}",
+                        "$activeCount Lessons Repeating",
                         context.getDrawable(R.mipmap.ic_launcher)
                     ),
-                    buttons = listOf(
-                        Button("Go", event = START_LESSON, hasNext = true),
-                        Button("Close", event = CANCEL_COURSE, hasNext = false),
-                        Button("Reset", event = RESET_COURSE, hasNext = false)
-                    ),
+                    buttons = buttons,
                     events = events
                 )
             )
@@ -197,8 +210,8 @@ class CourseActivity : FragmentActivity(), CoroutineScope, AppScope, LegendScope
                     ),
                     buttons = listOf(
                         Button("Back", event = CANCEL_ANSWER),
-                        Button("Hard", event = ANSWER_HARD, subtext = "Repeat soon."),
-                        Button("Easy", event = ANSWER_EASY, subtext = "Repeat after I've forgotten.")
+                        Button("Repeat", event = ANSWER_HARD, subtext = "Hard. Repeat soon."),
+                        Button("Space", event = ANSWER_EASY, subtext = "Easy. Repeat after I've forgotten.")
                     ),
                     events = events
                 )

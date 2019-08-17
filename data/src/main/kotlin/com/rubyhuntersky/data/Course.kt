@@ -29,6 +29,8 @@ data class Course(
             lessons = courseMaterial.lessons.map { Lesson(it, time - Duration.ofMinutes(2)) }.toSet()
         )
 
+        const val maxLessonsPerSession = 43
+
         fun toActiveOrderedLessons(lessons: Iterable<Lesson>, time: LocalDateTime): List<Lesson> {
             return lessons.filter { it.isAwake(time) }
                 .sortedWith(Comparator { a, b ->
@@ -40,7 +42,7 @@ data class Course(
                         else -> a.material.level.compareTo(b.material.level)
                     }
                 })
-                .let { if (it.size > 30) it.subList(0, 30) else it }
+                .let { if (it.size > maxLessonsPerSession) it.subList(0, maxLessonsPerSession) else it }
         }
     }
 }
