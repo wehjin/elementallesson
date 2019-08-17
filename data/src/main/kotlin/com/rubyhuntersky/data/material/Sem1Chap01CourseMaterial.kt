@@ -59,7 +59,7 @@ object Sem1Chap01CourseMaterial : CourseMaterial {
         LessonMaterial(level = 1, prompt = "I", promptColor = "formal", response = "わたくし"),
         LessonMaterial(level = 1, prompt = "I", promptColor = "polite", response = "わたし"),
         LessonMaterial(level = 1, prompt = "is; am; are", response = "です"),
-        LessonMaterial(level = 1, prompt = "good", promptColor = "adjective", response = "いい\ni adjective"),
+        LessonMaterial(level = 1, prompt = "good", promptColor = "adjective", response = "いい", responseColor = "い adjective"),
         LessonMaterial(level = 1, prompt = "at; in; on", promptColor = "particle, place of action", response = "で"),
         LessonMaterial(level = 1, prompt = "question?", promptColor = "particle, question marker", response = "か"),
         LessonMaterial(level = 1, prompt = "A's B", promptColor = "particle, possessive", response = "の"),
