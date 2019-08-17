@@ -87,7 +87,7 @@ object Sem1Chap10CourseMaterial : CourseMaterial {
         LessonMaterial(
             level = 10,
             prompt = "turn on",
-            response = "わける",
+            response = "つける",
             responseColor = "ru verb"
         ),
         LessonMaterial(
