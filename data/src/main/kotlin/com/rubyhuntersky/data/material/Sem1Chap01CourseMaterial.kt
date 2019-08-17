@@ -68,7 +68,7 @@ object Sem1Chap01CourseMaterial : CourseMaterial {
         LessonMaterial(level = 1, prompt = "ah; oh", promptColor = "expression", response = "あ/ああ", responseColor = ""),
         LessonMaterial(level = 1, prompt = "Oh, is that so?", response = "ああ、そうですか。", responseColor = ""),
         LessonMaterial(level = 1, prompt = "hmm; er; uh", response = "あのう", responseColor = ""),
-        LessonMaterial(level = 1, prompt = "Pleased to meet you.", promptColor = "plain", response = "", responseColor = ""),
+        LessonMaterial(level = 1, prompt = "Pleased to meet you.", promptColor = "plain", response = "どうぞよろしく。", responseColor = ""),
         LessonMaterial(level = 1, prompt = "yes", promptColor = "plain", response = "ええ", responseColor = ""),
         LessonMaterial(level = 1, prompt = "yes", promptColor = "formal", response = "はい", responseColor = ""),
         LessonMaterial(level = 1, prompt = "It is the first time we've met.", promptColor = "approaching", response = "はじめまして。", responseColor = ""),
