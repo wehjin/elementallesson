@@ -15,6 +15,14 @@ data class Study(val courses: List<Course>) {
         return copy(courses = newCourses)
     }
 
+    fun mergeInto(previous: Study?): Study {
+        return previous?.let {
+            val previousCourseTitles = previous.courses.map(Course::fullTitle).toSet()
+            val newCourses = this.courses.filter { !previousCourseTitles.contains(it.fullTitle) }
+            previous.copy(courses = previous.courses + newCourses)
+        } ?: this
+    }
+
     companion object {
         fun start(degreeMaterial: DegreeMaterial, time: LocalDateTime): Study {
             val courses = degreeMaterial.courses.map { material ->

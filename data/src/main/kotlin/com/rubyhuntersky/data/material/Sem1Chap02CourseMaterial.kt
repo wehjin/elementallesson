@@ -4,7 +4,7 @@ import com.rubyhuntersky.data.material.core.CourseMaterial
 import com.rubyhuntersky.data.material.core.LessonMaterial
 
 object Sem1Chap02CourseMaterial : CourseMaterial {
-    override val title = "Chapter 1"
+    override val title = "Chapter 2"
     override val subtitle = "Semester 1"
     override val lessons = listOf(
         LessonMaterial(level = 2, prompt = "animation", response = "アニメ"),

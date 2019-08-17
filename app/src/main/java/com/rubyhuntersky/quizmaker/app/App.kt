@@ -35,7 +35,7 @@ class App : Application(), CoroutineScope, LegendScope {
         super.onCreate()
         launch {
             val studyFile = File(filesDir, "activeStudy")
-            var study = StudyStore.read(studyFile) ?: Study.start(BasicDegreeMaterial, LocalDateTime.now())
+            var study = Study.start(BasicDegreeMaterial, LocalDateTime.now()).mergeInto(StudyStore.read(studyFile))
             while (!storeChannel.isClosedForReceive) {
                 when (val msg = storeChannel.receive()) {
                     is StoreMsg.ReadStudy -> msg.response.send(study)
