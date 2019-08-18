@@ -53,7 +53,7 @@ object Sem1Chap03CourseMaterial : CourseMaterial {
         LessonMaterial(level = 3, prompt = "read", response = "よむ", responseColor = "u verb"),
         LessonMaterial(level = 3, prompt = "good at; skillful; proficient", response = "じょうず"),
         LessonMaterial(level = 3, prompt = "definitely", response = "ぜひ", promptColor = "level 1"),
-        LessonMaterial(level = 3, prompt = "A[subject marker] B", response = "が", promptColor = "particle"),
+        LessonMaterial(level = 3, prompt = "A [subject marker] B", response = "が", promptColor = "particle, focus on A"),
         LessonMaterial(level = 3, prompt = "also; too; (not) either", response = "も", promptColor = "particle"),
         LessonMaterial(level = 3, prompt = "and", response = "と", promptColor = "particle, between nouns, exclusive"),
         LessonMaterial(level = 3, prompt = "Oh?/Oh!", response = "え", promptColor = "expression"),
