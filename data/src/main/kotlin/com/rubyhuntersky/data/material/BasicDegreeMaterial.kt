@@ -8,6 +8,7 @@ object BasicDegreeMaterial : DegreeMaterial {
         Sem1CourseMaterial,
         Sem1Chap01CourseMaterial,
         Sem1Chap02CourseMaterial,
+        Sem1Chap03CourseMaterial,
         Sem1Chap10CourseMaterial
     )
 }

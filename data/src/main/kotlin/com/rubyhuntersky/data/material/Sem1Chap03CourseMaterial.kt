@@ -1,0 +1,67 @@
+package com.rubyhuntersky.data.material
+
+import com.rubyhuntersky.data.material.core.CourseMaterial
+import com.rubyhuntersky.data.material.core.LessonMaterial
+
+object Sem1Chap03CourseMaterial : CourseMaterial {
+    override val title = "Chapter 3"
+    override val subtitle = "Semester 1"
+    override val lessons = listOf(
+        LessonMaterial(level = 3, prompt = "barbecue", response = "バーベキュー", promptColor = "noun"),
+        LessonMaterial(level = 3, prompt = "basketball", response = "バスケットボール"),
+        LessonMaterial(level = 3, prompt = "bed", response = "ベッド"),
+        LessonMaterial(level = 3, prompt = "rice bowl; teacup", response = "ちゃわん"),
+        LessonMaterial(level = 3, prompt = "Germany", response = "ドイツ"),
+        LessonMaterial(level = 3, prompt = "futon", response = "ふとん"),
+        LessonMaterial(level = 3, prompt = "foreign country", response = "がいこく"),
+        LessonMaterial(level = 3, prompt = "game", response = "ゲーム"),
+        LessonMaterial(level = 3, prompt = "~language", response = "〜ご", promptColor = "~suffix"),
+        LessonMaterial(level = 3, prompt = "Chinese language", response = "ちゅうごくご"),
+        LessonMaterial(level = 3, prompt = "German language", response = "ドイツご"),
+        LessonMaterial(level = 3, prompt = "English language", response = "えいご"),
+        LessonMaterial(level = 3, prompt = "French language", response = "フランスご"),
+        LessonMaterial(level = 3, prompt = "foreign language", response = "かいこくご"),
+        LessonMaterial(level = 3, prompt = "what language?", response = "なにご"),
+        LessonMaterial(level = 3, prompt = "Spanish language", response = "スペインご"),
+        LessonMaterial(level = 3, prompt = "Harajuku district in Tokyo", response = "はらじゅく"),
+        LessonMaterial(level = 3, prompt = "chopsticks", response = "はし"),
+        LessonMaterial(level = 3, prompt = "book", response = "本", responseColor = "ほん"),
+        LessonMaterial(level = 3, prompt = "bookstore", response = "ほんや"),
+        LessonMaterial(level = 3, prompt = "England; UK", response = "イギリス"),
+        LessonMaterial(level = 3, prompt = "jazz", response = "ジャズ"),
+        LessonMaterial(level = 3, prompt = "shopping", response = "かいもの", promptColor = "noun"),
+        LessonMaterial(level = 3, prompt = "this morning", response = "けさ"),
+        LessonMaterial(level = 3, prompt = "yesterday", response = "きのう"),
+        LessonMaterial(level = 3, prompt = "tonight", response = "こんばん"),
+        LessonMaterial(level = 3, prompt = "cola", response = "コーラ"),
+        LessonMaterial(level = 3, prompt = "e-mail", response = "メール"),
+        LessonMaterial(level = 3, prompt = "day before yesterday", response = "おととい"),
+        LessonMaterial(level = 3, prompt = "PlayStation", response = "プレイステーション"),
+        LessonMaterial(level = 3, prompt = "salad", response = "サラダ"),
+        LessonMaterial(level = 3, prompt = "sandwich", response = "サンドイッチ"),
+        LessonMaterial(level = 3, prompt = "Shibuya district in Tokyo", response = "しぶや"),
+        LessonMaterial(level = 3, prompt = "newspaper", response = "しんぶん"),
+        LessonMaterial(level = 3, prompt = "meal", response = "しょくじ"),
+        LessonMaterial(level = 3, prompt = "letter", response = "てがみ"),
+        LessonMaterial(level = 3, prompt = "magazine", response = "ざっし"),
+        LessonMaterial(level = 3, prompt = "go out; leave home", response = "出かける", responseColor = "ru verb\nでかける"),
+        LessonMaterial(level = 3, prompt = "speak; talk", response = "はなす", responseColor = "u verb"),
+        LessonMaterial(level = 3, prompt = "buy", response = "買う", responseColor = "u verb\nかいます"),
+        LessonMaterial(level = 3, prompt = "do shopping", response = "かいもの（お）する", responseColor = "irregular verb"),
+        LessonMaterial(level = 3, prompt = "write", response = "かく", responseColor = "u verb\nかきます"),
+        LessonMaterial(level = 3, prompt = "have a meal", response = "しょくじ（お）する", responseColor = "irregular verb"),
+        LessonMaterial(level = 3, prompt = "read", response = "よむ", responseColor = "u verb"),
+        LessonMaterial(level = 3, prompt = "good at; skillful; proficient", response = "じょうず"),
+        LessonMaterial(level = 3, prompt = "definitely", response = "ぜひ", promptColor = "level 1"),
+        LessonMaterial(level = 3, prompt = "A[subject marker] B", response = "が", promptColor = "particle"),
+        LessonMaterial(level = 3, prompt = "also; too; (not) either", response = "も", promptColor = "particle"),
+        LessonMaterial(level = 3, prompt = "and", response = "と", promptColor = "particle, between nouns, exclusive"),
+        LessonMaterial(level = 3, prompt = "Oh?/Oh!", response = "え", promptColor = "expression"),
+        LessonMaterial(level = 3, prompt = "but", response = "でも", promptColor = "expression, placed before statement"),
+        LessonMaterial(level = 3, prompt = "Is it all right with you?", response = "いいんですか。"),
+        LessonMaterial(level = 3, prompt = "I appreciate it; I appreciate your offer; Please do it for me.", response = "おねがいします。"),
+        LessonMaterial(level = 3, prompt = "Not yet.", response = "まだせす。"),
+        LessonMaterial(level = 3, prompt = "Speaking of which...", response = "そうそう、"),
+        LessonMaterial(level = 3, prompt = "Wow!", response = "うーん")
+   )
+}
