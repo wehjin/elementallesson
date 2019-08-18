@@ -51,7 +51,7 @@ object Sem1Chap10CourseMaterial : CourseMaterial {
         LessonMaterial(level = 10, prompt = "number", response = "ばんごう"),
         LessonMaterial(level = 10, prompt = "secret", response = "ひみつ"),
         LessonMaterial(level = 10, prompt = "present; gift", response = "プレゼント"),
-        LessonMaterial(level = 10, prompt = "bath", response = "（お）ふろ"),
+        LessonMaterial(level = 10, prompt = "bath", response = "(お)ふろ"),
         LessonMaterial(level = 10, prompt = "boss", response = "ボス"),
         LessonMaterial(level = 10, prompt = "window", response = "まど"),
         LessonMaterial(
