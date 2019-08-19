@@ -84,7 +84,7 @@ object Sem1Chap09CourseMaterial : CourseMaterial {
         LessonMaterial(level = 9, prompt = "marry", response = "けっこん（を）する", responseColor = "irregular verb\nと particle\nアメリカ人と　けっこんする。"),
         LessonMaterial(level = 9, prompt = "accessorize", response = "する", responseColor = "irregular verb"),
         LessonMaterial(level = 9, prompt = "make a phone call", response = "でんわ（を）する", responseColor = "irregular verb"),
-        LessonMaterial(level = 9, prompt = "stay with a host family", response = "", promptColor = "verb", responseColor = "irregular verb"),
+        LessonMaterial(level = 9, prompt = "stay with a host family", response = "ホームステイ（を）する", promptColor = "verb", responseColor = "irregular verb"),
         LessonMaterial(level = 9, prompt = "cook", response = "りようり（を）する", promptColor = "verb", responseColor = "irregular verb"),
         LessonMaterial(level = 9, prompt = "regrettable", response = "ざんねん"),
         LessonMaterial(level = 9, prompt = "later", response = "あとで", promptColor = "adverb"),
