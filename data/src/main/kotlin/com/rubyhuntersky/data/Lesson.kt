@@ -21,8 +21,7 @@ data class Lesson(
         get() = learnedTime != null
 
     fun isAwake(time: LocalDateTime): Boolean {
-        val isAsleep = wakeTime.isAfter(time)
-        return !isAsleep
+        return !wakeTime.isAfter(time)
     }
 
     val prompt get() = material.prompt
@@ -48,7 +47,7 @@ data class Lesson(
     val wakeTime: LocalDateTime
         get() {
             return if (easyTime == null || easyTime < hardTime) {
-                hardTime + Duration.ofMinutes(1)
+                hardTime
             } else {
                 val rested = Duration.between(hardTime, easyTime) + Duration.ofHours(2)
                 when {
