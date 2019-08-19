@@ -72,7 +72,7 @@ object Sem1Chap02CourseMaterial : CourseMaterial {
         LessonMaterial(level = 2, prompt = "see; look; watch", response = "みる", responseColor = "ru verb"),
         LessonMaterial(level = 2, prompt = "sleep; go to bed", response = "ねる", responseColor = "ru verb"),
         LessonMaterial(level = 2, prompt = "drink", response = "のむ", promptColor = "verb", responseColor = "u verb"),
-        LessonMaterial(level = 2, prompt = "get up; wake up", response = "おく", responseColor = "u verb"),
+        LessonMaterial(level = 2, prompt = "get up; wake up", response = "おきる", responseColor = "ru verb\nおきます"),
         LessonMaterial(level = 2, prompt = "do", response = "する", responseColor = "irregular verb"),
         LessonMaterial(level = 2, prompt = "eat", response = "たべまる", responseColor = "ru verb"),
         LessonMaterial(level = 2, prompt = "A, right?", response = "Aね", promptColor = "particle, requesting confirmation"),
