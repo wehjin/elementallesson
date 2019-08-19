@@ -60,7 +60,7 @@ object Sem1Chap02CourseMaterial : CourseMaterial {
         LessonMaterial(level = 2, prompt = "tennis", response = "テニス"),
         LessonMaterial(level = 2, prompt = "tempura", response = "てんぷら"),
         LessonMaterial(level = 2, prompt = "TV", response = "テレビ"),
-        LessonMaterial(level = 2, prompt = "test", response = "テスト", promptColor = "nount"),
+        LessonMaterial(level = 2, prompt = "test", response = "テスト", promptColor = "noun"),
         LessonMaterial(level = 2, prompt = "library", response = "としょかん", promptColor = "building"),
         LessonMaterial(level = 2, prompt = "Tsukiji district in Tokyo", response = "つきじ"),
         LessonMaterial(level = 2, prompt = "wine", response = "ワイン"),
