@@ -9,4 +9,6 @@ data class LessonMaterial(
     val response: String,
     val promptColor: String? = null,
     val responseColor: String? = null
-)
+) {
+    val id: String by lazy { "$level:$prompt" }
+}

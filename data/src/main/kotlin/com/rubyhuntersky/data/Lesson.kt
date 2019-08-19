@@ -14,6 +14,9 @@ data class Lesson(
     @Serializable(with = LocalDateTimeSerializer::class)
     val easyTime: LocalDateTime? = null
 ) {
+    val id: String
+        get() = material.id
+
     val isLearned: Boolean
         get() = learnedTime != null
 
@@ -26,6 +29,8 @@ data class Lesson(
     val promptColor get() = material.promptColor
     val response get() = material.response
     val responseColor get() = material.responseColor
+
+    fun mergeInto(previous: Lesson?): Lesson = previous?.copy(material = this.material) ?: this
 
     fun setEasy(time: LocalDateTime): Lesson {
         return if (easyTime == null || easyTime.isBefore(hardTime)) {

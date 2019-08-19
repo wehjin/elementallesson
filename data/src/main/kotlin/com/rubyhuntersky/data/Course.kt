@@ -23,6 +23,19 @@ data class Course(
                 lessons.add(lesson)
             })
 
+    fun mergeInto(previous: Course?): Course {
+        return previous?.let { previousCourse ->
+            val latestLessons = this.lessons.associateBy(Lesson::id)
+            val previousLessonKeys = previousCourse.lessons.map(Lesson::id).toSet()
+            val newIds = latestLessons.keys - previousLessonKeys
+            val newLessons = newIds.mapNotNull { latestLessons[it] }
+            val keepIds = latestLessons.keys - newIds
+            val keepLessons = latestLessons.filterKeys { keepIds.contains(it) }
+            val updatedLessons = previousCourse.lessons.mapNotNull { keepLessons[it.id]?.mergeInto(it) }
+            previousCourse.copy(lessons = (updatedLessons + newLessons).toSet())
+        } ?: this
+    }
+
     companion object {
         fun start(courseMaterial: CourseMaterial, time: LocalDateTime) = Course(
             title = courseMaterial.title,

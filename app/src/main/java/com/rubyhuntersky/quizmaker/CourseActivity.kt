@@ -133,7 +133,7 @@ class CourseActivity : FragmentActivity(), CoroutineScope, AppScope, LegendScope
             val firstButton = if (activeCount > 0) {
                 listOf(
                     Button(
-                        "First ${min(activeCount, Course.maxLessonsPerSession)}",
+                        "Next ${min(activeCount, Course.maxLessonsPerSession)}",
                         event = START_LESSON,
                         hasNext = true
                     )
@@ -141,19 +141,18 @@ class CourseActivity : FragmentActivity(), CoroutineScope, AppScope, LegendScope
             } else {
                 emptyList()
             }
-            val buttons = firstButton + listOf(
-                Button("Close", event = CANCEL_COURSE, hasNext = false),
-                Button("Reset", event = RESET_COURSE, hasNext = false)
-            )
             control.send(
                 Msg.SetView(
                     guidance = GuidanceStylist.Guidance(
                         course.title,
                         course.subtitle ?: "",
-                        "$activeCount Lessons Repeating",
+                        if (activeCount > 0) "$activeCount Active Lessons" else "All Lessons Resting",
                         context.getDrawable(R.mipmap.ic_launcher)
                     ),
-                    buttons = buttons,
+                    buttons = firstButton + listOf(
+                        Button("Close", event = CANCEL_COURSE, hasNext = false),
+                        Button("Reset", event = RESET_COURSE, hasNext = false)
+                    ),
                     events = events
                 )
             )
