@@ -62,7 +62,7 @@ object Sem1Chap09CourseMaterial : CourseMaterial {
         LessonMaterial(level = 9, prompt = "everyone", response = "みなさん", promptColor = "polite"),
         LessonMaterial(level = 9, prompt = "everyone", response = "みんな", promptColor = "plain"),
         LessonMaterial(level = 9, prompt = "eyeglasses", response = "めがね"),
-        LessonMaterial(level = 9, prompt = "racket", response = "(ご)りょうしん", promptColor = "e.g. tennis"),
+        LessonMaterial(level = 9, prompt = "racket", response = "ラケット", promptColor = "e.g. tennis"),
         LessonMaterial(level = 9, prompt = "parents", response = "(ご)りょうしん"),
         LessonMaterial(level = 9, prompt = "teach", response = "おしえる", responseColor = "ru verb"),
         LessonMaterial(level = 9, prompt = "put on top; wear above waist", response = "きる", responseColor = "ru verb"),
