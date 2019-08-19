@@ -94,7 +94,7 @@ object Sem1Chap09CourseMaterial : CourseMaterial {
         LessonMaterial(level = 9, prompt = "I see.", response = "そう"),
         LessonMaterial(level = 9, prompt = "Really?", response = "へえ", promptColor = "short exclamation"),
         LessonMaterial(level = 9, prompt = "Oh!; Dear me!", response = "まあ", promptColor = "expression of surprise\nused by women"),
-        LessonMaterial(level = 9, prompt = "all of the people together", response = "皆さんで"),
+        LessonMaterial(level = 9, prompt = "all of the people together", response = "みなさんで"),
         LessonMaterial(level = 9, prompt = "Say hi to everyone from me.", response = "みなさんによろしくね。", promptColor = "Give everyone my regards.", responseColor = "よろしくいってね。"),
         LessonMaterial(level = 9, prompt = "Hello!", response = "もしもし", promptColor = "phone greeting")
    )
