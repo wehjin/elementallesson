@@ -89,7 +89,7 @@ object Sem1Chap09CourseMaterial : CourseMaterial {
         LessonMaterial(level = 9, prompt = "regrettable", response = "ざんねん"),
         LessonMaterial(level = 9, prompt = "later", response = "あとで", promptColor = "adverb"),
         LessonMaterial(level = 9, prompt = "from", response = "から", promptColor = "origin particle"),
-        LessonMaterial(level = 9, prompt = "to a person", response = "と", promptColor = "recipient particle\ne.g. show a photo to Alice"),
+        LessonMaterial(level = 9, prompt = "to a person", response = "に", promptColor = "recipient particle\ne.g. show a photo to Alice"),
         LessonMaterial(level = 9, prompt = "Oh!", response = "あら", promptColor = "after noticing something new different from expected\nused by women"),
         LessonMaterial(level = 9, prompt = "I see.", response = "そう"),
         LessonMaterial(level = 9, prompt = "Really?", response = "へえ", promptColor = "short exclamation"),
