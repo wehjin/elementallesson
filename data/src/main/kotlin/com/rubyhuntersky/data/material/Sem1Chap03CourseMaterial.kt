@@ -20,7 +20,7 @@ object Sem1Chap03CourseMaterial : CourseMaterial {
         LessonMaterial(level = 3, prompt = "German language", response = "ドイツご"),
         LessonMaterial(level = 3, prompt = "English language", response = "えいご"),
         LessonMaterial(level = 3, prompt = "French language", response = "フランスご"),
-        LessonMaterial(level = 3, prompt = "foreign language", response = "かいこくご"),
+        LessonMaterial(level = 3, prompt = "foreign language", response = "がいこくご"),
         LessonMaterial(level = 3, prompt = "what language?", response = "なにご"),
         LessonMaterial(level = 3, prompt = "Spanish language", response = "スペインご"),
         LessonMaterial(level = 3, prompt = "Harajuku district in Tokyo", response = "はらじゅく"),
