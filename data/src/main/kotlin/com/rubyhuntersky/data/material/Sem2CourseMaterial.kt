@@ -32,7 +32,7 @@ object Sem2CourseMaterial : CourseMaterial {
         LessonMaterial(level = 11, prompt = "one unit", response = "ーつ", responseColor = "ひとつ"),
         LessonMaterial(level = 11, prompt = "usual; ordinary; status quo", promptColor = "noun", response = "ふつう"),
         LessonMaterial(level = 11, prompt = "ball", promptColor = "noun\nthe object", response = "ボール"),
-        LessonMaterial(level = 11, prompt = "n sticks", promptColor = "long, thin objects counter", response = "〜本", responseColor = "〜ほん\npon: いっぽん　ろっぽん　はっぽん　じゅっぽん\nbon: さんぼん なんぽん"),
+        LessonMaterial(level = 11, prompt = "n sticks", promptColor = "long, thin objects counter", response = "〜本", responseColor = "〜ほん\npon: いっぽん　ろっぽん　はっぽん　じゅっぽん\nbon: さんぼん なんぼん"),
         LessonMaterial(level = 11, prompt = "n sheets", promptColor = "thin, flat objects counter", response = "〜まい"),
         LessonMaterial(level = 11, prompt = "comic", response = "まんが"),
         LessonMaterial(level = 11, prompt = "shop; store", response = "みせ"),
