@@ -70,7 +70,7 @@ object Sem2CourseMaterial : CourseMaterial {
         LessonMaterial(level = 11, prompt = "Hurrah!", response = "やった！"),
         LessonMaterial(level = 11, prompt = "hundred", promptColor = "kanji", response = "百 三百 六百", responseColor = "ひゃく さんびゃく ろっぴゃく"),
         LessonMaterial(level = 11, prompt = "thousand; Chiba prefecture", promptColor = "kanji", response = "千, 三千; 千ば", responseColor = "せん, さんぜん; ちば"),
-        LessonMaterial(level = 11, prompt = "ten thousand; all countries", promptColor = "kanji", response = "万; 万こく", responseColor = "まん; ばんこ"),
+        LessonMaterial(level = 11, prompt = "ten thousand; all countries", promptColor = "kanji", response = "万; 万こく", responseColor = "まん; ばんこく"),
         LessonMaterial(level = 11, prompt = "yen, circle", promptColor = "kanji", response = "円", responseColor = "えん"),
         LessonMaterial(level = 11, prompt = "live; address", promptColor = "kanji", response = "住む 住しょ", responseColor = "すむ じゅうしょ"),
         LessonMaterial(level = 11, prompt = "small; small bird; stream; elementary school", promptColor = "kanji", response = "小さい 小とり 小がわ 小学こう", responseColor = "ちいさい ことり おがわ　しょうがっこう"),
