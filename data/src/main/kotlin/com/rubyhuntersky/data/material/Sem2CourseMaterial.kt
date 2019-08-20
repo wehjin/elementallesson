@@ -44,7 +44,7 @@ object Sem2CourseMaterial : CourseMaterial {
         LessonMaterial(level = 11, prompt = "exist; is", promptColor = "respectful", response = "いらっしゃる", responseColor = "u verb\nwhen addressing customers"),
         LessonMaterial(level = 11, prompt = "differ", promptColor = "verb", response = "ちがう", responseColor="u verb"),
         LessonMaterial(level = 11, prompt = "line up; align", response = "ならぶ", responseColor="u verb"),
-        LessonMaterial(level = 11, prompt = "receive", response = "もらう", responseColor="u verb"),
+        LessonMaterial(level = 11, prompt = "receive", response = "もらう", responseColor="u verb\nAは Bから/に　Cを もらいました。"),
         LessonMaterial(level = 11, prompt = "give low", response = "やる", responseColor="u verb\nGiver is I, receiver is lower\n私は　はなに　水を　やりました。"),
         LessonMaterial(level = 11, prompt = "be pleased, be delighted", response = "よるこぶ", responseColor="u verb"),
         LessonMaterial(level = 11, prompt = "necessary", response = "ひつよう", responseColor = "na adjective"),
