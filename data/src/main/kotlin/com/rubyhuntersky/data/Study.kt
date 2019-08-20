@@ -20,7 +20,7 @@ data class Study(val courses: List<Course>) {
             val previousCourseTitles = previous.courses.map(Course::fullTitle).toSet()
             val newCourses = this.courses.filter { !previousCourseTitles.contains(it.fullTitle) }
             val updateMap = this.courses.associateBy(Course::fullTitle)
-            val updatedCourses = previous.courses.map { updateMap[it.fullTitle]?.mergeInto(it) ?: it }
+            val updatedCourses = previous.courses.mapNotNull { updateMap[it.fullTitle]?.mergeInto(it) }
             previous.copy(courses = updatedCourses + newCourses)
         } ?: this
     }

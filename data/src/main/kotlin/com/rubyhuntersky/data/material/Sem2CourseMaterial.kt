@@ -67,6 +67,23 @@ object Sem2CourseMaterial : CourseMaterial {
         LessonMaterial(level = 11, prompt = "It's just a T-shirt, so I wonder if it's all right as a gift.", response = "Tシャツでも　いいだな。"),
         LessonMaterial(level = 11, prompt = "It's popular.", response = "人きがおります。", responseColor = "It has popularity."),
         LessonMaterial(level = 11, prompt = "Hello, is this the Sasaki's residence", response = "もしもし、ささきさんのおたくですか。"),
-        LessonMaterial(level = 11, prompt = "Hurrah!", response = "やった！")
+        LessonMaterial(level = 11, prompt = "Hurrah!", response = "やった！"),
+        LessonMaterial(level = 11, prompt = "hundred", promptColor = "kanji", response = "百 三百 六百", responseColor = "ひゃく さんびゃく ろっぴゃく"),
+        LessonMaterial(level = 11, prompt = "thousand; Chiba prefecture", promptColor = "kanji", response = "千, 三千; 千ば", responseColor = "せん, さんぜん; ちば"),
+        LessonMaterial(level = 11, prompt = "ten thousand; all countries", promptColor = "kanji", response = "万; 万こく", responseColor = "まん; ばんこ"),
+        LessonMaterial(level = 11, prompt = "yen, circle", promptColor = "kanji", response = "円", responseColor = "えん"),
+        LessonMaterial(level = 11, prompt = "live; address", promptColor = "kanji", response = "住む 住しょ", responseColor = "すむ じゅうしょ"),
+        LessonMaterial(level = 11, prompt = "small; small bird; stream; elementary school", promptColor = "kanji", response = "小さい 小とり 小がわ 小学こう", responseColor = "ちいさい ことり おがわ　しょうがっこう"),
+        LessonMaterial(level = 11, prompt = "like, love, favorite; pancake; favorite food", promptColor = "kanji", response = "好き お好みやき 好ぶつ", responseColor = "好き　おこのみやき　こうぶつ"),
+        LessonMaterial(level = 11, prompt = "next- this- last- every- week; weekend", promptColor = "kanji", response = "来週　今週　先週　毎週; 週まつ", responseColor = "らいしゅう　こんしゅう　せんしゅう　まいしゅう; しゅうまつ"),
+        LessonMaterial(level = 11, prompt = "buddy; friend", promptColor = "kanji", response = "友だち　友人", responseColor = "ともだち　ゆうじん"),
+        LessonMaterial(level = 11, prompt = "father; parents; your father", promptColor = "kanji", response = "父　父母　お父さん", responseColor = "ちち　ふぼ　お父さん"),
+        LessonMaterial(level = 11, prompt = "mother; motherland; your mother", promptColor = "kanji", response = "母　母こく　お母さん", responseColor = "はは　ぼくに　おかあさん"),
+        LessonMaterial(level = 11, prompt = "older brother; guardians; your older brother; siblings", promptColor = "kanji", response = "兄　父兄　お兄さん　兄弟", responseColor = "あに　ふけい　おにいさん　きょうだい"),
+        LessonMaterial(level = 11, prompt = "older sister; sisters; your older sister", promptColor = "kanji", response = "\"姉　姉妹　お姉さん", responseColor = "あね　しまい　おねえさん"),
+        LessonMaterial(level = 11, prompt = "younger brother; sons, children; pupil; siblings", promptColor = "kanji", response = "弟　子弟　弟子　兄弟", responseColor = "おとうと　してい　でし　きょうだい"),
+        LessonMaterial(level = 11, prompt = "younger sister; sisters", promptColor = "kanji", response = "妹　姉妹", responseColor = "いもうと　しまい"),
+        LessonMaterial(level = 11, prompt = "buy; shopping; trading", promptColor = "kanji", response = "買う　買いもの　売買", responseColor = "かう　かいもの　ばいばい"),
+        LessonMaterial(level = 11, prompt = "see, look, watch; show; sightsee", promptColor = "kanji", response = "見る　見せる　見ぶつ", responseColor = "みる　みせる　けんぶつ")
     )
 }
