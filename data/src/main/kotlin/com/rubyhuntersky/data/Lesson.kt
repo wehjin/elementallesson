@@ -57,7 +57,8 @@ data class Lesson(
                     rested > Duration.ofDays(4) -> easyTime + Duration.ofDays(8)
                     rested > Duration.ofDays(2) -> easyTime + Duration.ofDays(4)
                     rested > Duration.ofDays(1) -> easyTime + Duration.ofDays(2)
-                    else -> easyTime + Duration.ofDays(1)
+                    rested > Duration.ofHours(12) -> easyTime + Duration.ofDays(1)
+                    else -> easyTime + Duration.ofHours(12)
                 } - Duration.ofHours(2)
             }
         }
