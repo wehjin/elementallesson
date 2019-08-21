@@ -66,7 +66,7 @@ object Sem1Chap04CourseMaterial : CourseMaterial {
         LessonMaterial(level = 4, prompt = "wide; spacious; large", response = "ひろい", responseColor="i adjective"),
         LessonMaterial(level = 4, prompt = "old", promptColor = "things", response = "ふるい", responseColor="i adjective"),
         LessonMaterial(level = 4, prompt = "tasteless; unappetizing", response = "まずい", responseColor="i adjective"),
-        LessonMaterial(level = 4, prompt = "cheap; inexpensive", response = "さむい", responseColor="i adjective"),
+        LessonMaterial(level = 4, prompt = "cheap; inexpensive", response = "やすい", responseColor="i adjective"),
         LessonMaterial(level = 4, prompt = "bad", response = "わるい", responseColor="i adjective"),
         LessonMaterial(level = 4, prompt = "not very much; not very often", response = "あまり"),
         LessonMaterial(level = 4, prompt = "quite", response = "ずいぶん"),
