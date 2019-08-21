@@ -83,7 +83,7 @@ object Sem1Chap04CourseMaterial : CourseMaterial {
         LessonMaterial(level = 4, prompt = "I haven't seen you for a long time.", response = "しばらくです。"),
         LessonMaterial(level = 4, prompt = "therefore", response = "それで"),
         LessonMaterial(level = 4, prompt = "moreover; besides", response = "それに"),
-        LessonMaterial(level = 4, prompt = "How was it?", response = "...どうですか。"),
+        LessonMaterial(level = 4, prompt = "How was it?", response = "...どうでしたか。"),
         LessonMaterial(level = 4, prompt = "Really?", response = "ほんとうですか。"),
         LessonMaterial(level = 4, prompt = "That's true, isn't it?", response = "ほんとうですね。"),
         LessonMaterial(level = 4, prompt = "anyway", promptColor = "changing the subject", response = "まあ")
