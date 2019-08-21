@@ -13,7 +13,7 @@ object Sem2CourseMaterial : CourseMaterial {
         LessonMaterial(level = 11, prompt = "whisky", response = "ウイスキー"),
         LessonMaterial(level = 11, prompt = "picture book", response = "え本"),
         LessonMaterial(level = 11, prompt = "yen", response = "円", responseColor = "えん"),
-        LessonMaterial(level = 11, prompt = "same", response = "おなじ"),
+        LessonMaterial(level = 11, prompt = "same", response = "おなじ", responseColor = "と particle\nかれは　まえのと　おなじです。"),
         LessonMaterial(level = 11, prompt = "postage stamp", response = "きって"),
         LessonMaterial(level = 11, prompt = "wallet; purse", response = "さいふ"),
         LessonMaterial(level = 11, prompt = "n volumes", promptColor = "bound objects counter", response = "〜さつ", responseColor = "contracted: いっさつ　はっさつ　じゅっさつ"),
