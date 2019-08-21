@@ -64,7 +64,7 @@ object Sem2CourseMaterial : CourseMaterial {
         LessonMaterial(level = 11, prompt = "That's decided.", response = "きまり！"),
         LessonMaterial(level = 11, prompt = "Please give me.", response = "ください", responseColor = "くださる is respectful form of くれる"),
         LessonMaterial(level = 11, prompt = "such a trivial thing", response = "そんなこと"),
-        LessonMaterial(level = 11, prompt = "It's just a T-shirt, so I wonder if it's all right as a gift.", response = "Tシャツでも　いいだな。"),
+        LessonMaterial(level = 11, prompt = "It's just a T-shirt, so I wonder if it's all right as a gift.", response = "Tシャツでも　いいかな。"),
         LessonMaterial(level = 11, prompt = "It's popular.", response = "人きがおります。", responseColor = "It has popularity."),
         LessonMaterial(level = 11, prompt = "Hello, is this the Sasaki's residence", response = "もしもし、ささきさんのおたくですか。"),
         LessonMaterial(level = 11, prompt = "Hurrah!", response = "やった！"),
