@@ -60,7 +60,7 @@ object Sem1Chap03CourseMaterial : CourseMaterial {
         LessonMaterial(level = 3, prompt = "but", response = "でも", promptColor = "expression, placed before statement"),
         LessonMaterial(level = 3, prompt = "Is it all right with you?", response = "いいんですか。"),
         LessonMaterial(level = 3, prompt = "I appreciate it; I appreciate your offer; Please do it for me.", response = "おねがいします。"),
-        LessonMaterial(level = 3, prompt = "Not yet.", response = "まだせす。"),
+        LessonMaterial(level = 3, prompt = "Not yet.", response = "まだです。"),
         LessonMaterial(level = 3, prompt = "Speaking of which...", response = "そうそう、"),
         LessonMaterial(level = 3, prompt = "Wow!", response = "うーん")
    )
