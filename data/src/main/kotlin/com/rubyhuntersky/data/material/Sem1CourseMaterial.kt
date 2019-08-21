@@ -8,6 +8,7 @@ object Sem1CourseMaterial : CourseMaterial {
     override val lessons = Sem1Chap01CourseMaterial.lessons +
             Sem1Chap02CourseMaterial.lessons +
             Sem1Chap03CourseMaterial.lessons +
+            Sem1Chap04CourseMaterial.lessons +
             Sem1Chap09CourseMaterial.lessons +
             Sem1Chap10CourseMaterial.lessons
 }
