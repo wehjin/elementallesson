@@ -45,7 +45,7 @@ object Sem1Chap04CourseMaterial : CourseMaterial {
         LessonMaterial(level = 4, prompt = "rent",promptColor = "noun", response = "やちん"),
         LessonMaterial(level = 4, prompt = "dormitory", response = "りょう"),
         LessonMaterial(level = 4, prompt = "look for", response = "さがします"),
-        LessonMaterial(level = 4, prompt = "go in; enter", response = "入ります"),
+        LessonMaterial(level = 4, prompt = "go in; enter", response = "はいります"),
         LessonMaterial(level = 4, prompt = "healthy; energetic; high-spirited", response = "げんき"),
         LessonMaterial(level = 4, prompt = "pretty; clean", response = "きれい"),
         LessonMaterial(level = 4, prompt = "quiet", response = "しずか"),
