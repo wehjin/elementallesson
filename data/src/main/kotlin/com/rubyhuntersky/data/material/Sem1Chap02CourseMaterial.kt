@@ -74,7 +74,7 @@ object Sem1Chap02CourseMaterial : CourseMaterial {
         LessonMaterial(level = 2, prompt = "drink", response = "のむ", promptColor = "verb", responseColor = "u verb"),
         LessonMaterial(level = 2, prompt = "get up; wake up", response = "おきる", responseColor = "ru verb\nおきます"),
         LessonMaterial(level = 2, prompt = "do", response = "する", responseColor = "irregular verb"),
-        LessonMaterial(level = 2, prompt = "eat", response = "たべまる", responseColor = "ru verb"),
+        LessonMaterial(level = 2, prompt = "eat", response = "たべる", responseColor = "ru verb"),
         LessonMaterial(level = 2, prompt = "A, right?", response = "Aね", promptColor = "particle, requesting confirmation"),
         LessonMaterial(level = 2, prompt = "towards A", response = "Aに", promptColor = "particle, motion destination"),
         LessonMaterial(level = 2, prompt = "B is object of A action", response = "BをA", promptColor = "particle, direct object of action"),
