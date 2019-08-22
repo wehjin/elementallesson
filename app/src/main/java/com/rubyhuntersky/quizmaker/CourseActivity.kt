@@ -129,7 +129,7 @@ class CourseActivity : FragmentActivity(), CoroutineScope, AppScope, LegendScope
 
     class CourseFragment : StepFragment() {
         suspend fun setSight(course: Course, events: Channel<String>, context: Context) {
-            val activeCount = course.getActiveLessons(LocalDateTime.now()).size
+            val activeCount = course.activeLessons(LocalDateTime.now()).size
             val firstButton = if (activeCount > 0) {
                 listOf(
                     Button(

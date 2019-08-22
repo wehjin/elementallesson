@@ -1,7 +1,9 @@
 package com.rubyhuntersky.quizmaker.android
 
 import android.app.Application
+import android.content.Context
 import android.content.Intent
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -21,6 +23,7 @@ import com.rubyhuntersky.quizmaker.app.AppMsg
 import com.rubyhuntersky.quizmaker.app.AppScope
 import com.rubyhuntersky.quizmaker.findLegend
 import kotlinx.coroutines.*
+import java.time.LocalDateTime
 import kotlin.coroutines.CoroutineContext
 
 @ExperimentalCoroutinesApi
@@ -82,8 +85,13 @@ class DegreeFragment : VerticalGridSupportFragment(), CoroutineScope, AppScope, 
             val course = item as Course
             val imageCardView = viewHolder.view as ImageCardView
             imageCardView.titleText = course.title
-            imageCardView.contentText = course.subtitle ?: ""
+            imageCardView.contentText = course.subtitle
+            imageCardView.badgeImage = course.toBadge(viewHolder.view.context)
             imageCardView.mainImage = imageCardView.context.getDrawable(R.mipmap.ic_launcher)
+        }
+
+        private fun Course.toBadge(context: Context): Drawable? {
+            return if (activeLessons(LocalDateTime.now()).isEmpty()) null else context.getDrawable(R.drawable.ic_whatshot_white_24dp)
         }
 
         override fun onUnbindViewHolder(viewHolder: ViewHolder) {}

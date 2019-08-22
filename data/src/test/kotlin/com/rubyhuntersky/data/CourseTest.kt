@@ -12,7 +12,7 @@ internal class CourseTest {
     internal fun startsWithActiveLessons() {
         val now = LocalDateTime.now()
         val course = Course.start(Sem1Chap10CourseMaterial, now)
-        val activeLessons = course.getActiveLessons(now)
+        val activeLessons = course.activeLessons(now)
         assertEquals(course.lessons.size, activeLessons.size)
     }
 
@@ -20,9 +20,9 @@ internal class CourseTest {
     internal fun lessonBecomesInactiveAfterEasy() {
         val now = LocalDateTime.now()
         val course = Course.start(Sem1Chap10CourseMaterial, now - Duration.ofHours(1))
-        val activeLessons = course.getActiveLessons(now)
+        val activeLessons = course.activeLessons(now)
         val newCourse = course.replaceLesson(activeLessons.first().setEasy(now))
-        val newActiveLessons = newCourse.getActiveLessons(now + Duration.ofHours(1))
+        val newActiveLessons = newCourse.activeLessons(now + Duration.ofHours(1))
         assertEquals(activeLessons.size - 1, newActiveLessons.size)
     }
 }

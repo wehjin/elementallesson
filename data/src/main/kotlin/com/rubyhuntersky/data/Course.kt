@@ -14,7 +14,7 @@ data class Course(
     val fullTitle: String get() = subtitle?.let { "$title: $it" } ?: title
 
     fun lessonList(time: LocalDateTime): List<Lesson> = toActiveOrderedLessons(lessons, time)
-    fun getActiveLessons(time: LocalDateTime): Set<Lesson> = lessons.filter { it.isAwake(time) }.toSet()
+    fun activeLessons(time: LocalDateTime): Set<Lesson> = lessons.filter { it.isAwake(time) }.toSet()
 
     fun replaceLesson(lesson: Lesson): Course = copy(
         lessons = lessons.toMutableSet()
