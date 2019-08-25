@@ -78,7 +78,7 @@ object Sem2CourseMaterial : CourseMaterial {
         LessonMaterial(level = 11, prompt = "next- this- last- every- week; weekend", promptColor = "kanji", response = "来週　今週　先週　毎週; 週まつ", responseColor = "らいしゅう　こんしゅう　せんしゅう　まいしゅう; しゅうまつ"),
         LessonMaterial(level = 11, prompt = "buddy; friend", promptColor = "kanji", response = "友だち　友人", responseColor = "ともだち　ゆうじん"),
         LessonMaterial(level = 11, prompt = "father; parents; your father", promptColor = "kanji", response = "父　父母　お父さん", responseColor = "ちち　ふぼ　お父さん"),
-        LessonMaterial(level = 11, prompt = "mother; motherland; your mother", promptColor = "kanji", response = "母　母こく　お母さん", responseColor = "はは　ぼくに　おかあさん"),
+        LessonMaterial(level = 11, prompt = "mother; motherland; your mother", promptColor = "kanji", response = "母　母こく　お母さん", responseColor = "はは　ぼこく　おかあさん"),
         LessonMaterial(level = 11, prompt = "older brother; guardians; your older brother; siblings", promptColor = "kanji", response = "兄　父兄　お兄さん　兄弟", responseColor = "あに　ふけい　おにいさん　きょうだい"),
         LessonMaterial(level = 11, prompt = "older sister; sisters; your older sister", promptColor = "kanji", response = "姉　姉妹　お姉さん", responseColor = "あね　しまい　おねえさん"),
         LessonMaterial(level = 11, prompt = "younger brother; sons, children; pupil; siblings", promptColor = "kanji", response = "弟　子弟　弟子　兄弟", responseColor = "おとうと　してい　でし　きょうだい"),
