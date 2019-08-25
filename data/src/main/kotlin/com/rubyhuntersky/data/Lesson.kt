@@ -44,22 +44,31 @@ data class Lesson(
     val learnedTime: LocalDateTime?
         get() = easyTime?.let { easy -> if (easy.isAfter(hardTime)) easy else null }
 
+    fun restDurationWithEasy(easy: LocalDateTime): Duration {
+        return if (easy < hardTime) {
+            Duration.ZERO
+        } else {
+            val rested = Duration.between(hardTime, easy) + Duration.ofHours(2)
+            when {
+                rested > Duration.ofDays(32) -> Duration.ofDays(64)
+                rested > Duration.ofDays(16) -> Duration.ofDays(32)
+                rested > Duration.ofDays(8) -> Duration.ofDays(16)
+                rested > Duration.ofDays(4) -> Duration.ofDays(8)
+                rested > Duration.ofDays(2) -> Duration.ofDays(4)
+                rested > Duration.ofDays(1) -> Duration.ofDays(2)
+                rested > Duration.ofHours(12) -> Duration.ofDays(1)
+                else -> Duration.ofHours(12)
+            } - Duration.ofHours(2)
+        }
+    }
+
     val wakeTime: LocalDateTime
         get() {
             return if (easyTime == null || easyTime < hardTime) {
                 hardTime
             } else {
-                val rested = Duration.between(hardTime, easyTime) + Duration.ofHours(2)
-                when {
-                    rested > Duration.ofDays(32) -> easyTime + Duration.ofDays(64)
-                    rested > Duration.ofDays(16) -> easyTime + Duration.ofDays(32)
-                    rested > Duration.ofDays(8) -> easyTime + Duration.ofDays(16)
-                    rested > Duration.ofDays(4) -> easyTime + Duration.ofDays(8)
-                    rested > Duration.ofDays(2) -> easyTime + Duration.ofDays(4)
-                    rested > Duration.ofDays(1) -> easyTime + Duration.ofDays(2)
-                    rested > Duration.ofHours(12) -> easyTime + Duration.ofDays(1)
-                    else -> easyTime + Duration.ofHours(12)
-                } - Duration.ofHours(2)
+                val restDuration = restDurationWithEasy(easyTime)
+                easyTime + restDuration
             }
         }
 }

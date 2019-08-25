@@ -17,6 +17,7 @@ import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.selects.select
+import java.time.Duration
 import java.time.LocalDateTime
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.min
@@ -210,11 +211,26 @@ class CourseActivity : FragmentActivity(), CoroutineScope, AppScope, LegendScope
                     buttons = listOf(
                         Button("Back", event = CANCEL_ANSWER),
                         Button("Repeat", event = ANSWER_HARD, subtext = "Hard. Repeat soon."),
-                        Button("Space", event = ANSWER_EASY, subtext = "Easy. Repeat after I've forgotten.")
+                        Button(
+                            "Space",
+                            event = ANSWER_EASY,
+                            subtext = "Easy. Repeat in ${lesson.toRestLengthString()}."
+                        )
                     ),
                     events = events
                 )
             )
+        }
+
+        private fun Lesson.toRestLengthString(): String {
+            val restDuration = restDurationWithEasy(LocalDateTime.now())
+            return when {
+                restDuration >= Duration.ofDays(30) -> "${restDuration.toDays() / 30} months"
+                restDuration >= Duration.ofDays(7) -> "${restDuration.toDays() / 7} weeks"
+                restDuration >= Duration.ofDays(1) -> "${restDuration.toDays()} days"
+                restDuration >= Duration.ofHours(1) -> "${restDuration.toHours()} hours"
+                else -> "${restDuration.toMinutes()} minutes"
+            }
         }
 
         companion object {
