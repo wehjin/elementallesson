@@ -175,7 +175,7 @@ class CourseActivity : FragmentActivity(), CoroutineScope, AppScope, LegendScope
                         lesson.prompt,
                         lesson.promptColor ?: "",
                         lesson.learnedTime?.let {
-                            "Last seen: ${Duration.between(it, LocalDateTime.now()).toRelativeString()}"
+                            "Last seen: ${Duration.between(it, LocalDateTime.now()).toRelativeString()} ago"
                         } ?: "",
                         null
                     ),
