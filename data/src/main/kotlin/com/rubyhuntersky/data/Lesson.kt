@@ -42,13 +42,14 @@ data class Lesson(
     fun setHard(time: LocalDateTime): Lesson = copy(hardTime = time, easyTime = null)
 
     val learnedTime: LocalDateTime?
-        get() = easyTime?.let { easy -> if (easy.isAfter(hardTime)) easy else null }
+        get() = easyTime?.let { if (it.isAfter(hardTime)) it else null }
 
     fun restDurationWithEasy(easy: LocalDateTime): Duration {
-        return if (easy < hardTime) {
+        val hard = if (easyTime == null || easyTime.isBefore(hardTime)) easy else hardTime
+        return if (easy.isBefore(hard)) {
             Duration.ZERO
         } else {
-            val rested = Duration.between(hardTime, easy) + Duration.ofHours(2)
+            val rested = Duration.between(hard, easy) + Duration.ofHours(1)
             when {
                 rested > Duration.ofDays(32) -> Duration.ofDays(64)
                 rested > Duration.ofDays(16) -> Duration.ofDays(32)
@@ -58,7 +59,7 @@ data class Lesson(
                 rested > Duration.ofDays(1) -> Duration.ofDays(2)
                 rested > Duration.ofHours(12) -> Duration.ofDays(1)
                 else -> Duration.ofHours(12)
-            } - Duration.ofHours(2)
+            } - Duration.ofHours(1)
         }
     }
 

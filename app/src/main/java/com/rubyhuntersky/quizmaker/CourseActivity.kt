@@ -174,7 +174,9 @@ class CourseActivity : FragmentActivity(), CoroutineScope, AppScope, LegendScope
                     guidance = GuidanceStylist.Guidance(
                         lesson.prompt,
                         lesson.promptColor ?: "",
-                        lesson.learnedTime?.let { "Last seen: $it" } ?: "",
+                        lesson.learnedTime?.let {
+                            "Last seen: ${Duration.between(it, LocalDateTime.now()).toRelativeString()}"
+                        } ?: "",
                         null
                     ),
                     buttons = listOf(
@@ -212,9 +214,9 @@ class CourseActivity : FragmentActivity(), CoroutineScope, AppScope, LegendScope
                         Button("Back", event = CANCEL_ANSWER),
                         Button("Repeat", event = ANSWER_HARD, subtext = "Hard. Repeat soon."),
                         Button(
-                            "Space",
+                            "Rest",
                             event = ANSWER_EASY,
-                            subtext = "Easy. Repeat in ${lesson.toRestLengthString()}."
+                            subtext = "Easy. Repeat in ${lesson.restDurationWithEasy(LocalDateTime.now()).toRelativeString()}."
                         )
                     ),
                     events = events
@@ -222,21 +224,22 @@ class CourseActivity : FragmentActivity(), CoroutineScope, AppScope, LegendScope
             )
         }
 
-        private fun Lesson.toRestLengthString(): String {
-            val restDuration = restDurationWithEasy(LocalDateTime.now())
-            return when {
-                restDuration >= Duration.ofDays(30) -> "${restDuration.toDays() / 30} months"
-                restDuration >= Duration.ofDays(7) -> "${restDuration.toDays() / 7} weeks"
-                restDuration >= Duration.ofDays(1) -> "${restDuration.toDays()} days"
-                restDuration >= Duration.ofHours(1) -> "${restDuration.toHours()} hours"
-                else -> "${restDuration.toMinutes()} minutes"
-            }
-        }
-
         companion object {
             const val ANSWER_EASY = "recordEasy"
             const val ANSWER_HARD = "recordHard"
             const val CANCEL_ANSWER = "backToLesson"
+        }
+    }
+
+    companion object {
+        private fun Duration.toRelativeString(): String {
+            return when {
+                this >= Duration.ofDays(30) -> "${toDays() / 30} months"
+                this >= Duration.ofDays(7) -> "${toDays() / 7} weeks"
+                this >= Duration.ofDays(1) -> "${toDays()} days"
+                this >= Duration.ofHours(1) -> "${toHours()} hours"
+                else -> "${toMinutes()} minutes"
+            }
         }
     }
 }
