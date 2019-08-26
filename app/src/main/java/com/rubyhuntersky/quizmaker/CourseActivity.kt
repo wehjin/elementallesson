@@ -214,7 +214,7 @@ class CourseActivity : FragmentActivity(), CoroutineScope, AppScope, LegendScope
                         Button("Back", event = CANCEL_ANSWER),
                         Button("Repeat", event = ANSWER_HARD, subtext = "Hard. Repeat soon."),
                         Button(
-                            "Rest",
+                            "Space",
                             event = ANSWER_EASY,
                             subtext = "Easy. Repeat in ${lesson.restDurationWithEasy(LocalDateTime.now()).toRelativeString()}."
                         )
