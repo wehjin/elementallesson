@@ -120,7 +120,10 @@ fun LegendScope.startAppLegend(storeCtl: SendChannel<StoreMsg>): Legend<AppMdl, 
                 if (newActiveLessons.isEmpty()) {
                     newCourseMdl
                 } else {
-                    AppMdl.ActiveLesson(newActiveLessons.random(), newActiveLessons, newCourseMdl)
+                    val otherLessons = newActiveLessons.filter { it.id != newLesson.id }
+                    val newActiveLesson =
+                        if (otherLessons.isEmpty()) newActiveLessons.random() else otherLessons.random()
+                    AppMdl.ActiveLesson(newActiveLesson, newActiveLessons, newCourseMdl)
                 }
             }
             oldMdl is AppMdl.ActiveAnswer && msg is AppMsg.SpaceLesson -> {
