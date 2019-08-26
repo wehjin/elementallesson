@@ -74,7 +74,7 @@ object Sem1Chap10CourseMaterial : CourseMaterial {
         ),
         LessonMaterial(
             level = 10,
-            prompt = "talk, speak, tell; word,language",
+            prompt = "talk, speak, tell; word, language",
             promptColor = "kanji\njapanese, english, french, to talk",
             response = "語：かた、ゴ",
             responseColor = "日本語（にほんご）、えい語（ご）、フランス語（ご）、語（かた）る"
