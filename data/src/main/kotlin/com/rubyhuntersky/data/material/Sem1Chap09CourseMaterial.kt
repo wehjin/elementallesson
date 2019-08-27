@@ -96,6 +96,104 @@ object Sem1Chap09CourseMaterial : CourseMaterial {
         LessonMaterial(level = 9, prompt = "Oh!; Dear me!", response = "まあ", promptColor = "expression of surprise\nused by women"),
         LessonMaterial(level = 9, prompt = "all of the people together", response = "みなさんで"),
         LessonMaterial(level = 9, prompt = "Say hi to everyone from me.", response = "みなさんによろしくね。", promptColor = "Give everyone my regards.", responseColor = "よろしくいってね。"),
-        LessonMaterial(level = 9, prompt = "Hello!", response = "もしもし", promptColor = "phone greeting")
+        LessonMaterial(level = 9, prompt = "Hello!", response = "もしもし", promptColor = "phone greeting"),
+        LessonMaterial(
+            level = 9,
+            prompt = "kanji: one",
+            promptColor = "january, one bottle, one item, first day of month, one person",
+            response = "一",
+            responseColor = "一月（いちがつ）、ー本（いっほん）、ーつ（ひとつ）、一日（ついたち、いちにち）、一人（ひとり）"
+        ),
+        LessonMaterial(
+            level = 9,
+            prompt = "kanji: two",
+            promptColor = "february, two cups, two items, second day, two people",
+            response = "二",
+            responseColor = "二月（にがつ）、二はい（にはい）、二（ふた）つ、二日（ふつか）、二人（ふたり）"
+        ),
+        LessonMaterial(
+            level = 9,
+            prompt = "kanji: three",
+            promptColor = "march, three times, third day, three people, three items",
+            response = "三",
+            responseColor = "三月（さんがつ）、三（さん）ど、三日（みっか）、三人（さんにん）、三（みっ）つ"
+        ),
+        LessonMaterial(
+            level = 9,
+            prompt = "kanji: four",
+            promptColor = "april, forty, fourth day, four people, four items",
+            response = "四",
+            responseColor = "四月（しがつ）、四十（よんじゅう）、四日（よっか）、四人（よにん）、四（よっ）つ"
+        ),
+        LessonMaterial(
+            level = 9,
+            prompt = "kanji: five",
+            promptColor = "may, fifth day, five items",
+            response = "五",
+            responseColor = "五月（ごがつ）、五日（いつか）、五（いつ）つ"
+        ),
+        LessonMaterial(
+            level = 9,
+            prompt = "kanji: six",
+            promptColor = "june, sixth day, six cups, six items",
+            response = "六",
+            responseColor = "六月（ろくがつ）、六日（むいか）、六（ろっ）ぱい、六（むっ）つ"
+        ),
+        LessonMaterial(
+            level = 9,
+            prompt = "kanji: seven",
+            promptColor = "july, seventh day, seven people, seven things",
+            response = "七",
+            responseColor = "七月（しちがつ）、七日（なのか）、七人（7、ななにん）、七（なな）つ"
+        ),
+        LessonMaterial(
+            level = 9,
+            prompt = "kanji: eight",
+            promptColor = "august, eight pencils, eighth day, eight items",
+            response = "八",
+            responseColor = "八月（はちがつ）、八本（はっぽん）、八日（ようか）、八（やっ）つ"
+        ),
+        LessonMaterial(
+            level = 9,
+            prompt = "kanji: nine",
+            promptColor = "september, nine　o'clock, ninety, ninth day, nine items, nine people",
+            response = "九",
+            responseColor = "九月（くがつ）、九（く）じ、九十（きゅうじゅう）、九日（ここのか）、九（ここの）つ、九人（きゅうにん）"
+        ),
+        LessonMaterial(
+            level = 9,
+            prompt = "kanji: ten",
+            promptColor = "tenth day, ten people, ten",
+            response = "十",
+            responseColor = "十日（とおか）、十人（じゅうにん）、十（とお、じゅう）"
+        ),
+        LessonMaterial(
+            level = 9,
+            prompt = "kanji: moon, month",
+            promptColor = "december, monday, every month, three months",
+            response = "月",
+            responseColor = "十二月（じゅうにがつ）、月曜日（げつようび）、毎月（まいつき、マイげつ）、三か月（さんかげつ）"
+        ),
+        LessonMaterial(
+            level = 9,
+            prompt = "kanji: sun, day, daytime",
+            promptColor = "Japan, birthday, every day, mother's day, tenth day, holiday",
+            response = "日",
+            responseColor = "日本（にほん）、たんじょうび（たんじょうび）、毎日（まいにち）、はhの日（ひ）、十日（とおか）、休日（きゅうじつ）"
+        ),
+        LessonMaterial(
+            level = 9,
+            prompt = "kanji: origin, book",
+            promptColor = "Yamamoto, one pencil, two pencils, book",
+            response = "本",
+            responseColor = "山本（やまもと）、一本（いっぽん）、二本（にほん）、本"
+        ),
+        LessonMaterial(
+            level = 9,
+            prompt = "kanji: people",
+            promptColor = "which person, japanese person, two people, person",
+            response = "人",
+            responseColor = "なん人（にん）、日本人（にほんじん）、二人（ふたり）、人（ひと）"
+        )
    )
 }
