@@ -67,106 +67,106 @@ object Sem1Chap10CourseMaterial : CourseMaterial {
         LessonMaterial(level = 10, prompt = "of course", response = "もちろん"),
         LessonMaterial(
             level = 10,
-            prompt = "now; present",
-            promptColor = "kanji\nnow, this week, this, month, tonight, this semester, this year, today)",
+            prompt = "kanji: now; present",
+            promptColor = "now, this week, this, month, tonight, this semester, this year, today)",
             response = "今：いま、コン",
             responseColor = "今（いま）、今（こん）しゅう、今（こん）月、今（こん）ばん、今学（こんがっ）き、今（こ）とし、今日（きょう）"
         ),
         LessonMaterial(
             level = 10,
-            prompt = "talk, speak, tell; word, language",
-            promptColor = "kanji\njapanese, english, french, to talk",
+            prompt = "kanji: talk, speak, tell; word, language",
+            promptColor = "japanese, english, french, to talk",
             response = "語：かた、ゴ",
             responseColor = "日本語（にほんご）、えい語（ご）、フランス語（ご）、語（かた）る"
         ),
         LessonMaterial(
             level = 10,
-            prompt = "ahead; previous",
-            promptColor = "kanji\nteacher, previous (semester, week, month), ahead",
+            prompt = "kanji: ahead; previous",
+            promptColor = "teacher, previous (semester, week, month), ahead",
             response = "先：さき、セン",
             responseColor="先生（せんせい）、先学（センがっ）き、先（せん）しゅう、先月（せんげつ）、先（さき）に"
         ),
         LessonMaterial(
             level = 10,
-            prompt = "study; learning",
-            promptColor = "kanji\nstudent, college, school, to study",
+            prompt = "kanji: study; learning",
+            promptColor = "student, college, school, to study",
             response = "学：まな、ガク ガッ",
             responseColor="学生（かぐせい）、大学（だいがく）、学（ガッ）こう、学（まな）ぶ"
         ),
         LessonMaterial(
             level = 10,
-            prompt = "live; birth",
-            promptColor = "kanji\nstudent, teacher, to live, to be born, birthday",
+            prompt = "kanji: live; birth",
+            promptColor = "student, teacher, to live, to be born, birthday",
             response = "生：い、う、セイ",
             responseColor="学生（がくせい）、先生（せんせい）、生（い）きる、生（う）まれる、たん生日（じょうび）"
         ),
         LessonMaterial(
             level = 10,
-            prompt = "every",
-            promptColor = "kanji\nevery (day, week, month, year, night)",
+            prompt = "kanji: every",
+            promptColor = "every (day, week, month, year, night)",
             response = "毎：マイ",
             responseColor="毎日（まいにち）、毎（まい）しゅう、毎月（まいつき、まいげつ）、毎（まい）ねん、毎（まい）ばん"
         ),
         LessonMaterial(
             level = 10,
-            prompt = "rest",
-            promptColor = "kanji\nto be absent, recess, holiday",
+            prompt = "kanji: rest",
+            promptColor = "to be absent, recess, holiday",
             response = "休：やす、きょう",
             responseColor="休（やす）む、休（やす）み、休日（きょうじつ）"
         ),
         LessonMaterial(
             level = 10,
-            prompt = "read",
-            promptColor = "kanji\nto read, reading books",
+            prompt = "kanji: read",
+            promptColor = "to read, reading books",
             response = "読：よ、どく",
             responseColor="読（やす）む、読（どく）しょ"
         ),
         LessonMaterial(
             level = 10,
-            prompt = "child",
-            promptColor = "kanji\nMasako, child, electronic dictionary",
+            prompt = "kanji: child",
+            promptColor = "Masako, child, electronic dictionary",
             response = "子：こ、し",
             responseColor="まさ子（こ）、子（こ）ども、でん子（し）じしょ"
         ),
         LessonMaterial(
             level = 10,
-            prompt = "big",
-            promptColor = "kanji\ncollege, love, big, hard, important, adult",
+            prompt = "kanji: big",
+            promptColor = "college, love, big, hard, important, adult",
             response = "大：おお、だい、たい",
             responseColor="大学生（だいがくせい）、大（だい）すき、大（おお）きい、大（たい）へん、大（たい）せつ、大人（おとな）"
         ),
         LessonMaterial(
             level = 10,
-            prompt = "come; next",
-            promptColor = "kanji\nnext (week, month, year), to come, will come, won't come",
+            prompt = "kanji: come; next",
+            promptColor = "next (week, month, year), to come, will come, won't come",
             response = "来：く、き、こ、らい",
             responseColor="来（らい）しゅう、来月（らいげつ）、来（らい）ねん、来（く）る、来（き）ます、来（こ）ない"
         ),
         LessonMaterial(
             level = 10,
-            prompt = "know",
-            promptColor = "kanji\nknow, acquaintance",
+            prompt = "kanji: know",
+            promptColor = "know, acquaintance",
             response = "知：し、ち",
             responseColor="知（し）る、知人（ちじん）"
         ),
         LessonMaterial(
             level = 10,
-            prompt = "what",
-            promptColor = "kanji\nwhat, what is it, how many people, how many hours",
+            prompt = "kanji: what",
+            promptColor = "what, what is it, how many people, how many hours",
             response = "何：なに、なん",
-            responseColor="何（なに）、何（なん）ですか、何人（なんいん）、何（なん）じ"
+            responseColor="何（なに）、何（なん）ですか、何人（なんにん）、何（なん）じ"
         ),
         LessonMaterial(
             level = 10,
-            prompt = "say",
-            promptColor = "kanji\nsay, language, message, word",
+            prompt = "kanji: say",
+            promptColor = "say, language, message, word",
             response = "言：い、げん、ごん、こと",
             responseColor="言（い）う、言語（げんご）、でん言（ごん）、言（こと）ば"
         ),
         LessonMaterial(
             level = 10,
-            prompt = "go; conduct; line",
-            promptColor = "kanji\ngo, to carry out, bank, trip, ~ lines",
+            prompt = "kanji: go; conduct; line",
+            promptColor = "go, to carry out, bank, trip, ~ lines",
             response = "行：い、おこな、こう、ぎょう",
             responseColor = "行（い）く、行（おこな）う、ぎん行（こう）、りょ行（こう）、ー行（いちぎょう）"
         )
