@@ -61,7 +61,7 @@ object Sem1Chap10CourseMaterial : CourseMaterial {
         LessonMaterial(level = 10, prompt = "okay; OK; alright", response = "オーケー"),
         LessonMaterial(level = 10, prompt = "Let's study hard.", response = "がんばってべんきょうしましょう。"),
         LessonMaterial(level = 10, prompt = "under any circumstance; definitely", response = "ぜったいに"),
-        LessonMaterial(level = 10, prompt = "but", response = "だけど"),
+        LessonMaterial(level = 10, prompt = "but", promptColor = "though\nends sentence", response = "だけど"),
         LessonMaterial(level = 10, prompt = "next; next time", response = "つぎに"),
         LessonMaterial(level = 10, prompt = "all together", response = "みんなで"),
         LessonMaterial(level = 10, prompt = "of course", response = "もちろん"),
