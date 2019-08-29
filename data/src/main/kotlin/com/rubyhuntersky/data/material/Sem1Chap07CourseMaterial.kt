@@ -28,7 +28,7 @@ object Sem1Chap07CourseMaterial : CourseMaterial {
         LessonMaterial(level = 7, prompt = "T-shirt", response = "Tシャツ"),
         LessonMaterial(level = 7, prompt = "digital camera", response = "デジカメ"),
         LessonMaterial(level = 7, prompt = "ten days", response = "とおかかん"),
-        LessonMaterial(level = 7, prompt = "what day of the month", promptColor = "how many days", response = "なんいち"),
+        LessonMaterial(level = 7, prompt = "what day of the month", promptColor = "how many days", response = "なんにち"),
         LessonMaterial(level = 7, prompt = "27th day of the month", response = "２７にち"),
         LessonMaterial(level = 7, prompt = "Sunday", response = "にちようび"),
         LessonMaterial(level = 7, prompt = "necklace", response = "ネックレス"),
