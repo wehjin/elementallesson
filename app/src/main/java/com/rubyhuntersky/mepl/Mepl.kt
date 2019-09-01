@@ -1,6 +1,7 @@
 package com.rubyhuntersky.mepl
 
 import android.content.Context
+import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.net.Uri
 import android.util.Log
@@ -45,10 +46,10 @@ object Mepl : CoroutineScope {
                             clipBase = msg.clipBase
                         }
                         mediaPlayer = mediaPlayer?.also {
+                            Log.d(tag, "Restarting player")
                             it.seekTo(0)
-                            it.start()
-                            Log.d(tag, "Restarted player")
                         } ?: createMediaPlayer(getClipUri(msg.clipBase), context)
+                        mediaPlayer.start()
                     }
                 }
             }
@@ -57,7 +58,13 @@ object Mepl : CoroutineScope {
 
     private fun createMediaPlayer(uri: Uri, context: Context): MediaPlayer {
         Log.d(tag, "URI: $uri")
-        return MediaPlayer.create(context, uri).apply {
+        return MediaPlayer().apply {
+            Log.i(tag, "Creating player")
+            val audioAttributes = AudioAttributes.Builder()
+                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                .setUsage(AudioAttributes.USAGE_MEDIA).build()!!
+            setAudioAttributes(audioAttributes)
+            setDataSource(context, uri)
             setOnErrorListener { _, _, extra ->
                 val message = when (extra) {
                     MediaPlayer.MEDIA_ERROR_IO -> "MEDIA_ERROR_IO"
@@ -72,8 +79,7 @@ object Mepl : CoroutineScope {
                 Log.e(tag, "ERROR: $message")
                 true
             }
-            start()
-            Log.i(tag, "Created player")
+            prepare()
         }
     }
 

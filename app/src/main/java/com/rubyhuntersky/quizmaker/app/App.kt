@@ -1,11 +1,13 @@
 package com.rubyhuntersky.quizmaker.app
 
 import android.app.Application
+import com.crashlytics.android.Crashlytics
 import com.rubyhuntersky.data.Study
 import com.rubyhuntersky.data.material.BasicDegreeMaterial
 import com.rubyhuntersky.mepl.Mepl
 import com.rubyhuntersky.quizmaker.LegendScope
 import com.rubyhuntersky.quizmaker.viewcourse.startViewCourseLegend
+import io.fabric.sdk.android.Fabric
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -34,6 +36,7 @@ class App : Application(), CoroutineScope, LegendScope {
 
     override fun onCreate() {
         super.onCreate()
+        Fabric.with(Fabric.Builder(this).kits(Crashlytics()).debuggable(true).build())
         Mepl.start(this)
         launch {
             val studyFile = File(filesDir, "activeStudy")
