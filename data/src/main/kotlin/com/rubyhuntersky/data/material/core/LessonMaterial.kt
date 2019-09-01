@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class LessonMaterial(
     val level: Int = 1,
+    val type: LessonType = LessonType.PRODUCTION,
     val prompt: String,
     val response: String,
     val promptColor: String? = null,
