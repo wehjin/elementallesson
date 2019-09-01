@@ -13,27 +13,41 @@ import java.time.LocalDateTime
 class LessonFragment : StepFragment() {
 
     suspend fun setSight(lesson: Lesson, events: Channel<String>) {
+        val standardButtons = listOf(
+            Button(
+                "Check My Answer",
+                event = CHECK_ANSWER,
+                hasNext = true,
+                subtext = "Try writing or saying it in a sentence."
+            ),
+            Button(
+                "Back",
+                event = CANCEL_LESSON,
+                hasNext = false
+            )
+        )
         control.send(
             Msg.SetView(
                 guidance = lesson.toGuidance(),
-                buttons = listOf(
-                    Button(
-                        "Check My Answer",
-                        event = CHECK_ANSWER,
-                        hasNext = true,
-                        subtext = "Try writing or saying it in a sentence."
-                    ),
-                    Button(
-                        "Back",
-                        event = CANCEL_LESSON,
-                        hasNext = false
-                    )
-                ),
+                buttons = lesson.toButtons(standardButtons),
                 events = events
             )
         )
     }
 
+    private fun Lesson.toButtons(standardButtons: List<Button>): List<Button> {
+        return when (material.type) {
+            LessonType.LISTENING -> {
+                val playButton = Button(
+                    "Play",
+                    event = PLAY_CLIP,
+                    hasNext = false
+                )
+                listOf(playButton) + standardButtons
+            }
+            else -> standardButtons
+        }
+    }
 
     private fun Lesson.toGuidance(): GuidanceStylist.Guidance {
         val breadcrumb = learnedTime?.let {
@@ -60,5 +74,6 @@ class LessonFragment : StepFragment() {
     companion object {
         const val CHECK_ANSWER = "checkAnswer"
         const val CANCEL_LESSON = "cancelLesson"
+        const val PLAY_CLIP = "playClip"
     }
 }
