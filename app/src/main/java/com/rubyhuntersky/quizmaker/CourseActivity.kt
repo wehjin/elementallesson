@@ -8,6 +8,7 @@ import androidx.leanback.app.GuidedStepSupportFragment
 import androidx.leanback.widget.GuidanceStylist
 import com.rubyhuntersky.data.Course
 import com.rubyhuntersky.data.Lesson
+import com.rubyhuntersky.quizmaker.android.toRelativeString
 import com.rubyhuntersky.quizmaker.app.AppScope
 import com.rubyhuntersky.quizmaker.app.TAG
 import com.rubyhuntersky.quizmaker.viewcourse.ViewCourseMdl
@@ -17,7 +18,6 @@ import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.selects.select
-import java.time.Duration
 import java.time.LocalDateTime
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.min
@@ -56,7 +56,10 @@ class CourseActivity : FragmentActivity(), CoroutineScope, AppScope, LegendScope
         }
     }
 
-    private fun launchRenderer(models: ReceiveChannel<ViewCourseMdl>, legend: Legend<ViewCourseMdl, ViewCourseMsg>) {
+    private fun launchRenderer(
+        models: ReceiveChannel<ViewCourseMdl>,
+        legend: Legend<ViewCourseMdl, ViewCourseMsg>
+    ) {
         Log.d(TAG, "Launching renderer.")
         launch {
             val events = Channel<String>()
@@ -69,18 +72,30 @@ class CourseActivity : FragmentActivity(), CoroutineScope, AppScope, LegendScope
                             } else if (mdl.activeCourse != null && mdl.activeLesson != null) {
                                 getCurrentFragment<AnswerFragment>()?.let {
                                     Log.d("CourseLegend", "Popping to lesson.")
-                                    it.popBackStackToGuidedStepSupportFragment(LessonFragment::class.java, 0)
+                                    it.popBackStackToGuidedStepSupportFragment(
+                                        LessonFragment::class.java,
+                                        0
+                                    )
                                 }
                                 requireLessonFragment().setSight(mdl.activeLesson, events)
                             } else if (mdl.activeCourse != null) {
                                 Log.d(TAG, "Active course: ${mdl.activeCourse.title}")
                                 getCurrentFragment<LessonFragment>()?.let {
                                     Log.d("CourseLegend", "Popping to course.")
-                                    it.popBackStackToGuidedStepSupportFragment(CourseFragment::class.java, 0)
+                                    it.popBackStackToGuidedStepSupportFragment(
+                                        CourseFragment::class.java,
+                                        0
+                                    )
                                 }
-                                requireCourseFragment().setSight(mdl.activeCourse, events, this@CourseActivity)
+                                requireCourseFragment().setSight(
+                                    mdl.activeCourse,
+                                    events,
+                                    this@CourseActivity
+                                )
                             } else {
-                                GuidedStepSupportFragment.getCurrentGuidedStepSupportFragment(supportFragmentManager)
+                                GuidedStepSupportFragment.getCurrentGuidedStepSupportFragment(
+                                    supportFragmentManager
+                                )
                                     ?.finishGuidedStepSupportFragments()
                                 this@CourseActivity.finish()
                             }
@@ -166,39 +181,6 @@ class CourseActivity : FragmentActivity(), CoroutineScope, AppScope, LegendScope
         }
     }
 
-    class LessonFragment : StepFragment() {
-
-        suspend fun setSight(lesson: Lesson, events: Channel<String>) {
-            control.send(
-                Msg.SetView(
-                    guidance = GuidanceStylist.Guidance(
-                        lesson.prompt,
-                        lesson.promptColor ?: "",
-                        lesson.learnedTime?.let {
-                            "Last seen: ${Duration.between(it, LocalDateTime.now()).toRelativeString()} ago"
-                        } ?: "",
-                        null
-                    ),
-                    buttons = listOf(
-                        Button(
-                            "Check My Answer",
-                            event = CHECK_ANSWER,
-                            hasNext = true,
-                            subtext = "Try writing or saying it in a sentence."
-                        ),
-                        Button("Back", event = CANCEL_LESSON, hasNext = false)
-                    ),
-                    events = events
-                )
-            )
-        }
-
-        companion object {
-            const val CHECK_ANSWER = "checkAnswer"
-            const val CANCEL_LESSON = "cancelLesson"
-        }
-    }
-
     class AnswerFragment : StepFragment() {
 
         suspend fun setSight(lesson: Lesson, events: Channel<String>) {
@@ -228,18 +210,6 @@ class CourseActivity : FragmentActivity(), CoroutineScope, AppScope, LegendScope
             const val ANSWER_EASY = "recordEasy"
             const val ANSWER_HARD = "recordHard"
             const val CANCEL_ANSWER = "backToLesson"
-        }
-    }
-
-    companion object {
-        private fun Duration.toRelativeString(): String {
-            return when {
-                this >= Duration.ofDays(30) -> "${toDays() / 30} months"
-                this >= Duration.ofDays(7) -> "${toDays() / 7} weeks"
-                this >= Duration.ofDays(1) -> "${toDays()} days"
-                this >= Duration.ofHours(1) -> "${toHours()} hours"
-                else -> "${toMinutes()} minutes"
-            }
         }
     }
 }

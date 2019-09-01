@@ -12,6 +12,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.launch
 import java.io.File
+import java.time.Duration
 import java.time.LocalDateTime
 import kotlin.coroutines.CoroutineContext
 
@@ -35,7 +36,8 @@ class App : Application(), CoroutineScope, LegendScope {
         super.onCreate()
         launch {
             val studyFile = File(filesDir, "activeStudy")
-            var study = Study.start(BasicDegreeMaterial, LocalDateTime.now()).mergeInto(StudyStore.read(studyFile))
+            var study = Study.start(BasicDegreeMaterial, LocalDateTime.now())
+                .mergeInto(StudyStore.read(studyFile))
             while (!storeChannel.isClosedForReceive) {
                 when (val msg = storeChannel.receive()) {
                     is StoreMsg.ReadStudy -> msg.response.send(study)
