@@ -3,6 +3,7 @@ package com.rubyhuntersky.quizmaker.app
 import android.app.Application
 import com.rubyhuntersky.data.Study
 import com.rubyhuntersky.data.material.BasicDegreeMaterial
+import com.rubyhuntersky.mepl.Mepl
 import com.rubyhuntersky.quizmaker.LegendScope
 import com.rubyhuntersky.quizmaker.viewcourse.startViewCourseLegend
 import kotlinx.coroutines.CoroutineScope
@@ -12,7 +13,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.launch
 import java.io.File
-import java.time.Duration
 import java.time.LocalDateTime
 import kotlin.coroutines.CoroutineContext
 
@@ -34,6 +34,7 @@ class App : Application(), CoroutineScope, LegendScope {
 
     override fun onCreate() {
         super.onCreate()
+        Mepl.start(this)
         launch {
             val studyFile = File(filesDir, "activeStudy")
             var study = Study.start(BasicDegreeMaterial, LocalDateTime.now())
@@ -51,6 +52,7 @@ class App : Application(), CoroutineScope, LegendScope {
 
     override fun onTerminate() {
         job.cancel()
+        Mepl.stop()
         super.onTerminate()
     }
 }

@@ -5,6 +5,7 @@ import com.rubyhuntersky.data.Course
 import com.rubyhuntersky.data.Lesson
 import com.rubyhuntersky.data.Study
 import com.rubyhuntersky.data.material.BasicDegreeMaterial
+import com.rubyhuntersky.mepl.Mepl
 import com.rubyhuntersky.quizmaker.Legend
 import com.rubyhuntersky.quizmaker.LegendScope
 import com.rubyhuntersky.quizmaker.startLegend
@@ -66,6 +67,7 @@ sealed class AppMsg {
     object ResetCourse : AppMsg()
     object StartLessons : AppMsg()
     object CancelLessons : AppMsg()
+    object PlayClip : AppMsg()
     object CheckAnswer : AppMsg()
     object CancelAnswer : AppMsg()
     object RepeatLesson : AppMsg()
@@ -107,6 +109,9 @@ fun LegendScope.startAppLegend(storeCtl: SendChannel<StoreMsg>): Legend<AppMdl, 
                 }
             }
             oldMdl is AppMdl.ActiveLesson && msg is AppMsg.CancelLessons -> oldMdl.courseMdl
+            oldMdl is AppMdl.ActiveLesson && msg is AppMsg.PlayClip -> {
+                oldMdl.also { it.lesson.clipBase?.let(Mepl::playClip) }
+            }
             oldMdl is AppMdl.ActiveLesson && msg is AppMsg.CheckAnswer -> AppMdl.ActiveAnswer(oldMdl)
             oldMdl is AppMdl.ActiveAnswer && msg is AppMsg.CancelAnswer -> oldMdl.lessonMdl
             oldMdl is AppMdl.ActiveAnswer && msg is AppMsg.RepeatLesson -> {

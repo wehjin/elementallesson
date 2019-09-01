@@ -1,6 +1,7 @@
 package com.rubyhuntersky.data
 
 import com.rubyhuntersky.data.material.core.LessonMaterial
+import com.rubyhuntersky.data.material.core.LessonType
 import kotlinx.serialization.Serializable
 import java.time.Duration
 import java.time.LocalDateTime
@@ -17,8 +18,14 @@ data class Lesson(
     val id: String
         get() = material.id
 
+    val type: LessonType
+        get() = material.type
+
     val isLearned: Boolean
         get() = learnedTime != null
+
+    val clipBase: String?
+        get() = if (type == LessonType.LISTENING) material.prompt else null
 
     fun isAwake(time: LocalDateTime): Boolean {
         return !wakeTime.isAfter(time)

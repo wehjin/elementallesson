@@ -108,6 +108,7 @@ class CourseActivity : FragmentActivity(), CoroutineScope, AppScope, LegendScope
                             CourseFragment.START_LESSON -> legend.offer(ViewCourseMsg.StartLesson)
                             LessonFragment.CANCEL_LESSON -> legend.offer(ViewCourseMsg.CancelLesson)
                             LessonFragment.CHECK_ANSWER -> legend.offer(ViewCourseMsg.CheckAnswer)
+                            LessonFragment.PLAY_CLIP -> legend.offer(ViewCourseMsg.PlayClip)
                             AnswerFragment.CANCEL_ANSWER -> legend.offer(ViewCourseMsg.BackToLesson)
                             AnswerFragment.ANSWER_HARD -> legend.offer(ViewCourseMsg.RecordHard)
                             AnswerFragment.ANSWER_EASY -> legend.offer(ViewCourseMsg.RecordEasy)
