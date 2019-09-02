@@ -1,10 +1,15 @@
 package com.rubyhuntersky.mepl
 
 import android.content.Context
-import android.media.AudioAttributes
-import android.media.MediaPlayer
 import android.net.Uri
 import android.util.Log
+import com.google.android.exoplayer2.ExoPlaybackException
+import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.ExoPlayerFactory
+import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.source.ProgressiveMediaSource
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
+import com.google.android.exoplayer2.util.Util
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -34,52 +39,42 @@ object Mepl : CoroutineScope {
 
     fun start(context: Context) {
         channel = Channel(10)
-        launch(Dispatchers.IO) {
-            var mediaPlayer: MediaPlayer? = null
+        launch(Dispatchers.Main) {
+            var exoPlayer: ExoPlayer? = null
             var clipBase = ""
             for (msg in channel) {
                 when (msg) {
                     is Msg.PlayClip -> {
                         if (clipBase != msg.clipBase) {
-                            mediaPlayer?.release()
-                            mediaPlayer = null
+                            exoPlayer?.release()
+                            exoPlayer = null
                             clipBase = msg.clipBase
                         }
-                        mediaPlayer = mediaPlayer?.also {
+                        exoPlayer = exoPlayer?.also {
                             Log.d(tag, "Restarting player")
                             it.seekTo(0)
-                        } ?: createMediaPlayer(getClipUri(msg.clipBase), context)
-                        mediaPlayer.start()
+                        } ?: createExoPlayer(getClipUri(msg.clipBase), context)
+                        exoPlayer.playWhenReady = true
                     }
                 }
             }
+            exoPlayer?.release()
         }
     }
 
-    private fun createMediaPlayer(uri: Uri, context: Context): MediaPlayer {
-        Log.d(tag, "URI: $uri")
-        return MediaPlayer().apply {
-            Log.i(tag, "Creating player")
-            val audioAttributes = AudioAttributes.Builder()
-                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
-                .setUsage(AudioAttributes.USAGE_MEDIA).build()!!
-            setAudioAttributes(audioAttributes)
-            setDataSource(context, uri)
-            setOnErrorListener { _, _, extra ->
-                val message = when (extra) {
-                    MediaPlayer.MEDIA_ERROR_IO -> "MEDIA_ERROR_IO"
-                    MediaPlayer.MEDIA_ERROR_MALFORMED -> "MEDIA_ERROR_MALFORMED"
-                    MediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK -> "MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK"
-                    MediaPlayer.MEDIA_ERROR_SERVER_DIED -> "MEDIA_ERROR_SERVER_DIED"
-                    MediaPlayer.MEDIA_ERROR_TIMED_OUT -> "MEDIA_ERROR_TIMED_OUT"
-                    MediaPlayer.MEDIA_ERROR_UNKNOWN -> "MEDIA_ERROR_UNKNOWN"
-                    MediaPlayer.MEDIA_ERROR_UNSUPPORTED -> "MEDIA_ERROR_UNSUPPORTED"
-                    else -> extra.toString()
+    private fun createExoPlayer(uri: Uri, context: Context): ExoPlayer {
+        return ExoPlayerFactory.newSimpleInstance(context).apply {
+            addListener(object : Player.EventListener {
+                override fun onPlayerError(error: ExoPlaybackException) {
+                    throw error.sourceException
                 }
-                Log.e(tag, "ERROR: $message")
-                true
-            }
-            prepare()
+            })
+
+            val dataSourceFactory =
+                DefaultDataSourceFactory(context, Util.getUserAgent(context, tag))
+            val mediaSource =
+                ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(uri)
+            prepare(mediaSource)
         }
     }
 
