@@ -7,8 +7,6 @@ import androidx.fragment.app.FragmentActivity
 import androidx.leanback.app.GuidedStepSupportFragment
 import androidx.leanback.widget.GuidanceStylist
 import com.rubyhuntersky.data.Course
-import com.rubyhuntersky.data.Lesson
-import com.rubyhuntersky.quizmaker.android.toRelativeString
 import com.rubyhuntersky.quizmaker.app.AppScope
 import com.rubyhuntersky.quizmaker.app.TAG
 import com.rubyhuntersky.quizmaker.viewcourse.ViewCourseMdl
@@ -182,35 +180,4 @@ class CourseActivity : FragmentActivity(), CoroutineScope, AppScope, LegendScope
         }
     }
 
-    class AnswerFragment : StepFragment() {
-
-        suspend fun setSight(lesson: Lesson, events: Channel<String>) {
-            control.send(
-                Msg.SetView(
-                    guidance = GuidanceStylist.Guidance(
-                        lesson.response,
-                        lesson.responseColor ?: "",
-                        lesson.prompt,
-                        null
-                    ),
-                    buttons = listOf(
-                        Button("Back", event = CANCEL_ANSWER),
-                        Button("Repeat", event = ANSWER_HARD, subtext = "Hard. Repeat soon."),
-                        Button(
-                            "Space",
-                            event = ANSWER_EASY,
-                            subtext = "Easy. Repeat in ${lesson.restDurationWithEasy(LocalDateTime.now()).toRelativeString()}."
-                        )
-                    ),
-                    events = events
-                )
-            )
-        }
-
-        companion object {
-            const val ANSWER_EASY = "recordEasy"
-            const val ANSWER_HARD = "recordHard"
-            const val CANCEL_ANSWER = "backToLesson"
-        }
-    }
 }

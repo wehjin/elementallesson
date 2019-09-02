@@ -87,6 +87,9 @@ open class StepFragment : GuidedStepSupportFragment(), CoroutineScope {
                     .hasNext(button.hasNext)
                     .build()
             }
+            if (actions.isNotEmpty()) {
+                selectedActionPosition = 0
+            }
         }
     }
 
