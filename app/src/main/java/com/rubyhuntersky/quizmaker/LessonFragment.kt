@@ -64,7 +64,7 @@ class LessonFragment : StepFragment() {
             }
             LessonType.LISTENING -> {
                 val title = "〚 Listen 〛"
-                val description = promptColor ?: ""
+                val description = ""
                 GuidanceStylist.Guidance(title, description, breadcrumb, null)
             }
             else -> TODO()

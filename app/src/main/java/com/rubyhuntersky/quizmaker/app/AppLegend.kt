@@ -4,11 +4,11 @@ import android.util.Log
 import com.rubyhuntersky.data.Course
 import com.rubyhuntersky.data.Lesson
 import com.rubyhuntersky.data.Study
-import com.rubyhuntersky.data.material.BasicDegreeMaterial
 import com.rubyhuntersky.mepl.Mepl
 import com.rubyhuntersky.quizmaker.Legend
 import com.rubyhuntersky.quizmaker.LegendScope
 import com.rubyhuntersky.quizmaker.startLegend
+import com.rubyhuntersky.quizmaker.tools.MaterialLoader
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.SendChannel
@@ -75,83 +75,99 @@ sealed class AppMsg {
 }
 
 @ExperimentalCoroutinesApi
-fun LegendScope.startAppLegend(storeCtl: SendChannel<StoreMsg>): Legend<AppMdl, AppMsg> = startLegend { mdls, msgs ->
-    val tag = "AppLegend"
-    val studyChannel = Channel<Study>()
-    storeCtl.send(StoreMsg.ReadStudy(studyChannel))
-    var mdl: AppMdl = AppMdl.ActiveStudy(studyChannel.receive()).also { mdls.send(it) }
-    for (msg in msgs) {
-        val oldMdl = mdl
-        mdl = when {
-            msg is AppMsg.SelectCourse -> {
-                Log.d(tag, "Selected course: ${msg.course.title}")
-                AppMdl.ActiveCourse(msg.course, AppMdl.ActiveStudy(oldMdl.study))
-            }
-            oldMdl is AppMdl.ActiveCourse && msg is AppMsg.CancelCourse -> oldMdl.studyMdl
-            oldMdl is AppMdl.ActiveCourse && msg is AppMsg.ResetCourse -> {
-                val courseMaterial = BasicDegreeMaterial.courses.find { it.title == oldMdl.course.title }
-                courseMaterial?.let { material ->
-                    val newCourse = Course.start(material, LocalDateTime.now())
-                    val newStudy = oldMdl.studyMdl.study.replaceCourse(newCourse)
-                        .also { storeCtl.send(StoreMsg.WriteStudy(it)) }
-                    val newStudyMdl = oldMdl.studyMdl.copy(study = newStudy)
-                    AppMdl.ActiveCourse(newCourse, newStudyMdl)
-                } ?: oldMdl.also {
-                    Log.d(tag, "No course material found for course reset: ${oldMdl.course.title}")
-                }
-            }
-            oldMdl is AppMdl.ActiveCourse && msg is AppMsg.StartLessons -> {
-                val activeLessons = oldMdl.course.lessonList(LocalDateTime.now())
-                if (activeLessons.isEmpty()) {
-                    oldMdl
-                } else {
-                    AppMdl.ActiveLesson(activeLessons.first(), activeLessons, oldMdl)
-                }
-            }
-            oldMdl is AppMdl.ActiveLesson && msg is AppMsg.CancelLessons -> oldMdl.courseMdl
-            oldMdl is AppMdl.ActiveLesson && msg is AppMsg.PlayClip -> {
-                oldMdl.also { it.lesson.clipBase?.let(Mepl::playClip) }
-            }
-            oldMdl is AppMdl.ActiveLesson && msg is AppMsg.CheckAnswer -> AppMdl.ActiveAnswer(oldMdl)
-            oldMdl is AppMdl.ActiveAnswer && msg is AppMsg.CancelAnswer -> oldMdl.lessonMdl
-            oldMdl is AppMdl.ActiveAnswer && msg is AppMsg.RepeatLesson -> {
-                val newLesson = oldMdl.activeLesson.setHard(LocalDateTime.now())
-                val newCourseMdl = oldMdl.lessonMdl.courseMdl.replaceLesson(newLesson)
-                    .also { storeCtl.send(StoreMsg.WriteStudy(it.study)) }
-                val newActiveLessons = Course.toActiveOrderedLessons(
-                    lessons = oldMdl.activeLessons.map { if (it.material == newLesson.material) newLesson else it },
-                    time = LocalDateTime.now()
-                )
-                if (newActiveLessons.isEmpty()) {
-                    newCourseMdl
-                } else {
-                    val otherLessons = newActiveLessons.filter { it.id != newLesson.id }
-                    val newActiveLesson =
-                        if (otherLessons.isEmpty()) newActiveLessons.random() else otherLessons.random()
-                    AppMdl.ActiveLesson(newActiveLesson, newActiveLessons, newCourseMdl)
-                }
-            }
-            oldMdl is AppMdl.ActiveAnswer && msg is AppMsg.SpaceLesson -> {
-                val newLesson = oldMdl.activeLesson.setEasy(LocalDateTime.now())
-                val newCourseMdl = oldMdl.lessonMdl.courseMdl.replaceLesson(newLesson)
-                    .also { storeCtl.send(StoreMsg.WriteStudy(it.study)) }
-                val newActiveLessons = Course.toActiveOrderedLessons(
-                    lessons = oldMdl.activeLessons.filter { it.material != newLesson.material },
-                    time = LocalDateTime.now()
-                )
-                if (newActiveLessons.isEmpty()) {
-                    newCourseMdl
-                } else {
-                    AppMdl.ActiveLesson(newActiveLessons.random(), newActiveLessons, newCourseMdl)
-                }
-            }
-            else -> {
-                Log.e(tag, "Invalid update: MSG: ${msg::class.java.simpleName} MDL: ${oldMdl::class.java.simpleName}")
-                oldMdl
-            }
+fun LegendScope.startAppLegend(storeCtl: SendChannel<StoreMsg>): Legend<AppMdl, AppMsg> =
+    startLegend { mdls, msgs ->
+        val tag = "AppLegend"
+        val study = Channel<Study>().let {
+            storeCtl.send(StoreMsg.ReadStudy(it))
+            it.receive()
         }
-        mdls.send(mdl)
+        var mdl: AppMdl = AppMdl.ActiveStudy(study).also { mdls.send(it) }
+        for (msg in msgs) {
+            val oldMdl = mdl
+            mdl = when {
+                msg is AppMsg.SelectCourse -> {
+                    Log.d(tag, "Selected course: ${msg.course.title}")
+                    AppMdl.ActiveCourse(msg.course, AppMdl.ActiveStudy(oldMdl.study))
+                }
+                oldMdl is AppMdl.ActiveCourse && msg is AppMsg.CancelCourse -> oldMdl.studyMdl
+                oldMdl is AppMdl.ActiveCourse && msg is AppMsg.ResetCourse -> {
+                    val courseMaterial =
+                        MaterialLoader.basicDegreeMaterial.courses.find { it.title == oldMdl.course.title }
+                    courseMaterial?.let { material ->
+                        val newCourse = Course.start(material, LocalDateTime.now())
+                        val newStudy = oldMdl.studyMdl.study.replaceCourse(newCourse)
+                            .also { storeCtl.send(StoreMsg.WriteStudy(it)) }
+                        val newStudyMdl = oldMdl.studyMdl.copy(study = newStudy)
+                        AppMdl.ActiveCourse(newCourse, newStudyMdl)
+                    } ?: oldMdl.also {
+                        Log.d(
+                            tag,
+                            "No course material found for course reset: ${oldMdl.course.title}"
+                        )
+                    }
+                }
+                oldMdl is AppMdl.ActiveCourse && msg is AppMsg.StartLessons -> {
+                    val activeLessons = oldMdl.course.lessonList(LocalDateTime.now())
+                    if (activeLessons.isEmpty()) {
+                        oldMdl
+                    } else {
+                        AppMdl.ActiveLesson(activeLessons.first(), activeLessons, oldMdl)
+                    }
+                }
+                oldMdl is AppMdl.ActiveLesson && msg is AppMsg.CancelLessons -> oldMdl.courseMdl
+                oldMdl is AppMdl.ActiveLesson && msg is AppMsg.PlayClip -> {
+                    oldMdl.also { it.lesson.clipBase?.let(Mepl::playClip) }
+                }
+                oldMdl is AppMdl.ActiveLesson && msg is AppMsg.CheckAnswer -> AppMdl.ActiveAnswer(
+                    oldMdl
+                )
+                oldMdl is AppMdl.ActiveAnswer && msg is AppMsg.CancelAnswer -> oldMdl.lessonMdl
+                oldMdl is AppMdl.ActiveAnswer && msg is AppMsg.RepeatLesson -> {
+                    val newLesson = oldMdl.activeLesson.setHard(LocalDateTime.now())
+                    val newCourseMdl = oldMdl.lessonMdl.courseMdl.replaceLesson(newLesson)
+                        .also { storeCtl.send(StoreMsg.WriteStudy(it.study)) }
+                    val newActiveLessons = Course.toActiveOrderedLessons(
+                        lessons = oldMdl.activeLessons.map { if (it.material == newLesson.material) newLesson else it },
+                        time = LocalDateTime.now()
+                    )
+                    if (newActiveLessons.isEmpty()) {
+                        newCourseMdl
+                    } else {
+                        val otherLessons = newActiveLessons.filter { it.id != newLesson.id }
+                        val newActiveLesson =
+                            if (otherLessons.isEmpty()) newActiveLessons.random() else otherLessons.random()
+                        AppMdl.ActiveLesson(newActiveLesson, newActiveLessons, newCourseMdl)
+                    }
+                }
+                oldMdl is AppMdl.ActiveAnswer && msg is AppMsg.SpaceLesson -> {
+                    val newLesson = oldMdl.activeLesson.setEasy(LocalDateTime.now())
+                    val newCourseMdl = oldMdl.lessonMdl.courseMdl.replaceLesson(newLesson)
+                        .also { storeCtl.send(StoreMsg.WriteStudy(it.study)) }
+                    val newActiveLessons = Course.toActiveOrderedLessons(
+                        lessons = oldMdl.activeLessons.filter { it.material != newLesson.material },
+                        time = LocalDateTime.now()
+                    )
+                    if (newActiveLessons.isEmpty()) {
+                        newCourseMdl
+                    } else {
+                        AppMdl.ActiveLesson(
+                            newActiveLessons.random(),
+                            newActiveLessons,
+                            newCourseMdl
+                        )
+                    }
+                }
+                else -> {
+                    Log.e(
+                        tag,
+                        "Invalid update: MSG: ${msg::class.java.simpleName} MDL: ${oldMdl::class.java.simpleName}"
+                    )
+                    oldMdl
+                }
+            }
+            mdls.send(mdl)
+        }
+        mdls.close()
+        mdl
     }
-    mdls.close()
-    mdl
-}

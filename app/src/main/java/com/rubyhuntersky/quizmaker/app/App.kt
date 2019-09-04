@@ -1,11 +1,12 @@
 package com.rubyhuntersky.quizmaker.app
 
 import android.app.Application
+import android.util.Log
 import com.crashlytics.android.Crashlytics
 import com.rubyhuntersky.data.Study
-import com.rubyhuntersky.data.material.BasicDegreeMaterial
 import com.rubyhuntersky.mepl.Mepl
 import com.rubyhuntersky.quizmaker.LegendScope
+import com.rubyhuntersky.quizmaker.tools.MaterialLoader
 import com.rubyhuntersky.quizmaker.viewcourse.startViewCourseLegend
 import io.fabric.sdk.android.Fabric
 import kotlinx.coroutines.CoroutineScope
@@ -38,17 +39,27 @@ class App : Application(), CoroutineScope, LegendScope {
         super.onCreate()
         Fabric.with(Fabric.Builder(this).kits(Crashlytics()).debuggable(true).build())
         Mepl.start(this)
+        startStudyStore()
+    }
+
+    private fun startStudyStore() {
         launch {
-            val studyFile = File(filesDir, "activeStudy")
-            var study = Study.start(BasicDegreeMaterial, LocalDateTime.now())
-                .mergeInto(StudyStore.read(studyFile))
-            while (!storeChannel.isClosedForReceive) {
-                when (val msg = storeChannel.receive()) {
-                    is StoreMsg.ReadStudy -> msg.response.send(study)
-                    is StoreMsg.WriteStudy -> {
-                        study = msg.study.also { StudyStore.write(it, studyFile) }
+            try {
+                val studyFile = File(filesDir, "activeStudy")
+                val degreeMaterial = MaterialLoader.basicDegreeMaterial
+                var study = Study.start(degreeMaterial, LocalDateTime.now())
+                    .mergeInto(StudyStore.read(studyFile))
+                for (msg in storeChannel) {
+                    when (msg) {
+                        is StoreMsg.ReadStudy -> msg.response.send(study)
+                        is StoreMsg.WriteStudy -> {
+                            study = msg.study.also { StudyStore.write(it, studyFile) }
+                        }
                     }
                 }
+            } catch (thrown: Throwable) {
+                Log.e("StudyStore", "Failed to open", thrown)
+                Crashlytics.logException(thrown)
             }
         }
     }
