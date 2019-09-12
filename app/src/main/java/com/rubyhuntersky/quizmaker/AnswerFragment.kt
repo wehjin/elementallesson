@@ -51,9 +51,8 @@ class AnswerFragment : StepFragment() {
             }
             LessonType.CLOZE -> {
                 val title = lesson.response
-                val description = ""
-                val breadcrumb = lesson.prompt.upgradeEllipsis()
-                GuidanceStylist.Guidance(title, description, breadcrumb, null)
+                val description = lesson.prompt.upgradeEllipsis()
+                GuidanceStylist.Guidance(title, description, "", null)
             }
             else -> TODO()
         }

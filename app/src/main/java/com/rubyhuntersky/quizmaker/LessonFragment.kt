@@ -69,8 +69,8 @@ class LessonFragment : StepFragment() {
                 GuidanceStylist.Guidance(title, description, breadcrumb, null)
             }
             LessonType.CLOZE -> {
-                val title = prompt.upgradeEllipsis()
-                val description = "Cloze"
+                val title = "〚 Cloze 〛"
+                val description = prompt.upgradeEllipsis()
                 GuidanceStylist.Guidance(title, description, breadcrumb, null)
             }
             else -> TODO()
