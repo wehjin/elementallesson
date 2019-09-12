@@ -43,7 +43,7 @@ internal class LessonTest {
         val easy = LocalDateTime.now()
         val hard = easy - Duration.ofHours(1)
         val lesson = Lesson(Sem1Chap10CourseMaterial.lessons.first(), hard, easy)
-        assertEquals(easy + Duration.ofHours(22), lesson.wakeTime)
+        assertEquals(easy + Duration.ofHours(23), lesson.wakeTime)
     }
 
     @Test
@@ -51,7 +51,7 @@ internal class LessonTest {
         val easy = LocalDateTime.now()
         val hard = easy - Duration.ofHours(24)
         val lesson = Lesson(Sem1Chap10CourseMaterial.lessons.first(), hard, easy)
-        assertEquals(easy + Duration.ofHours(46), lesson.wakeTime)
+        assertEquals(easy + Duration.ofHours(47), lesson.wakeTime)
     }
 
     @Test
@@ -59,6 +59,6 @@ internal class LessonTest {
         val easy = LocalDateTime.now()
         val hard = easy - Duration.ofHours(48)
         val lesson = Lesson(Sem1Chap10CourseMaterial.lessons.first(), hard, easy)
-        assertEquals(easy + Duration.ofHours(94), lesson.wakeTime)
+        assertEquals(easy + Duration.ofHours(95), lesson.wakeTime)
     }
 }

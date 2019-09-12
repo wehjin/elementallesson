@@ -58,14 +58,14 @@ data class Lesson(
         } else {
             val rested = Duration.between(hard, easy) + Duration.ofHours(1)
             when {
+                rested > Duration.ofDays(64) -> Duration.ofDays(128)
                 rested > Duration.ofDays(32) -> Duration.ofDays(64)
                 rested > Duration.ofDays(16) -> Duration.ofDays(32)
                 rested > Duration.ofDays(8) -> Duration.ofDays(16)
                 rested > Duration.ofDays(4) -> Duration.ofDays(8)
                 rested > Duration.ofDays(2) -> Duration.ofDays(4)
                 rested > Duration.ofDays(1) -> Duration.ofDays(2)
-                rested > Duration.ofHours(12) -> Duration.ofDays(1)
-                else -> Duration.ofHours(12)
+                else -> Duration.ofDays(1)
             } - Duration.ofHours(1)
         }
     }
