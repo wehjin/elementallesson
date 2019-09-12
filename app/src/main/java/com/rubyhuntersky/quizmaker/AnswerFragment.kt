@@ -4,6 +4,7 @@ import androidx.leanback.widget.GuidanceStylist
 import com.rubyhuntersky.data.Lesson
 import com.rubyhuntersky.data.material.core.LessonType
 import com.rubyhuntersky.quizmaker.android.toRelativeString
+import com.rubyhuntersky.quizmaker.tools.upgradeEllipsis
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import java.time.LocalDateTime
@@ -35,17 +36,24 @@ class AnswerFragment : StepFragment() {
 
     private fun getGuidance(lesson: Lesson): GuidanceStylist.Guidance {
         return when (lesson.type) {
-            LessonType.LISTENING -> {
-                val title = lesson.response
-                val description = lesson.responseColor ?: ""
-                GuidanceStylist.Guidance(title, description, "", null)
-            }
-            else -> {
+            LessonType.PRODUCTION -> {
                 val title = lesson.response
                 val description = lesson.responseColor ?: ""
                 val breadcrumb = lesson.prompt
                 GuidanceStylist.Guidance(title, description, breadcrumb, null)
             }
+            LessonType.LISTENING -> {
+                val title = lesson.response
+                val description = lesson.responseColor ?: ""
+                GuidanceStylist.Guidance(title, description, "", null)
+            }
+            LessonType.CLOZE -> {
+                val title = lesson.response
+                val description = ""
+                val breadcrumb = lesson.prompt.upgradeEllipsis()
+                GuidanceStylist.Guidance(title, description, breadcrumb, null)
+            }
+            else -> TODO()
         }
     }
 

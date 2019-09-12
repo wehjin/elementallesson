@@ -4,6 +4,7 @@ import androidx.leanback.widget.GuidanceStylist
 import com.rubyhuntersky.data.Lesson
 import com.rubyhuntersky.data.material.core.LessonType
 import com.rubyhuntersky.quizmaker.android.toRelativeString
+import com.rubyhuntersky.quizmaker.tools.upgradeEllipsis
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import java.time.Duration
@@ -65,6 +66,11 @@ class LessonFragment : StepFragment() {
             LessonType.LISTENING -> {
                 val title = "〚 Listen 〛"
                 val description = ""
+                GuidanceStylist.Guidance(title, description, breadcrumb, null)
+            }
+            LessonType.CLOZE -> {
+                val title = prompt.upgradeEllipsis()
+                val description = "Cloze"
                 GuidanceStylist.Guidance(title, description, breadcrumb, null)
             }
             else -> TODO()
