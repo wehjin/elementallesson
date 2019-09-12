@@ -43,7 +43,7 @@ data class Course(
             lessons = courseMaterial.lessons.map { Lesson(it, time - Duration.ofMinutes(2)) }.toSet()
         )
 
-        const val maxLessonsPerSession = 43
+        const val maxLessonsPerSession = 20
 
         fun toActiveOrderedLessons(lessons: Iterable<Lesson>, time: LocalDateTime): List<Lesson> {
             return lessons.filter { it.isAwake(time) }
