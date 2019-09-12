@@ -13,6 +13,8 @@ import java.time.LocalDateTime
 class AnswerFragment : StepFragment() {
 
     suspend fun setSight(lesson: Lesson, events: Channel<String>) {
+        val restDuration =
+            lesson.restDurationWithEasy(LocalDateTime.now()) + Lesson.fuzzDuration
         control.send(
             Msg.SetView(
                 guidance = getGuidance(lesson),
@@ -26,7 +28,7 @@ class AnswerFragment : StepFragment() {
                     Button(
                         "Space",
                         event = ANSWER_EASY,
-                        subtext = "Easy. Repeat in ${lesson.restDurationWithEasy(LocalDateTime.now()).toRelativeString()}."
+                        subtext = "Easy. Repeat in ${restDuration.toRelativeString()}."
                     )
                 ),
                 events = events

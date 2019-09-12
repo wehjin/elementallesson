@@ -56,7 +56,7 @@ data class Lesson(
         return if (easy.isBefore(hard)) {
             Duration.ZERO
         } else {
-            val rested = Duration.between(hard, easy) + Duration.ofHours(1)
+            val rested = Duration.between(hard, easy) + fuzzDuration
             when {
                 rested > Duration.ofDays(64) -> Duration.ofDays(128)
                 rested > Duration.ofDays(32) -> Duration.ofDays(64)
@@ -66,7 +66,7 @@ data class Lesson(
                 rested > Duration.ofDays(2) -> Duration.ofDays(4)
                 rested > Duration.ofDays(1) -> Duration.ofDays(2)
                 else -> Duration.ofDays(1)
-            } - Duration.ofHours(1)
+            } - fuzzDuration
         }
     }
 
@@ -79,4 +79,8 @@ data class Lesson(
                 easyTime + restDuration
             }
         }
+
+    companion object {
+        val fuzzDuration = Duration.ofHours(1)
+    }
 }
