@@ -59,7 +59,7 @@ android {
         applicationId "com.rubyhuntersky.quizmaker"
         minSdkVersion 26
         targetSdkVersion 28
-        versionCode 6
+        versionCode 7
         versionName "1.0.$versionCode"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [fabric_io_id: fabric_key]
