@@ -29,7 +29,8 @@ object MaterialLoader : CoroutineScope {
             }
 
     private fun fetchBasicDegree(): DegreeMaterial {
-        val ch12Lessons = fetchCh12Lessons()
+        val ch11RemoteLessons = fetchChapterLessons(11)
+        val ch12RemoteLessons = fetchChapterLessons(12)
         return object : DegreeMaterial {
             override val courses = listOf(
                 Sem1CourseMaterial,
@@ -37,20 +38,20 @@ object MaterialLoader : CoroutineScope {
                     override val title = Sem2CourseMaterial.title
                     override val subtitle = Sem2CourseMaterial.subtitle
                     override val lessons =
-                        Sem2CourseMaterial.lessons + ch12Lessons
+                        Sem2CourseMaterial.lessons + ch12RemoteLessons + ch11RemoteLessons
                 },
                 object : CourseMaterial {
-                    override val title: String = "Chapter 12"
-                    override val subtitle: String? = "Semester 2"
-                    override val lessons: List<LessonMaterial> = ch12Lessons.toList()
+                    override val title = "Chapter 11 Cloze"
+                    override val subtitle = "Semester 2"
+                    override val lessons = ch11RemoteLessons.toList()
                 },
                 ExperimentalCourseMaterial
             )
         }
     }
 
-    private fun fetchCh12Lessons(): Sequence<LessonMaterial> {
-        val url = "https://wehjin.github.io/gan2/ch12/LESSONS.LST"
+    private fun fetchChapterLessons(chapter: Int): Sequence<LessonMaterial> {
+        val url = "https://wehjin.github.io/gan2/ch$chapter/LESSONS.LST"
         val request = Request.Builder().url(url).build()
         val response = okClient.newCall(request).execute()
         if (!response.isSuccessful) {
