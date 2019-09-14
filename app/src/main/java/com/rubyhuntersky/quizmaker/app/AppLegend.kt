@@ -112,7 +112,7 @@ fun LegendScope.startAppLegend(storeCtl: SendChannel<StoreMsg>): Legend<AppMdl, 
                     if (activeLessons.isEmpty()) {
                         oldMdl
                     } else {
-                        AppMdl.ActiveLesson(activeLessons.first(), activeLessons, oldMdl)
+                        AppMdl.ActiveLesson(activeLessons.random(), activeLessons, oldMdl)
                     }
                 }
                 oldMdl is AppMdl.ActiveLesson && msg is AppMsg.CancelLessons -> oldMdl.courseMdl
@@ -136,7 +136,7 @@ fun LegendScope.startAppLegend(storeCtl: SendChannel<StoreMsg>): Legend<AppMdl, 
                     } else {
                         val otherLessons = newActiveLessons.filter { it.id != newLesson.id }
                         val newActiveLesson =
-                            if (otherLessons.isEmpty()) newActiveLessons.random() else otherLessons.random()
+                            if (otherLessons.isEmpty()) newLesson else otherLessons.random()
                         AppMdl.ActiveLesson(newActiveLesson, newActiveLessons, newCourseMdl)
                     }
                 }
@@ -151,11 +151,8 @@ fun LegendScope.startAppLegend(storeCtl: SendChannel<StoreMsg>): Legend<AppMdl, 
                     if (newActiveLessons.isEmpty()) {
                         newCourseMdl
                     } else {
-                        AppMdl.ActiveLesson(
-                            newActiveLessons.random(),
-                            newActiveLessons,
-                            newCourseMdl
-                        )
+                        val nextActiveLessons = newActiveLessons.random()
+                        AppMdl.ActiveLesson(nextActiveLessons, newActiveLessons, newCourseMdl)
                     }
                 }
                 else -> {
