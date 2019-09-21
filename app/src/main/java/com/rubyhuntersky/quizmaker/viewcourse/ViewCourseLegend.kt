@@ -46,7 +46,7 @@ fun LegendScope.startViewCourseLegend(appLegend: Legend<AppMdl, AppMsg>): Legend
             select<Unit> {
                 appMdls.onReceive { appMdl ->
                     viewCourseMdl = when (appMdl) {
-                        is AppMdl.ActiveStudy -> ViewCourseMdl(
+                        is AppMdl.CourseSelecting -> ViewCourseMdl(
                             null
                         )
                         is AppMdl.CourseViewing -> ViewCourseMdl(

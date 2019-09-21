@@ -48,8 +48,9 @@ data class Lesson(
 
     fun setHard(time: LocalDateTime): Lesson = copy(hardTime = time, easyTime = null)
 
-    val learnedTime: LocalDateTime?
-        get() = easyTime?.let { if (it.isAfter(hardTime)) it else null }
+    val learnedTime: LocalDateTime? by lazy {
+        easyTime?.let { if (it.isAfter(hardTime)) it else null }
+    }
 
     fun restDurationWithEasy(easy: LocalDateTime): Duration {
         val hard = if (easyTime == null || easyTime.isBefore(hardTime)) easy else hardTime
@@ -70,17 +71,16 @@ data class Lesson(
         }
     }
 
-    val wakeTime: LocalDateTime
-        get() {
-            return if (easyTime == null || easyTime < hardTime) {
-                hardTime
-            } else {
-                val restDuration = restDurationWithEasy(easyTime)
-                easyTime + restDuration
-            }
+    val wakeTime: LocalDateTime by lazy {
+        if (easyTime == null || easyTime < hardTime) {
+            hardTime
+        } else {
+            val restDuration = restDurationWithEasy(easyTime)
+            easyTime + restDuration
         }
+    }
 
     companion object {
-        val fuzzDuration = Duration.ofHours(1)
+        val fuzzDuration: Duration = Duration.ofHours(1)
     }
 }

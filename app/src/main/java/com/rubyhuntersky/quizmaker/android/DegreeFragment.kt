@@ -56,7 +56,7 @@ class DegreeFragment : VerticalGridSupportFragment(), CoroutineScope, AppScope, 
         launch {
             while (!mdls.isClosedForReceive) {
                 when (val mdl = mdls.receive()) {
-                    is AppMdl.ActiveStudy -> {
+                    is AppMdl.CourseSelecting -> {
                         adapter = ArrayObjectAdapter(CourseCardPresenter()).apply { addAll(0, mdl.study.courses) }
                     }
                 }

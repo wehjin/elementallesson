@@ -18,11 +18,11 @@ sealed class AppMdl {
 
     abstract val study: Study
 
-    data class ActiveStudy(
+    data class CourseSelecting(
         override val study: Study
     ) : AppMdl() {
 
-        fun replaceCourse(course: Course): ActiveStudy {
+        fun replaceCourse(course: Course): CourseSelecting {
             val newStudy = study.replaceCourse(course)
             return copy(study = newStudy)
         }
@@ -30,14 +30,14 @@ sealed class AppMdl {
 
     data class CourseViewing(
         val course: Course,
-        val studyMdl: ActiveStudy
+        val courseSelecting: CourseSelecting
     ) : AppMdl() {
-        override val study: Study get() = studyMdl.study
+        override val study: Study get() = courseSelecting.study
 
         fun updateLesson(lesson: Lesson): CourseViewing {
             val newCourse = course.replaceLesson(lesson)
-            val newStudyMdl = studyMdl.replaceCourse(newCourse)
-            return copy(course = newCourse, studyMdl = newStudyMdl)
+            val newStudyMdl = courseSelecting.replaceCourse(newCourse)
+            return copy(course = newCourse, courseSelecting = newStudyMdl)
         }
     }
 
@@ -98,23 +98,23 @@ fun LegendScope.startAppLegend(storeCtl: SendChannel<StoreMsg>): Legend<AppMdl, 
             storeCtl.send(StoreMsg.ReadStudy(it))
             it.receive()
         }
-        var mdl: AppMdl = AppMdl.ActiveStudy(study).also { mdls.send(it) }
+        var mdl: AppMdl = AppMdl.CourseSelecting(study).also { mdls.send(it) }
         for (msg in msgs) {
             val oldMdl = mdl
             mdl = when {
                 msg is AppMsg.SelectCourse -> {
                     Log.d(tag, "Selected course: ${msg.course.title}")
-                    AppMdl.CourseViewing(msg.course, AppMdl.ActiveStudy(oldMdl.study))
+                    AppMdl.CourseViewing(msg.course, AppMdl.CourseSelecting(oldMdl.study))
                 }
-                oldMdl is AppMdl.CourseViewing && msg is AppMsg.CancelCourse -> oldMdl.studyMdl
+                oldMdl is AppMdl.CourseViewing && msg is AppMsg.CancelCourse -> oldMdl.courseSelecting
                 oldMdl is AppMdl.CourseViewing && msg is AppMsg.ResetCourse -> {
                     val courseMaterial =
                         MaterialLoader.basicDegreeMaterial.courses.find { it.title == oldMdl.course.title }
                     courseMaterial?.let { material ->
                         val newCourse = Course.start(material, LocalDateTime.now())
-                        val newStudy = oldMdl.studyMdl.study.replaceCourse(newCourse)
+                        val newStudy = oldMdl.courseSelecting.study.replaceCourse(newCourse)
                             .also { storeCtl.send(StoreMsg.WriteStudy(it)) }
-                        val newStudyMdl = oldMdl.studyMdl.copy(study = newStudy)
+                        val newStudyMdl = oldMdl.courseSelecting.copy(study = newStudy)
                         AppMdl.CourseViewing(newCourse, newStudyMdl)
                     } ?: oldMdl.also {
                         Log.d(
@@ -124,11 +124,12 @@ fun LegendScope.startAppLegend(storeCtl: SendChannel<StoreMsg>): Legend<AppMdl, 
                     }
                 }
                 oldMdl is AppMdl.CourseViewing && msg is AppMsg.StartLessons -> {
-                    val activeLessons = oldMdl.course.lessonList(LocalDateTime.now())
-                    if (activeLessons.isEmpty()) {
+                    val sessionLessons = oldMdl.course.pickLessonsForSession(LocalDateTime.now())
+                    if (sessionLessons.isEmpty()) {
                         oldMdl
                     } else {
-                        AppMdl.LessonLearning(activeLessons.random(), activeLessons, oldMdl)
+                        val firstLesson = sessionLessons.random()
+                        AppMdl.LessonLearning(firstLesson, sessionLessons, oldMdl)
                     }
                 }
                 oldMdl is AppMdl.LessonLearning && msg is AppMsg.CancelLessons -> oldMdl.courseViewing
