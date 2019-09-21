@@ -49,17 +49,17 @@ fun LegendScope.startViewCourseLegend(appLegend: Legend<AppMdl, AppMsg>): Legend
                         is AppMdl.ActiveStudy -> ViewCourseMdl(
                             null
                         )
-                        is AppMdl.ActiveCourse -> ViewCourseMdl(
+                        is AppMdl.CourseViewing -> ViewCourseMdl(
                             appMdl.course,
                             null,
                             false
                         )
-                        is AppMdl.ActiveLesson -> ViewCourseMdl(
+                        is AppMdl.LessonLearning -> ViewCourseMdl(
                             appMdl.activeCourse,
                             appMdl.lesson,
                             false
                         )
-                        is AppMdl.ActiveAnswer -> ViewCourseMdl(
+                        is AppMdl.AnswerChecking -> ViewCourseMdl(
                             appMdl.activeCourse,
                             appMdl.activeLesson,
                             true

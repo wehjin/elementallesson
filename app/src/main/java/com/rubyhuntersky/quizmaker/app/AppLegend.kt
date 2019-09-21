@@ -28,35 +28,51 @@ sealed class AppMdl {
         }
     }
 
-    data class ActiveCourse(
+    data class CourseViewing(
         val course: Course,
         val studyMdl: ActiveStudy
     ) : AppMdl() {
         override val study: Study get() = studyMdl.study
 
-        fun replaceLesson(lesson: Lesson): ActiveCourse {
+        fun updateLesson(lesson: Lesson): CourseViewing {
             val newCourse = course.replaceLesson(lesson)
             val newStudyMdl = studyMdl.replaceCourse(newCourse)
             return copy(course = newCourse, studyMdl = newStudyMdl)
         }
     }
 
-    data class ActiveLesson(
+    data class LessonLearning(
         val lesson: Lesson,
         val activeLessonList: List<Lesson>,
-        val courseMdl: ActiveCourse
+        val courseViewing: CourseViewing
     ) : AppMdl() {
-        val activeCourse: Course get() = courseMdl.course
-        override val study: Study get() = courseMdl.study
+        val activeCourse: Course get() = courseViewing.course
+        override val study: Study get() = courseViewing.study
     }
 
-    data class ActiveAnswer(
-        val lessonMdl: ActiveLesson
+    data class AnswerChecking(
+        val lessonLearning: LessonLearning
     ) : AppMdl() {
-        val activeLesson: Lesson get() = lessonMdl.lesson
-        val activeLessons: List<Lesson> get() = lessonMdl.activeLessonList
-        val activeCourse: Course get() = lessonMdl.activeCourse
-        override val study: Study get() = lessonMdl.study
+        val activeLesson: Lesson get() = lessonLearning.lesson
+        private val activeLessons: List<Lesson> get() = lessonLearning.activeLessonList
+        val activeCourse: Course get() = lessonLearning.activeCourse
+        override val study: Study get() = lessonLearning.study
+
+        fun updateLesson(modified: Lesson): AppMdl {
+            val newCourseViewing = lessonLearning.courseViewing.updateLesson(modified)
+            val lessonsWithModified =
+                activeLessons.map { if (it.id == modified.id) modified else it }
+            val newActiveLessons =
+                Course.toActiveOrderedLessons(lessonsWithModified, LocalDateTime.now())
+            return when (newActiveLessons.size) {
+                0 -> newCourseViewing
+                1 -> LessonLearning(newActiveLessons.first(), newActiveLessons, newCourseViewing)
+                else -> {
+                    val nextLesson = newActiveLessons.filter { it.id != modified.id }.random()
+                    LessonLearning(nextLesson, newActiveLessons, newCourseViewing)
+                }
+            }
+        }
     }
 }
 
@@ -88,10 +104,10 @@ fun LegendScope.startAppLegend(storeCtl: SendChannel<StoreMsg>): Legend<AppMdl, 
             mdl = when {
                 msg is AppMsg.SelectCourse -> {
                     Log.d(tag, "Selected course: ${msg.course.title}")
-                    AppMdl.ActiveCourse(msg.course, AppMdl.ActiveStudy(oldMdl.study))
+                    AppMdl.CourseViewing(msg.course, AppMdl.ActiveStudy(oldMdl.study))
                 }
-                oldMdl is AppMdl.ActiveCourse && msg is AppMsg.CancelCourse -> oldMdl.studyMdl
-                oldMdl is AppMdl.ActiveCourse && msg is AppMsg.ResetCourse -> {
+                oldMdl is AppMdl.CourseViewing && msg is AppMsg.CancelCourse -> oldMdl.studyMdl
+                oldMdl is AppMdl.CourseViewing && msg is AppMsg.ResetCourse -> {
                     val courseMaterial =
                         MaterialLoader.basicDegreeMaterial.courses.find { it.title == oldMdl.course.title }
                     courseMaterial?.let { material ->
@@ -99,7 +115,7 @@ fun LegendScope.startAppLegend(storeCtl: SendChannel<StoreMsg>): Legend<AppMdl, 
                         val newStudy = oldMdl.studyMdl.study.replaceCourse(newCourse)
                             .also { storeCtl.send(StoreMsg.WriteStudy(it)) }
                         val newStudyMdl = oldMdl.studyMdl.copy(study = newStudy)
-                        AppMdl.ActiveCourse(newCourse, newStudyMdl)
+                        AppMdl.CourseViewing(newCourse, newStudyMdl)
                     } ?: oldMdl.also {
                         Log.d(
                             tag,
@@ -107,53 +123,31 @@ fun LegendScope.startAppLegend(storeCtl: SendChannel<StoreMsg>): Legend<AppMdl, 
                         )
                     }
                 }
-                oldMdl is AppMdl.ActiveCourse && msg is AppMsg.StartLessons -> {
+                oldMdl is AppMdl.CourseViewing && msg is AppMsg.StartLessons -> {
                     val activeLessons = oldMdl.course.lessonList(LocalDateTime.now())
                     if (activeLessons.isEmpty()) {
                         oldMdl
                     } else {
-                        AppMdl.ActiveLesson(activeLessons.random(), activeLessons, oldMdl)
+                        AppMdl.LessonLearning(activeLessons.random(), activeLessons, oldMdl)
                     }
                 }
-                oldMdl is AppMdl.ActiveLesson && msg is AppMsg.CancelLessons -> oldMdl.courseMdl
-                oldMdl is AppMdl.ActiveLesson && msg is AppMsg.PlayClip -> {
+                oldMdl is AppMdl.LessonLearning && msg is AppMsg.CancelLessons -> oldMdl.courseViewing
+                oldMdl is AppMdl.LessonLearning && msg is AppMsg.PlayClip -> {
                     oldMdl.also { it.lesson.clipBase?.let(Mepl::playClip) }
                 }
-                oldMdl is AppMdl.ActiveLesson && msg is AppMsg.CheckAnswer -> AppMdl.ActiveAnswer(
+                oldMdl is AppMdl.LessonLearning && msg is AppMsg.CheckAnswer -> AppMdl.AnswerChecking(
                     oldMdl
                 )
-                oldMdl is AppMdl.ActiveAnswer && msg is AppMsg.CancelAnswer -> oldMdl.lessonMdl
-                oldMdl is AppMdl.ActiveAnswer && msg is AppMsg.RepeatLesson -> {
-                    val newLesson = oldMdl.activeLesson.setHard(LocalDateTime.now())
-                    val newCourseMdl = oldMdl.lessonMdl.courseMdl.replaceLesson(newLesson)
+                oldMdl is AppMdl.AnswerChecking && msg is AppMsg.CancelAnswer -> oldMdl.lessonLearning
+                oldMdl is AppMdl.AnswerChecking && msg is AppMsg.RepeatLesson -> {
+                    val repeatingLesson = oldMdl.activeLesson.setHard(LocalDateTime.now())
+                    oldMdl.updateLesson(repeatingLesson)
                         .also { storeCtl.send(StoreMsg.WriteStudy(it.study)) }
-                    val newActiveLessons = Course.toActiveOrderedLessons(
-                        lessons = oldMdl.activeLessons.map { if (it.material == newLesson.material) newLesson else it },
-                        time = LocalDateTime.now()
-                    )
-                    if (newActiveLessons.isEmpty()) {
-                        newCourseMdl
-                    } else {
-                        val otherLessons = newActiveLessons.filter { it.id != newLesson.id }
-                        val newActiveLesson =
-                            if (otherLessons.isEmpty()) newLesson else otherLessons.random()
-                        AppMdl.ActiveLesson(newActiveLesson, newActiveLessons, newCourseMdl)
-                    }
                 }
-                oldMdl is AppMdl.ActiveAnswer && msg is AppMsg.SpaceLesson -> {
-                    val newLesson = oldMdl.activeLesson.setEasy(LocalDateTime.now())
-                    val newCourseMdl = oldMdl.lessonMdl.courseMdl.replaceLesson(newLesson)
+                oldMdl is AppMdl.AnswerChecking && msg is AppMsg.SpaceLesson -> {
+                    val spacedLesson = oldMdl.activeLesson.setEasy(LocalDateTime.now())
+                    oldMdl.updateLesson(spacedLesson)
                         .also { storeCtl.send(StoreMsg.WriteStudy(it.study)) }
-                    val newActiveLessons = Course.toActiveOrderedLessons(
-                        lessons = oldMdl.activeLessons.filter { it.material != newLesson.material },
-                        time = LocalDateTime.now()
-                    )
-                    if (newActiveLessons.isEmpty()) {
-                        newCourseMdl
-                    } else {
-                        val nextActiveLessons = newActiveLessons.random()
-                        AppMdl.ActiveLesson(nextActiveLessons, newActiveLessons, newCourseMdl)
-                    }
                 }
                 else -> {
                     Log.e(
