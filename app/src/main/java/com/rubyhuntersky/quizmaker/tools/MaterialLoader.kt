@@ -1,6 +1,5 @@
 package com.rubyhuntersky.quizmaker.tools
 
-import com.rubyhuntersky.data.material.ExperimentalCourseMaterial
 import com.rubyhuntersky.data.material.Sem1CourseMaterial
 import com.rubyhuntersky.data.material.Sem2CourseMaterial
 import com.rubyhuntersky.data.material.core.CourseMaterial
@@ -31,6 +30,7 @@ object MaterialLoader : CoroutineScope {
     private fun fetchBasicDegree(): DegreeMaterial {
         val ch11RemoteLessons = fetchChapterLessons(11)
         val ch12RemoteLessons = fetchChapterLessons(12)
+        val ch13RemoteLessons = fetchChapterLessons(13)
         return object : DegreeMaterial {
             override val courses = listOf(
                 Sem1CourseMaterial,
@@ -38,14 +38,13 @@ object MaterialLoader : CoroutineScope {
                     override val title = Sem2CourseMaterial.title
                     override val subtitle = Sem2CourseMaterial.subtitle
                     override val lessons =
-                        Sem2CourseMaterial.lessons + ch12RemoteLessons + ch11RemoteLessons
+                        Sem2CourseMaterial.lessons + ch11RemoteLessons + ch12RemoteLessons + ch13RemoteLessons
                 },
                 object : CourseMaterial {
-                    override val title = "Chapter 11 Cloze"
+                    override val title = "Experimental"
                     override val subtitle = "Semester 2"
-                    override val lessons = ch11RemoteLessons.toList()
-                },
-                ExperimentalCourseMaterial
+                    override val lessons = ch13RemoteLessons.toList()
+                }
             )
         }
     }
