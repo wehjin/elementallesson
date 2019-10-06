@@ -19,7 +19,7 @@ object Sem1Chap06CourseMaterial : CourseMaterial {
         LessonMaterial(level = 6, prompt = "station", response = "えき"),
         LessonMaterial(level = 6, prompt = "pencil", response = "えんぴつ"),
         LessonMaterial(level = 6, prompt = "money", response = "おかね"),
-        LessonMaterial(level = 6, prompt = "restroom", response = "いてあらい"),
+        LessonMaterial(level = 6, prompt = "restroom", response = "おてあらい"),
         LessonMaterial(level = 6, prompt = "boy", response = "おとこのこ"),
         LessonMaterial(level = 6, prompt = "man", response = "おとこのひと"),
         LessonMaterial(level = 6, prompt = "girl", response = "おんなのこ"),
