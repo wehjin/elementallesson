@@ -28,22 +28,23 @@ object MaterialLoader : CoroutineScope {
             }
 
     private fun fetchBasicDegree(): DegreeMaterial {
-        val ch11RemoteLessons = fetchChapterLessons(11)
-        val ch12RemoteLessons = fetchChapterLessons(12)
-        val ch13RemoteLessons = fetchChapterLessons(13)
         return object : DegreeMaterial {
             override val courses = listOf(
                 Sem1CourseMaterial,
                 object : CourseMaterial {
                     override val title = Sem2CourseMaterial.title
                     override val subtitle = Sem2CourseMaterial.subtitle
-                    override val lessons =
-                        Sem2CourseMaterial.lessons + ch11RemoteLessons + ch12RemoteLessons + ch13RemoteLessons
+                    override val lessons = (11..14)
+                        .map(this@MaterialLoader::fetchChapterLessons)
+                        .fold(
+                            initial = Sem2CourseMaterial.lessons,
+                            operation = { sum, more -> sum + more }
+                        )
                 },
                 object : CourseMaterial {
                     override val title = "Experimental"
-                    override val subtitle = "Semester 2"
-                    override val lessons = ch13RemoteLessons.toList()
+                    override val subtitle = "Semester 2 - 14"
+                    override val lessons = fetchChapterLessons(14).toList()
                 }
             )
         }
