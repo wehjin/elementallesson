@@ -23,7 +23,7 @@ data class Course(
             val takeFromReview = min(maxLessonsPerSession / 2, canReview.size)
             val takeFromLearn = min(maxLessonsPerSession - takeFromReview, canLearn.size)
             val review = canReview.sortedByDescending { it.learnedTime }.take(takeFromReview)
-            val learn = canLearn.take(takeFromLearn)
+            val learn = canLearn.shuffled().take(takeFromLearn)
             return review + learn
         }
     }
