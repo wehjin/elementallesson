@@ -11,16 +11,16 @@ repositories {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.11.1"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.2.0"
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.0-RC2'
-    implementation 'androidx.appcompat:appcompat:1.1.0-rc01'
-    implementation 'androidx.core:core-ktx:1.2.0-alpha03'
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.14.0"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.2"
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.2'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.core:core-ktx:1.2.0-rc01'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-    implementation 'com.android.support:recyclerview-v7:28.0.0'
-    implementation 'com.android.support:cardview-v7:28.0.0'
-    implementation 'com.android.support:leanback-v17:28.0.0'
-    implementation 'com.google.android.material:material:1.1.0-alpha09'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
+    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'androidx.leanback:leanback:1.0.0'
+    implementation 'com.google.android.material:material:1.2.0-alpha02'
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
     implementation project(':interaction')
     implementation('com.crashlytics.sdk.android:crashlytics:2.10.1@aar') { transitive = true }
@@ -47,7 +47,7 @@ if (!project.hasProperty("upload_index_rebellion_secret")) {
 fabric_key = project.property("fabric_key")
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
     sourceSets.each {
         it.java.srcDirs += "src/$it.name/kotlin"
     }
@@ -58,8 +58,8 @@ android {
     defaultConfig {
         applicationId "com.rubyhuntersky.quizmaker"
         minSdkVersion 26
-        targetSdkVersion 28
-        versionCode 7
+        targetSdkVersion 29
+        versionCode 8
         versionName "1.0.$versionCode"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [fabric_io_id: fabric_key]
