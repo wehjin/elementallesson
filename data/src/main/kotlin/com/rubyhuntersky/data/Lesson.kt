@@ -24,8 +24,14 @@ data class Lesson(
     val isLearned: Boolean
         get() = learnedTime != null
 
-    val clipBase: String?
-        get() = if (type == LessonType.LISTENING) material.prompt else null
+    val clipBase: ClipBase?
+        get() = if (type == LessonType.LISTENING) {
+            if (material.promptColor.isNullOrBlank()) {
+                ClipBase.Raw(material.prompt.trim())
+            } else {
+                ClipBase.Symbolic(material.prompt.trim(), material.promptColor.trim())
+            }
+        } else null
 
     fun isAwake(time: LocalDateTime): Boolean {
         return !wakeTime.isAfter(time)

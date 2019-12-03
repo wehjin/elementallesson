@@ -42,9 +42,28 @@ object MaterialLoader : CoroutineScope {
                         )
                 },
                 object : CourseMaterial {
-                    override val title = "Experimental"
-                    override val subtitle = "Semester 2 - 14"
+                    override val title = "Chapter 14"
+                    override val subtitle = "Semester 2"
                     override val lessons = fetchChapterLessons(14).toList()
+                },
+                object : CourseMaterial {
+                    override val title = "Experimental"
+                    override val subtitle = "Cached"
+                    override val lessons = listOf(
+                        LessonMaterial(
+                            level = 99,
+                            type = LessonType.LISTENING,
+                            prompt = "atogaafterward",
+                            promptColor = "後が",
+                            response = "afterward"
+                        ),
+                        LessonMaterial(
+                            level = 99,
+                            type = LessonType.LISTENING,
+                            prompt = "雨が",
+                            response = "rain"
+                        )
+                    )
                 }
             )
         }
