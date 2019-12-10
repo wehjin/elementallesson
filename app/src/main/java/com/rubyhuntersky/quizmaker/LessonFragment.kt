@@ -51,7 +51,7 @@ class LessonFragment : StepFragment() {
     }
 
     private fun Lesson.toGuidance(): GuidanceStylist.Guidance {
-        val breadcrumb = learnedTime?.let {
+        val lastSeen = learnedTime?.let {
             "Last seen: ${Duration.between(
                 it,
                 LocalDateTime.now()
@@ -61,17 +61,24 @@ class LessonFragment : StepFragment() {
             LessonType.PRODUCTION -> {
                 val title = prompt
                 val description = promptColor ?: ""
-                GuidanceStylist.Guidance(title, description, breadcrumb, null)
+                GuidanceStylist.Guidance(title, description, lastSeen, null)
             }
             LessonType.LISTENING -> {
                 val title = "〚 Listen 〛"
                 val description = ""
-                GuidanceStylist.Guidance(title, description, breadcrumb, null)
+                GuidanceStylist.Guidance(title, description, lastSeen, null)
             }
             LessonType.CLOZE -> {
-                val title = "〚 Cloze 〛"
-                val description = prompt.upgradeEllipsis()
-                GuidanceStylist.Guidance(title, description, breadcrumb, null)
+                val lessonType = "〚 Cloze 〛"
+                val secondLine = promptColor
+                if (secondLine.isNullOrBlank()) {
+                    val description = prompt.upgradeEllipsis()
+                    GuidanceStylist.Guidance(lessonType, description, lastSeen, null)
+                } else {
+                    val title = prompt.upgradeEllipsis()
+                    val description = secondLine.upgradeEllipsis()
+                    GuidanceStylist.Guidance(title, description, "$lessonType $lastSeen", null)
+                }
             }
             else -> TODO()
         }
