@@ -14,11 +14,14 @@ object Learner : AttributeGroup {
     }
 }
 
-fun Tomic.createLearner(
-    name: String
-): Peer<Learner.Name, String> = reformPeers(Learner.Name) {
-    reforms = formPeer(name)
-    peer(name)
+private const val onlyLearnerName = "only-learner"
+
+fun Tomic.createLearner(): Peer<Learner.Name, String> = reformPeers(Learner.Name) {
+    val learner = peerOrNull(onlyLearnerName)
+    if (learner == null) {
+        reforms = formPeer(onlyLearnerName)
+    }
+    peer(onlyLearnerName)
 }
 
 object Plan : AttributeGroup {
@@ -33,9 +36,31 @@ object Plan : AttributeGroup {
     }
 }
 
-fun Tomic.createPlan(author: Long, name: String): Minion<Plan.Author> =
-    reformMinions(Leader(author, Plan.Author)) {
-        val ent = Random.nextLong().absoluteValue
-        reforms = formMinion(ent) { Plan.Name set name }
-        minion(ent)
-    }
+fun Tomic.createPlan(
+    author: Long,
+    name: String
+): Minion<Plan.Author> = reformMinions(Leader(author, Plan.Author)) {
+    val ent = Random.nextLong().absoluteValue
+    reforms = formMinion(ent) { Plan.Name set name }
+    minion(ent)
+}
+
+fun Tomic.readPlans(
+    author: Long
+): Set<Minion<Plan.Author>> = minions(Leader(author, Plan.Author))
+
+fun Tomic.updatePlans(
+    author: Long,
+    init: MinionMob<Plan.Author>.() -> List<Form<*>>
+): Set<Minion<Plan.Author>> = reformMinions(Leader(author, Plan.Author)) {
+    reforms = this.init()
+    minions
+}
+
+fun Tomic.deletePlan(
+    author: Long,
+    plan: Long
+): Set<Minion<Plan.Author>> = reformMinions(Leader(author, Plan.Author)) {
+    reforms = minion(plan).unform
+    minions
+}
