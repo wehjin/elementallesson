@@ -7,7 +7,7 @@ internal class LearnerTest {
 
     @Test
     internal fun createLearner() {
-        val tomic = tomic("addLeaner", "learnerTest")
+        val tomic = tomic("createLearner", "learnerTest")
         val learner = tomic.createLearner()
         assertNotNull(learner)
     }
