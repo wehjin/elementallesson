@@ -9,11 +9,19 @@ import org.junit.jupiter.api.Test
 internal class LearnerTest {
 
     @Test
-    internal fun addLearner() {
+    internal fun createLearner() {
         val tomic = tomicWithPrefix("addLeaner")
         val name = "main"
-        val learner = tomic.addLearner(name)
+        val learner = tomic.createLearner(name)
         assertEquals(name, learner[Learner.Name])
+    }
+
+    @Test
+    internal fun createPlan() {
+        val tomic = tomicWithPrefix("createPlan")
+        val name = "First Plan"
+        val plan = tomic.createPlan(1000, name)
+        assertEquals(name, plan[Plan.Name])
     }
 
     private fun tomicWithPrefix(prefix: String): Tomic {
