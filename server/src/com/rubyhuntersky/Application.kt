@@ -66,7 +66,7 @@ fun Application.module() {
                                         name = "plan_drop"
                                         value = "${plan.ent}"
                                     }
-                                    +" ${plan[Plan.Name]} "
+                                    a(href = "/user/only/plan/${plan.ent}") { +" ${plan[Plan.Name]} " }
                                 }
                             }
                         }
