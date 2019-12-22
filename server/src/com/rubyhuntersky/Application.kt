@@ -1,7 +1,6 @@
 package com.rubyhuntersky
 
-import com.rubyhuntersky.data.v2.Learner
-import com.rubyhuntersky.data.v2.createLearner
+import com.rubyhuntersky.data.v2.*
 import com.rubyhuntersky.tomedb.get
 import com.rubyhuntersky.tomedb.tomicOf
 import io.ktor.application.Application
@@ -10,8 +9,12 @@ import io.ktor.application.install
 import io.ktor.features.DefaultHeaders
 import io.ktor.html.respondHtml
 import io.ktor.http.ContentType
+import io.ktor.http.Parameters
+import io.ktor.request.receive
+import io.ktor.response.respondRedirect
 import io.ktor.response.respondText
 import io.ktor.routing.get
+import io.ktor.routing.post
 import io.ktor.routing.routing
 import io.ktor.server.engine.ShutDownUrl
 import kotlinx.html.*
@@ -50,20 +53,45 @@ fun Application.module() {
                 body {
                     h1 { +"User: ${learner[Learner.Name]?.capitalize()}" }
                     h2 { +"Studies" }
-                    p {
-                        textInput {
-                            name = "Study Name"
-                            id = "study_name"
-                            value = "New Study"
-                        }
-                        button { +"Add" }
-                    }
+                    ul { +"None" }
                     h2 { +"Plans" }
+                    val plans = tomic.readPlans(learner.ent)
                     ul {
-                        +"None"
+                        if (plans.isEmpty()) +"None"
+                        else plans.map { plan ->
+                            li {
+                                form(action = "/user/only/plan", method = FormMethod.post) {
+                                    submitInput { value = "Drop" }
+                                    hiddenInput {
+                                        name = "plan_drop"
+                                        value = "${plan.ent}"
+                                    }
+                                    +" ${plan[Plan.Name]} "
+                                }
+                            }
+                        }
+                    }
+                    form(action = "/user/only/plan", method = FormMethod.post) {
+                        textInput {
+                            name = "plan_name"
+                            value = "Plan ${plans.size + 1}"
+                        }
+                        submitInput { value = "Add" }
                     }
                 }
             }
+        }
+
+        post("/user/only/plan") {
+            val learner = tomic.createLearner()
+            val params = call.receive<Parameters>()
+            params["plan_drop"]?.toLongOrNull()?.let { drop ->
+                tomic.deletePlan(learner.ent, drop)
+            }
+            params["plan_name"]?.let { name ->
+                tomic.createPlan(learner.ent, name)
+            }
+            call.respondRedirect("/user/only")
         }
     }
 }
