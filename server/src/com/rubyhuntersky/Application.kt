@@ -1,6 +1,7 @@
 package com.rubyhuntersky
 
 import com.rubyhuntersky.data.v2.*
+import com.rubyhuntersky.tomedb.Peer
 import com.rubyhuntersky.tomedb.get
 import com.rubyhuntersky.tomedb.tomicOf
 import io.ktor.application.Application
@@ -8,11 +9,9 @@ import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.features.DefaultHeaders
 import io.ktor.html.respondHtml
-import io.ktor.http.ContentType
 import io.ktor.http.Parameters
 import io.ktor.request.receive
 import io.ktor.response.respondRedirect
-import io.ktor.response.respondText
 import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.route
@@ -44,132 +43,133 @@ fun Application.module() {
     }
 
     routing {
-        route("/user/only/plan") {
-            route("{plan}") {
-                get {
-                    val learner = tomic.createLearner()
-                    call.parameters["plan"]?.toLongOrNull()?.let { plan ->
-                        call.respondHtml {
-                            body {
-                                h6 {
-                                    a(href = "/user/only") { +" ${learner[Learner.Name]}" }
-                                }
-                                form(action = "/user/only/plan", method = FormMethod.post) {
-                                    h1 {
-                                        +"Plan / ${plan.toString(16)} "
-                                        hiddenInput {
-                                            name = "drop_plan"
-                                            value = plan.toString()
-                                        }
-                                        submitInput { value = "Drop" }
-                                    }
-                                }
-                                h2 { +"Lessons" }
-                                ol {
-                                    val lessons = tomic.readPlanLessons(plan)
-                                    if (lessons.isEmpty()) {
-                                        +"None"
-                                    } else {
-                                        lessons.map { lesson ->
-                                            li {
-                                                form(
-                                                    action = "/user/only/plan/$plan/lesson",
-                                                    method = FormMethod.post
-                                                ) {
-                                                    +" ${lesson[Lesson.Prompt]} / ${lesson[Lesson.Response]} "
-                                                    hiddenInput {
-                                                        name = "drop_lesson"
-                                                        value = "${lesson.ent}"
-                                                    }
-                                                    submitInput { value = "Drop" }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                h4 { +"Add Lesson" }
-                                form(action = "/user/only/plan/$plan/lesson", method = FormMethod.post) {
-                                    ul {
-                                        p {
-                                            textInput {
-                                                name = "lesson_prompt"
-                                                placeholder = "Prompt"
-                                            }
-                                        }
-                                        p {
-                                            textInput {
-                                                name = "lesson_response"
-                                                placeholder = "Response"
-                                            }
-                                        }
-                                    }
-                                    p { submitInput {} }
-                                }
-                            }
-                        }
-                    } ?: call.respondRedirect("/user/only")
-                }
-                route("lesson") {
-                    post {
+        route("/user/only") {
+            get {
+                val learner = tomic.createLearner()
+                call.respondHtml { render(learner) }
+            }
+            route("plan") {
+                route("{plan}") {
+                    get {
+                        val learner = tomic.createLearner()
                         call.parameters["plan"]?.toLongOrNull()?.let { plan ->
-                            tomic.createLearner()
-                            val params = call.receive<Parameters>()
-                            params["lesson_prompt"]?.let { prompt ->
-                                val response = params["lesson_response"]?.trim() ?: "I am your father."
-                                tomic.createPlanLesson(plan, prompt, response)
-                            }
-                            println("PARAMS: $params")
-                            params["drop_lesson"]?.toLongOrNull()?.let { tomic.deletePlanLesson(plan, it) }
-                            call.respondRedirect("/user/only/plan/$plan")
+                            call.respondHtml { render(learner, plan) }
                         } ?: call.respondRedirect("/user/only")
                     }
-                }
-            }
-            post {
-                val learner = tomic.createLearner()
-                val params = call.receive<Parameters>()
-                params["drop_plan"]?.toLongOrNull()?.let { tomic.deletePlan(learner.ent, it) }
-                params["name_plan"]?.let { tomic.createPlan(learner.ent, it) }
-                call.respondRedirect("/user/only")
-            }
-        }
-
-        get("/") {
-            call.respondText("HELLO WORLD!", contentType = ContentType.Text.Plain)
-        }
-
-        get("/user/only") {
-            val learner = tomic.createLearner()
-            call.respondHtml {
-                body {
-                    h1 { +" User / ${learner[Learner.Name]?.capitalize()} " }
-                    h2 { +"Studies" }
-                    ul { +"None" }
-                    h2 { +"Plans" }
-                    val plans = tomic.readPlans(learner.ent)
-                    ul {
-                        if (plans.isEmpty()) +"None"
-                        else plans.map { plan ->
-                            li {
-                                a(href = "/user/only/plan/${plan.ent}") { +" ${plan[Plan.Name]} " }
-                            }
-                        }
-                    }
-                    h4 { +"Add Plan" }
-                    form(action = "/user/only/plan", method = FormMethod.post) {
-                        ul {
-                            textInput {
-                                name = "name_plan"
-                                placeholder = "Name"
-                            }
-                            +" "
-                            submitInput { }
+                    route("lesson") {
+                        post {
+                            call.parameters["plan"]?.toLongOrNull()?.let { plan ->
+                                tomic.createLearner()
+                                val params = call.receive<Parameters>()
+                                params["add_lesson"]?.let {
+                                    val prompt = params["lesson_prompt"]?.trim() ?: "Who am I?"
+                                    val response = params["lesson_response"]?.trim() ?: "I am your father."
+                                    tomic.createPlanLesson(plan, prompt, response)
+                                }
+                                params["drop_lesson"]?.toLongOrNull()?.let {
+                                    tomic.deletePlanLesson(plan, it)
+                                }
+                                call.respondRedirect("/user/only/plan/$plan")
+                            } ?: call.respondRedirect("/user/only")
                         }
                     }
                 }
+                post {
+                    val learner = tomic.createLearner()
+                    val params = call.receive<Parameters>()
+                    params["add_plan"]?.let {
+                        tomic.createPlan(learner.ent, it)
+                    }
+                    params["drop_plan"]?.toLongOrNull()?.let {
+                        tomic.deletePlan(learner.ent, it)
+                    }
+                    call.respondRedirect("/user/only")
+                }
             }
         }
+    }
+}
 
+private fun HTML.render(learner: Peer<Learner.Name, String>) = body {
+    h1 { +" User / ${learner[Learner.Name]} " }
+    h2 { +"Studies" }
+    ul { +"None" }
+    h2 { +"Plans" }
+    val plans = tomic.readPlans(learner.ent)
+    ul {
+        if (plans.isEmpty()) +"None"
+        else plans.map { plan ->
+            li {
+                val planName = plan[Plan.Name]
+                val displayName = if (planName?.trim().isNullOrEmpty()) "Untitled" else planName
+                a(href = "/user/only/plan/${plan.ent}") { +" $displayName " }
+            }
+        }
+    }
+    h4 { +"Add Plan" }
+    form(action = "/user/only/plan", method = FormMethod.post) {
+        ul {
+            textInput {
+                name = "add_plan"
+                placeholder = "Name"
+            }
+            +" "
+            submitInput { }
+        }
+    }
+}
 
+private fun HTML.render(learner: Peer<Learner.Name, String>, plan: Long) = body {
+    h6 { a(href = "/user/only") { +" ${learner[Learner.Name]}" } }
+    form(action = "/user/only/plan", method = FormMethod.post) {
+        h1 {
+            +"Plan / ${plan.toString(16)} "
+            hiddenInput {
+                name = "drop_plan"
+                value = plan.toString()
+            }
+            submitInput { value = "Drop" }
+        }
+    }
+    h2 { +"Lessons" }
+    ol {
+        val lessons = tomic.readPlanLessons(plan)
+        if (lessons.isEmpty()) {
+            +"None"
+        } else {
+            lessons.map { lesson ->
+                li {
+                    form(
+                        action = "/user/only/plan/$plan/lesson",
+                        method = FormMethod.post
+                    ) {
+                        +" ${lesson[Lesson.Prompt]} / ${lesson[Lesson.Response]} "
+                        hiddenInput {
+                            name = "drop_lesson"
+                            value = "${lesson.ent}"
+                        }
+                        submitInput { value = "Drop" }
+                    }
+                }
+            }
+        }
+    }
+    h4 { +"Add Lesson" }
+    form(action = "/user/only/plan/$plan/lesson", method = FormMethod.post) {
+        ul {
+            p {
+                textInput {
+                    name = "lesson_prompt"
+                    placeholder = "Prompt"
+                }
+            }
+            p {
+                textInput {
+                    name = "lesson_response"
+                    placeholder = "Response"
+                }
+            }
+        }
+        p { submitInput { name = "add_lesson" } }
     }
 }
