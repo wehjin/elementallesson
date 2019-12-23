@@ -64,7 +64,8 @@ fun Application.module() {
                                 params["add_lesson"]?.let {
                                     val prompt = params["lesson_prompt"]?.trim() ?: "Who am I?"
                                     val response = params["lesson_response"]?.trim() ?: "I am your father."
-                                    tomic.createPlanLesson(plan, prompt, response)
+                                    val level = params["lesson_level"]?.toLongOrNull() ?: 1L
+                                    tomic.createPlanLesson(plan, prompt, response, level)
                                 }
                                 params["drop_lesson"]?.toLongOrNull()?.let {
                                     tomic.deletePlanLesson(plan, it)
@@ -143,7 +144,10 @@ private fun HTML.render(learner: Peer<Learner.Name, String>, plan: Long) = body 
                         action = "/user/only/plan/$plan/lesson",
                         method = FormMethod.post
                     ) {
-                        +" ${lesson[Lesson.Prompt]} / ${lesson[Lesson.Response]} "
+                        val prompt = lesson[Lesson.Prompt]
+                        val response = lesson[Lesson.Response]
+                        val level = lesson[Lesson.Level]?.toLong() ?: 1
+                        +" $prompt / $response / Level$level "
                         hiddenInput {
                             name = "drop_lesson"
                             value = "${lesson.ent}"

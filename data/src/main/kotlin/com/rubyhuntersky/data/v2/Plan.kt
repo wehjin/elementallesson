@@ -31,12 +31,18 @@ object Lesson : AttributeGroup {
         override val description: String = "The plan holding the lesson."
         override val scriber: Scriber<Ent> = EntScriber
     }
+
+    object Level : AttributeInObject<Long>() {
+        override val description: String = "The level of the lesson"
+        override val scriber: Scriber<Long> = LongScriber
+    }
 }
 
 fun Tomic.createPlanLesson(
     plan: Long,
     prompt: String,
     response: String,
+    level: Long,
     responseColoring: String? = null,
     promptColoring: String? = null
 ): Minion<Lesson.Plan> = reformMinions(Leader(plan, Lesson.Plan)) {
@@ -44,6 +50,7 @@ fun Tomic.createPlanLesson(
     reforms = formMinion(ent) {
         Lesson.Prompt set prompt
         Lesson.Response set response
+        Lesson.Level set level
         promptColoring?.also { Lesson.PromptColoring set it }
         responseColoring?.also { Lesson.ResponseColoring set it }
     }

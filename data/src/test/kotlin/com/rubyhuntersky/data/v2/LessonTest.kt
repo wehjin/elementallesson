@@ -12,7 +12,7 @@ internal class LessonTest {
         val tomic = tomic("crud", "lessonTest")
         val plan: Long = 2000
 
-        val create = tomic.createPlanLesson(plan, "Hello", "Goodbye")
+        val create = tomic.createPlanLesson(plan, "Hello", "Goodbye", 1)
         assertEquals(plan, create[Lesson.Plan]!!.number)
 
         val read = tomic.readPlanLessons(plan)
