@@ -146,8 +146,8 @@ private fun HTML.render(learner: Peer<Learner.Name, String>, plan: Long) = body 
                     ) {
                         val prompt = lesson[Lesson.Prompt]
                         val response = lesson[Lesson.Response]
-                        val level = lesson[Lesson.Level]?.toLong() ?: 1
-                        +" $prompt / $response / Level$level "
+                        val level = lesson[Lesson.Level] ?: 1
+                        +" prompt='$prompt' / response='$response' / level=$level "
                         hiddenInput {
                             name = "drop_lesson"
                             value = "${lesson.ent}"
@@ -171,6 +171,12 @@ private fun HTML.render(learner: Peer<Learner.Name, String>, plan: Long) = body 
                 textInput {
                     name = "lesson_response"
                     placeholder = "Response"
+                }
+            }
+            p {
+                textInput {
+                    name = "lesson_level"
+                    placeholder = "Level"
                 }
             }
         }
