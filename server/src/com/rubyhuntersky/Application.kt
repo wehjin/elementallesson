@@ -48,9 +48,7 @@ fun Application.module() {
             val learner = tomic.createLearner()
             get { call.respondHtml { render(learner) } }
             post {
-                val params = call.receive<Parameters>()
-                params["add_plan"]?.let { tomic.createPlan(learner.ent, it) }
-                params["drop_plan"]?.toLongOrNull()?.let { tomic.deletePlan(learner.ent, it) }
+                updateUser(call.receive(), learner)
                 call.respondRedirect("/user/only")
             }
             route("plan/{plan}") {
@@ -61,21 +59,29 @@ fun Application.module() {
                 }
                 post {
                     call.parameters["plan"]?.toLongOrNull()?.let { plan ->
-                        val params = call.receive<Parameters>()
-                        params["add_lesson"]?.let {
-                            val prompt = params["lesson_prompt"]?.trim() ?: "Who am I?"
-                            val response = params["lesson_response"]?.trim() ?: "I am your father."
-                            val level = params["lesson_level"]?.toLongOrNull() ?: 1L
-                            tomic.createPlanLesson(plan, prompt, response, level)
-                        }
-                        params["drop_lesson"]?.toLongOrNull()?.let {
-                            tomic.deletePlanLesson(plan, it)
-                        }
+                        updatePlan(plan, call.receive())
                         call.respondRedirect("/user/only/plan/$plan")
                     } ?: call.respondRedirect("/user/only")
                 }
             }
         }
+    }
+}
+
+private fun updateUser(params: Parameters, learner: Peer<Learner.Name, String>) {
+    params["add_plan"]?.let { tomic.createPlan(learner.ent, it) }
+    params["drop_plan"]?.toLongOrNull()?.let { tomic.deletePlan(learner.ent, it) }
+}
+
+private fun updatePlan(plan: Long, params: Parameters) {
+    params["add_lesson"]?.let {
+        val prompt = params["lesson_prompt"]?.trim() ?: "Who am I?"
+        val response = params["lesson_response"]?.trim() ?: "I am your father."
+        val level = params["lesson_level"]?.toLongOrNull() ?: 1L
+        tomic.createPlanLesson(plan, prompt, response, level)
+    }
+    params["drop_lesson"]?.toLongOrNull()?.let {
+        tomic.deletePlanLesson(plan, it)
     }
 }
 
