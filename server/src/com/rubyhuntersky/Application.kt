@@ -44,7 +44,7 @@ fun Application.module() {
 
     routing {
         get("/") { call.respondRedirect("/user/only") }
-        route("/user/{}") {
+        route("/user/{user}") {
             val learner = tomic.createLearner()
             get { call.respondHtml { render(learner) } }
             post {
@@ -53,31 +53,26 @@ fun Application.module() {
                 params["drop_plan"]?.toLongOrNull()?.let { tomic.deletePlan(learner.ent, it) }
                 call.respondRedirect("/user/only")
             }
-            route("plan") {
-                route("{plan}") {
-                    get {
-                        call.parameters["plan"]?.toLongOrNull()?.let { plan ->
-                            call.respondHtml { render(learner, plan) }
-                        } ?: call.respondRedirect("/user/only")
-                    }
-                    route("lesson") {
-                        post {
-                            val maybePlan = call.parameters["plan"]?.toLongOrNull()
-                            maybePlan?.let { plan ->
-                                val params = call.receive<Parameters>()
-                                params["add_lesson"]?.let {
-                                    val prompt = params["lesson_prompt"]?.trim() ?: "Who am I?"
-                                    val response = params["lesson_response"]?.trim() ?: "I am your father."
-                                    val level = params["lesson_level"]?.toLongOrNull() ?: 1L
-                                    tomic.createPlanLesson(plan, prompt, response, level)
-                                }
-                                params["drop_lesson"]?.toLongOrNull()?.let {
-                                    tomic.deletePlanLesson(plan, it)
-                                }
-                                call.respondRedirect("/user/only/plan/$plan")
-                            } ?: call.respondRedirect("/user/only")
+            route("plan/{plan}") {
+                get {
+                    call.parameters["plan"]?.toLongOrNull()?.let { plan ->
+                        call.respondHtml { render(learner, plan) }
+                    } ?: call.respondRedirect("/user/only")
+                }
+                post {
+                    call.parameters["plan"]?.toLongOrNull()?.let { plan ->
+                        val params = call.receive<Parameters>()
+                        params["add_lesson"]?.let {
+                            val prompt = params["lesson_prompt"]?.trim() ?: "Who am I?"
+                            val response = params["lesson_response"]?.trim() ?: "I am your father."
+                            val level = params["lesson_level"]?.toLongOrNull() ?: 1L
+                            tomic.createPlanLesson(plan, prompt, response, level)
                         }
-                    }
+                        params["drop_lesson"]?.toLongOrNull()?.let {
+                            tomic.deletePlanLesson(plan, it)
+                        }
+                        call.respondRedirect("/user/only/plan/$plan")
+                    } ?: call.respondRedirect("/user/only")
                 }
             }
         }
@@ -133,10 +128,7 @@ private fun HTML.render(learner: Peer<Learner.Name, String>, plan: Long) = body 
         } else {
             lessons.map { lesson ->
                 li {
-                    form(
-                        action = "/user/only/plan/$plan/lesson",
-                        method = FormMethod.post
-                    ) {
+                    form("/user/only/plan/$plan", method = FormMethod.post) {
                         val prompt = lesson[Lesson.Prompt]
                         val response = lesson[Lesson.Response]
                         val level = lesson[Lesson.Level] ?: 1
@@ -152,7 +144,7 @@ private fun HTML.render(learner: Peer<Learner.Name, String>, plan: Long) = body 
         }
     }
     h4 { +"Add Lesson" }
-    form(action = "/user/only/plan/$plan/lesson", method = FormMethod.post) {
+    form("/user/only/plan/$plan", method = FormMethod.post) {
         ul {
             p {
                 textInput {
