@@ -87,26 +87,26 @@ private fun updatePlan(plan: Long, params: Parameters) {
 
 private fun HTML.render(learner: Peer<Learner.Name, String>) = body {
     h1 { +" User / ${learner[Learner.Name]} " }
-    h2 { +"Studies" }
-    ul { render(tomic.readStudies(learner.ent), Study.Name, "/user/only/study") }
-    h4 { +"Add Study" }
+
     form(action = "/user/only", method = FormMethod.post) {
-        ul {
+        h2 {
+            +" Studies "
             textInput { name = "add_study"; placeholder = "Name" }
             +" "
             submitInput { }
         }
     }
-    h2 { +"Plans" }
-    ul { render(tomic.readPlans(learner.ent), Plan.Name, "/user/only/plan") }
-    h4 { +"Add Plan" }
-    form(action = "/user/only", method = FormMethod.post) {
-        ul {
+    ul { render(tomic.readStudies(learner.ent), Study.Name, "/user/only/study") }
+
+    h2 {
+        form(action = "/user/only", method = FormMethod.post) {
+            +"Plans "
             textInput { name = "add_plan"; placeholder = "Name" }
             +" "
             submitInput { }
         }
     }
+    ul { render(tomic.readPlans(learner.ent), Plan.Name, "/user/only/plan") }
 }
 
 private fun UL.render(minions: Set<Minion<*>>, nameAttr: Attribute2<String>, path: String) {
