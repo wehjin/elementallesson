@@ -1,6 +1,7 @@
 package com.rubyhuntersky.data
 
 import com.rubyhuntersky.data.material.core.DegreeMaterial
+import com.rubyhuntersky.tomedb.Tomic
 import kotlinx.serialization.Serializable
 import java.time.Duration
 import java.time.LocalDateTime
@@ -37,4 +38,10 @@ data class Study(val courses: List<Course>) {
             return Study(courses)
         }
     }
+}
+
+fun Tomic.createStudy(
+    owner: Long,
+    name: String
+) {
 }

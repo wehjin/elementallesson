@@ -1,78 +1,52 @@
 package com.rubyhuntersky.data.v2
 
 import com.rubyhuntersky.tomedb.*
-import com.rubyhuntersky.tomedb.attributes.*
+import com.rubyhuntersky.tomedb.attributes.AttributeGroup
+import com.rubyhuntersky.tomedb.attributes.AttributeInObject
+import com.rubyhuntersky.tomedb.attributes.EntScriber
+import com.rubyhuntersky.tomedb.attributes.StringScriber
 import com.rubyhuntersky.tomedb.basics.Ent
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 
-object Lesson : AttributeGroup {
-    object Prompt : AttributeInObject<String>() {
-        override val description: String = "The lesson prompt."
-        override val scriber: Scriber<String> = StringScriber
+object Plan : AttributeGroup {
+    object Name : AttributeInObject<String>() {
+        override val description = "The name of the plan."
+        override val scriber = StringScriber
+
     }
 
-    object PromptColoring : AttributeInObject<String>() {
-        override val description: String = "Coloring for the lesson prompt."
-        override val scriber: Scriber<String> = StringScriber
-    }
-
-    object Response : AttributeInObject<String>() {
-        override val description: String = "The lesson response."
-        override val scriber: Scriber<String> = StringScriber
-    }
-
-    object ResponseColoring : AttributeInObject<String>() {
-        override val description: String = "Coloring for the lesson response."
-        override val scriber: Scriber<String> = StringScriber
-    }
-
-    object Plan : AttributeInObject<Ent>() {
-        override val description: String = "The plan holding the lesson."
-        override val scriber: Scriber<Ent> = EntScriber
-    }
-
-    object Level : AttributeInObject<Long>() {
-        override val description: String = "The level of the lesson"
-        override val scriber: Scriber<Long> = LongScriber
+    object Author : AttributeInObject<Ent>() {
+        override val description = "The author of the plan."
+        override val scriber = EntScriber
     }
 }
 
-fun Tomic.createPlanLesson(
-    plan: Long,
-    prompt: String,
-    response: String,
-    level: Long,
-    responseColoring: String? = null,
-    promptColoring: String? = null
-): Minion<Lesson.Plan> = reformMinions(Leader(plan, Lesson.Plan)) {
+fun Tomic.createPlan(
+    author: Long,
+    name: String
+): Minion<Plan.Author> = reformMinions(Leader(author, Plan.Author)) {
     val ent = Random.nextLong().absoluteValue
-    reforms = formMinion(ent) {
-        Lesson.Prompt set prompt
-        Lesson.Response set response
-        Lesson.Level set level
-        promptColoring?.also { Lesson.PromptColoring set it }
-        responseColoring?.also { Lesson.ResponseColoring set it }
-    }
+    reforms = formMinion(ent) { Plan.Name set name }
     minion(ent)
 }
 
-fun Tomic.readPlanLessons(
-    plan: Long
-): Set<Minion<Lesson.Plan>> = minions(Leader(plan, Lesson.Plan))
+fun Tomic.readPlans(
+    author: Long
+): Set<Minion<Plan.Author>> = minions(Leader(author, Plan.Author))
 
-fun Tomic.updatePlanLessons(
-    plan: Long,
-    init: MinionMob<Lesson.Plan>.() -> List<Form<*>>
-): Set<Minion<Lesson.Plan>> = reformMinions(Leader(plan, Lesson.Plan)) {
+fun Tomic.updatePlans(
+    author: Long,
+    init: MinionMob<Plan.Author>.() -> List<Form<*>>
+): Set<Minion<Plan.Author>> = reformMinions(Leader(author, Plan.Author)) {
     reforms = this.init()
     minions
 }
 
-fun Tomic.deletePlanLesson(
-    plan: Long,
-    lesson: Long
-): Set<Minion<Lesson.Plan>> = reformMinions(Leader(plan, Lesson.Plan)) {
-    reforms = minion(lesson).unform
+fun Tomic.deletePlan(
+    author: Long,
+    plan: Long
+): Set<Minion<Plan.Author>> = reformMinions(Leader(author, Plan.Author)) {
+    reforms = minion(plan).unform
     minions
 }

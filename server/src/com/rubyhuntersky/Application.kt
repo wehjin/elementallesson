@@ -1,7 +1,9 @@
 package com.rubyhuntersky
 
 import com.rubyhuntersky.data.v2.*
+import com.rubyhuntersky.tomedb.Minion
 import com.rubyhuntersky.tomedb.Peer
+import com.rubyhuntersky.tomedb.attributes.Attribute2
 import com.rubyhuntersky.tomedb.get
 import com.rubyhuntersky.tomedb.tomicOf
 import io.ktor.application.Application
@@ -48,7 +50,10 @@ fun Application.module() {
             val learner = tomic.createLearner()
             get { call.respondHtml { render(learner) } }
             post {
-                updateUser(call.receive(), learner)
+                val params: Parameters = call.receive()
+                params["add_plan"]?.let { tomic.createPlan(learner.ent, it) }
+                params["drop_plan"]?.toLongOrNull()?.let { tomic.deletePlan(learner.ent, it) }
+                params["add_study"]?.let { tomic.createStudy(learner.ent, it) }
                 call.respondRedirect("/user/only")
             }
             route("plan/{plan}") {
@@ -68,11 +73,6 @@ fun Application.module() {
     }
 }
 
-private fun updateUser(params: Parameters, learner: Peer<Learner.Name, String>) {
-    params["add_plan"]?.let { tomic.createPlan(learner.ent, it) }
-    params["drop_plan"]?.toLongOrNull()?.let { tomic.deletePlan(learner.ent, it) }
-}
-
 private fun updatePlan(plan: Long, params: Parameters) {
     params["add_lesson"]?.let {
         val prompt = params["lesson_prompt"]?.trim() ?: "Who am I?"
@@ -88,28 +88,36 @@ private fun updatePlan(plan: Long, params: Parameters) {
 private fun HTML.render(learner: Peer<Learner.Name, String>) = body {
     h1 { +" User / ${learner[Learner.Name]} " }
     h2 { +"Studies" }
-    ul { +"None" }
-    h2 { +"Plans" }
-    val plans = tomic.readPlans(learner.ent)
-    ul {
-        if (plans.isEmpty()) +"None"
-        else plans.map { plan ->
-            li {
-                val planName = plan[Plan.Name]
-                val displayName = if (planName?.trim().isNullOrEmpty()) "Untitled" else planName
-                a(href = "/user/only/plan/${plan.ent}") { +" $displayName " }
-            }
+    ul { render(tomic.readStudies(learner.ent), Study.Name, "/user/only/study") }
+    h4 { +"Add Study" }
+    form(action = "/user/only", method = FormMethod.post) {
+        ul {
+            textInput { name = "add_study"; placeholder = "Name" }
+            +" "
+            submitInput { }
         }
     }
+    h2 { +"Plans" }
+    ul { render(tomic.readPlans(learner.ent), Plan.Name, "/user/only/plan") }
     h4 { +"Add Plan" }
     form(action = "/user/only", method = FormMethod.post) {
         ul {
-            textInput {
-                name = "add_plan"
-                placeholder = "Name"
-            }
+            textInput { name = "add_plan"; placeholder = "Name" }
             +" "
             submitInput { }
+        }
+    }
+}
+
+private fun UL.render(minions: Set<Minion<*>>, nameAttr: Attribute2<String>, path: String) {
+    if (minions.isEmpty()) +"None"
+    else {
+        minions.map { minion ->
+            li {
+                val name = minion[nameAttr]?.trim()
+                val displayName = if (name.isNullOrEmpty()) "Untitled" else name
+                a(href = "$path/${minion.ent}") { +" $displayName " }
+            }
         }
     }
 }
