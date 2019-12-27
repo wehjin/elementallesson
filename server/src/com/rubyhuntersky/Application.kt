@@ -43,23 +43,27 @@ fun Application.module() {
     }
 
     routing {
-        route("/user/only") {
-            get {
-                val learner = tomic.createLearner()
-                call.respondHtml { render(learner) }
+        get("/") { call.respondRedirect("/user/only") }
+        route("/user/{}") {
+            val learner = tomic.createLearner()
+            get { call.respondHtml { render(learner) } }
+            post {
+                val params = call.receive<Parameters>()
+                params["add_plan"]?.let { tomic.createPlan(learner.ent, it) }
+                params["drop_plan"]?.toLongOrNull()?.let { tomic.deletePlan(learner.ent, it) }
+                call.respondRedirect("/user/only")
             }
             route("plan") {
                 route("{plan}") {
                     get {
-                        val learner = tomic.createLearner()
                         call.parameters["plan"]?.toLongOrNull()?.let { plan ->
                             call.respondHtml { render(learner, plan) }
                         } ?: call.respondRedirect("/user/only")
                     }
                     route("lesson") {
                         post {
-                            call.parameters["plan"]?.toLongOrNull()?.let { plan ->
-                                tomic.createLearner()
+                            val maybePlan = call.parameters["plan"]?.toLongOrNull()
+                            maybePlan?.let { plan ->
                                 val params = call.receive<Parameters>()
                                 params["add_lesson"]?.let {
                                     val prompt = params["lesson_prompt"]?.trim() ?: "Who am I?"
@@ -74,17 +78,6 @@ fun Application.module() {
                             } ?: call.respondRedirect("/user/only")
                         }
                     }
-                }
-                post {
-                    val learner = tomic.createLearner()
-                    val params = call.receive<Parameters>()
-                    params["add_plan"]?.let {
-                        tomic.createPlan(learner.ent, it)
-                    }
-                    params["drop_plan"]?.toLongOrNull()?.let {
-                        tomic.deletePlan(learner.ent, it)
-                    }
-                    call.respondRedirect("/user/only")
                 }
             }
         }
@@ -108,7 +101,7 @@ private fun HTML.render(learner: Peer<Learner.Name, String>) = body {
         }
     }
     h4 { +"Add Plan" }
-    form(action = "/user/only/plan", method = FormMethod.post) {
+    form(action = "/user/only", method = FormMethod.post) {
         ul {
             textInput {
                 name = "add_plan"
@@ -122,7 +115,7 @@ private fun HTML.render(learner: Peer<Learner.Name, String>) = body {
 
 private fun HTML.render(learner: Peer<Learner.Name, String>, plan: Long) = body {
     h6 { a(href = "/user/only") { +" ${learner[Learner.Name]}" } }
-    form(action = "/user/only/plan", method = FormMethod.post) {
+    form(action = "/user/only", method = FormMethod.post) {
         h1 {
             +"Plan / ${plan.toString(16)} "
             hiddenInput {
