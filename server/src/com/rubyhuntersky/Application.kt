@@ -9,6 +9,8 @@ import com.rubyhuntersky.tomedb.tomicOf
 import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.application.install
+import io.ktor.application.log
+import io.ktor.features.CallLogging
 import io.ktor.features.DefaultHeaders
 import io.ktor.html.respondHtml
 import io.ktor.http.Parameters
@@ -44,6 +46,8 @@ fun Application.module() {
         exitCodeSupplier = { 0 } // ApplicationCall.() -> Int
     }
 
+    install(CallLogging)
+
     routing {
         get("/") { call.respondRedirect("/user/only") }
         route("/user/{user}") {
@@ -51,9 +55,11 @@ fun Application.module() {
             get { call.respondHtml { render(learner) } }
             post {
                 val params: Parameters = call.receive()
+                log.trace("Parameters: $params")
                 params["add_plan"]?.let { tomic.createPlan(learner.ent, it) }
                 params["drop_plan"]?.toLongOrNull()?.let { tomic.deletePlan(learner.ent, it) }
                 params["add_study"]?.let { tomic.createStudy(learner.ent, it) }
+                params["drop_study"]?.toLongOrNull()?.let { tomic.deleteStudy(learner.ent, it) }
                 call.respondRedirect("/user/only")
             }
             route("plan/{plan}") {
@@ -140,7 +146,7 @@ private fun HTML.renderStudy(learner: Peer<Learner.Name, String>, study: Minion<
             +"${study[Study.Name]} "
             hiddenInput {
                 name = "drop_study"
-                value = study.toString()
+                value = study.ent.toString()
             }
             submitInput { value = "Drop" }
         }

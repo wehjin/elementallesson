@@ -23,9 +23,10 @@ object Study : AttributeGroup {
 
 
 fun Tomic.deleteStudy(
-    study: Minion<Study.Owner>
-) = this.reformMinions(study.leader) {
-    reforms = study.unform
+    owner: Long,
+    study: Long
+) = this.reformMinions(Leader(owner, Study.Owner)) {
+    reforms = minion(study).unform
     minions
 }
 
