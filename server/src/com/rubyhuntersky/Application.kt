@@ -59,13 +59,23 @@ fun Application.module() {
             route("plan/{plan}") {
                 get {
                     call.parameters["plan"]?.toLongOrNull()?.let { plan ->
-                        call.respondHtml { render(learner, plan) }
+                        call.respondHtml { renderPlan(learner, plan) }
                     } ?: call.respondRedirect("/user/only")
                 }
                 post {
                     call.parameters["plan"]?.toLongOrNull()?.let { plan ->
                         updatePlan(plan, call.receive())
                         call.respondRedirect("/user/only/plan/$plan")
+                    } ?: call.respondRedirect("/user/only")
+                }
+            }
+            route("study/{study}") {
+                get {
+                    val maybeStudy = call.parameters["study"]?.toLongOrNull()?.let { ent ->
+                        tomic.readStudies(learner.ent).firstOrNull { it.ent == ent }
+                    }
+                    maybeStudy?.let { study ->
+                        call.respondHtml { renderStudy(learner, study) }
                     } ?: call.respondRedirect("/user/only")
                 }
             }
@@ -122,7 +132,24 @@ private fun UL.render(minions: Set<Minion<*>>, nameAttr: Attribute2<String>, pat
     }
 }
 
-private fun HTML.render(learner: Peer<Learner.Name, String>, plan: Long) = body {
+private fun HTML.renderStudy(learner: Peer<Learner.Name, String>, study: Minion<Study.Owner>) = body {
+    h6 { a(href = "/user/only") { +" ${learner[Learner.Name]}" } }
+    form(action = "/user/only", method = FormMethod.post) {
+        +"[ Study / ${study.ent.toString(16)} ]"
+        h1 {
+            +"${study[Study.Name]} "
+            hiddenInput {
+                name = "drop_study"
+                value = study.toString()
+            }
+            submitInput { value = "Drop" }
+        }
+    }
+    h2 { +"Lessons" }
+    ol { +"None" }
+}
+
+private fun HTML.renderPlan(learner: Peer<Learner.Name, String>, plan: Long) = body {
     h6 { a(href = "/user/only") { +" ${learner[Learner.Name]}" } }
     form(action = "/user/only", method = FormMethod.post) {
         h1 {
