@@ -1,10 +1,10 @@
 package com.rubyhuntersky
 
 import com.rubyhuntersky.data.v2.*
-import com.rubyhuntersky.tomedb.Minion
 import com.rubyhuntersky.tomedb.Peer
 import com.rubyhuntersky.tomedb.attributes.Attribute2
 import com.rubyhuntersky.tomedb.get
+import com.rubyhuntersky.tomedb.minion.Minion
 import kotlinx.html.*
 
 

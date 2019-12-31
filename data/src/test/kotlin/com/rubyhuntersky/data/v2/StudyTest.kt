@@ -2,6 +2,7 @@ package com.rubyhuntersky.data.v2
 
 import com.rubyhuntersky.tomedb.get
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 
 internal class StudyTest {
@@ -21,6 +22,7 @@ internal class StudyTest {
         assertEquals("First Study - Renamed", updated.first()[Study.Name])
 
         val deleted = tomic.deleteStudy(owner, updated.first().ent)
-        assertEquals(0, deleted.size)
+        assertNotNull(deleted)
+        assertEquals(0, tomic.readStudies(owner).size)
     }
 }

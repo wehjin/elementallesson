@@ -1,8 +1,10 @@
 package com.rubyhuntersky.data.v2
 
-import com.rubyhuntersky.tomedb.*
+import com.rubyhuntersky.tomedb.Form
+import com.rubyhuntersky.tomedb.Tomic
 import com.rubyhuntersky.tomedb.attributes.*
 import com.rubyhuntersky.tomedb.basics.Ent
+import com.rubyhuntersky.tomedb.minion.*
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 
@@ -59,7 +61,7 @@ fun Tomic.createPlanLesson(
 
 fun Tomic.readPlanLessons(
     plan: Long
-): Set<Minion<Lesson.Plan>> = minions(Leader(plan, Lesson.Plan))
+): Set<Minion<Lesson.Plan>> = latest.minions(Leader(plan, Lesson.Plan))
 
 fun Tomic.updatePlanLessons(
     plan: Long,
@@ -72,7 +74,8 @@ fun Tomic.updatePlanLessons(
 fun Tomic.deletePlanLesson(
     plan: Long,
     lesson: Long
-): Set<Minion<Lesson.Plan>> = reformMinions(Leader(plan, Lesson.Plan)) {
-    reforms = minion(lesson).unform
-    minions
+): Set<Minion<Lesson.Plan>> {
+    val leader = Leader(plan, Lesson.Plan)
+    unformMinion(leader, lesson)
+    return latest.minions(leader)
 }
