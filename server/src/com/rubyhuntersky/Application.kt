@@ -1,10 +1,6 @@
 package com.rubyhuntersky
 
 import com.rubyhuntersky.data.v2.*
-import com.rubyhuntersky.tomedb.Minion
-import com.rubyhuntersky.tomedb.Peer
-import com.rubyhuntersky.tomedb.attributes.Attribute2
-import com.rubyhuntersky.tomedb.get
 import com.rubyhuntersky.tomedb.tomicOf
 import io.ktor.application.Application
 import io.ktor.application.call
@@ -21,7 +17,6 @@ import io.ktor.routing.post
 import io.ktor.routing.route
 import io.ktor.routing.routing
 import io.ktor.server.engine.ShutDownUrl
-import kotlinx.html.*
 import java.io.File
 
 fun main(args: Array<String>) {
@@ -31,7 +26,7 @@ fun main(args: Array<String>) {
 private val homeDir = System.getenv("HOME")
 private val appDir = File(homeDir, ".studycatastrophe")
 private val tomeDir = File(appDir, "tome")
-private val tomic = tomicOf(tomeDir) { emptyList() }
+val tomic = tomicOf(tomeDir) { emptyList() }
 
 @Suppress("unused") // Referenced in application.conf
 fun Application.module() {
@@ -52,7 +47,7 @@ fun Application.module() {
         get("/") { call.respondRedirect("/user/only") }
         route("/user/{user}") {
             val learner = tomic.createLearner()
-            get { call.respondHtml { render(learner) } }
+            get { call.respondHtml { renderLearner(learner) } }
             post {
                 val params: Parameters = call.receive()
                 log.trace("Parameters: $params")
@@ -101,117 +96,3 @@ private fun updatePlan(plan: Long, params: Parameters) {
     }
 }
 
-private fun HTML.render(learner: Peer<Learner.Name, String>) = body {
-    h1 { +" User / ${learner[Learner.Name]} " }
-
-    form(action = "/user/only", method = FormMethod.post) {
-        h2 {
-            +" Studies "
-            textInput { name = "add_study"; placeholder = "Name" }
-            +" "
-            submitInput { }
-        }
-    }
-    ul { render(tomic.readStudies(learner.ent), Study.Name, "/user/only/study") }
-
-    h2 {
-        form(action = "/user/only", method = FormMethod.post) {
-            +"Plans "
-            textInput { name = "add_plan"; placeholder = "Name" }
-            +" "
-            submitInput { }
-        }
-    }
-    ul { render(tomic.readPlans(learner.ent), Plan.Name, "/user/only/plan") }
-}
-
-private fun UL.render(minions: Set<Minion<*>>, nameAttr: Attribute2<String>, path: String) {
-    if (minions.isEmpty()) +"None"
-    else {
-        minions.map { minion ->
-            li {
-                val name = minion[nameAttr]?.trim()
-                val displayName = if (name.isNullOrEmpty()) "Untitled" else name
-                a(href = "$path/${minion.ent}") { +" $displayName " }
-            }
-        }
-    }
-}
-
-private fun HTML.renderStudy(learner: Peer<Learner.Name, String>, study: Minion<Study.Owner>) = body {
-    h6 { a(href = "/user/only") { +" ${learner[Learner.Name]}" } }
-    form(action = "/user/only", method = FormMethod.post) {
-        +"[ Study / ${study.ent.toString(16)} ]"
-        h1 {
-            +"${study[Study.Name]} "
-            hiddenInput {
-                name = "drop_study"
-                value = study.ent.toString()
-            }
-            submitInput { value = "Drop" }
-        }
-    }
-    h2 { +"Lessons" }
-    ol { +"None" }
-}
-
-private fun HTML.renderPlan(learner: Peer<Learner.Name, String>, plan: Long) = body {
-    h6 { a(href = "/user/only") { +" ${learner[Learner.Name]}" } }
-    form(action = "/user/only", method = FormMethod.post) {
-        h1 {
-            +"Plan / ${plan.toString(16)} "
-            hiddenInput {
-                name = "drop_plan"
-                value = plan.toString()
-            }
-            submitInput { value = "Drop" }
-        }
-    }
-    h2 { +"Lessons" }
-    ol {
-        val lessons = tomic.readPlanLessons(plan)
-        if (lessons.isEmpty()) {
-            +"None"
-        } else {
-            lessons.map { lesson ->
-                li {
-                    form("/user/only/plan/$plan", method = FormMethod.post) {
-                        val prompt = lesson[Lesson.Prompt]
-                        val response = lesson[Lesson.Response]
-                        val level = lesson[Lesson.Level] ?: 1
-                        +" prompt='$prompt' / response='$response' / level=$level "
-                        hiddenInput {
-                            name = "drop_lesson"
-                            value = "${lesson.ent}"
-                        }
-                        submitInput { value = "Drop" }
-                    }
-                }
-            }
-        }
-    }
-    h4 { +"Add Lesson" }
-    form("/user/only/plan/$plan", method = FormMethod.post) {
-        ul {
-            p {
-                textInput {
-                    name = "lesson_prompt"
-                    placeholder = "Prompt"
-                }
-            }
-            p {
-                textInput {
-                    name = "lesson_response"
-                    placeholder = "Response"
-                }
-            }
-            p {
-                textInput {
-                    name = "lesson_level"
-                    placeholder = "Level"
-                }
-            }
-        }
-        p { submitInput { name = "add_lesson" } }
-    }
-}
