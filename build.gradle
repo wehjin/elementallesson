@@ -2,6 +2,7 @@
 
 buildscript {
     ext.kotlin_version = '1.3.61'
+    ext.tomedb_version = '4a66c2cad1'
     repositories {
         google()
         jcenter()

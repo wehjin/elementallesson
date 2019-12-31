@@ -21,6 +21,22 @@ object Study : AttributeGroup {
     }
 }
 
+
+fun Tomic.deleteStudy(
+    study: Minion<Study.Owner>
+) = this.reformMinions(study.leader) {
+    reforms = study.unform
+    minions
+}
+
+fun Tomic.updateStudy(
+    study: Minion<Study.Owner>,
+    collectReforms: EntReformScope.() -> Unit
+) = this.reformMinions(study.leader) {
+    this.reforms = study.reform(collectReforms)
+    minions
+}
+
 fun Tomic.readStudies(owner: Long): Set<Minion<Study.Owner>> = this.minions(Leader(owner, Study.Owner))
 
 fun Tomic.createStudy(
