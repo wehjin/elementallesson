@@ -23,7 +23,21 @@ fun HTML.renderStudy(learner: Peer<Learner.Name, String>, study: Minion<Study.Ow
         }
     }
     h2 { +"Lessons" }
-    ol { +"None" }
+    ol {
+        form {
+            textInput(name = "produce") {
+                placeholder = "Produce"
+                required = true
+            }
+            +" "
+            textInput(name = "prompt") {
+                placeholder = "Prompt"
+                required = true
+            }
+            +" "
+            submitInput { value = "Add Production" }
+        }
+    }
 }
 
 fun HTML.renderPlan(learner: Peer<Learner.Name, String>, plan: Long) = body {
