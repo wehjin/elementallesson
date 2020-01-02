@@ -34,7 +34,8 @@ fun HTML.renderStudy(
                 productionResponse != null -> {
                     li {
                         val prompt = assessment[Assessment.Prompt] ?: "No Prompt"
-                        +"($prompt) → $productionResponse"
+                        val level = assessment[Assessment.Level] ?: 0
+                        +"($prompt) → $productionResponse [ L$level ]"
                     }
                 }
                 else -> null
@@ -53,7 +54,13 @@ fun HTML.renderStudy(
                 placeholder = "Produce"
                 required = true
             }
-            +" "
+            +" [ "
+            textInput(name = "level") {
+                type = InputType.number
+                placeholder = "Level"
+                required = true
+            }
+            +" ] "
             submitInput { value = "Add Production" }
         }
     }

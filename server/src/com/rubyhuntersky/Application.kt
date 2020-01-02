@@ -89,9 +89,10 @@ fun Application.module() {
                         val params: Parameters = call.receive()
                         val productionResponse = params["production_response"]
                         val prompt = params["prompt"]
+                        val level = params["level"]?.toLongOrNull() ?: 0
                         when {
                             productionResponse != null && prompt != null -> {
-                                tomic.createProductionAssessment(study, productionResponse, prompt)
+                                tomic.createProductionAssessment(study, productionResponse, prompt, level)
                             }
                         }
                     }

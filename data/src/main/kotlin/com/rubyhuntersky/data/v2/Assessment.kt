@@ -27,13 +27,19 @@ object Assessment : AttributeGroup {
         override val scriber: Scriber<String> =
             StringScriber
     }
+
+    object Level : AttributeInObject<Long>() {
+        override val description: String = "The level of the assessment"
+        override val scriber: Scriber<Long> = LongScriber
+    }
 }
 
-fun Tomic.createProductionAssessment(study: Minion<Study.Owner>, response: String, prompt: String) {
+fun Tomic.createProductionAssessment(study: Minion<Study.Owner>, response: String, prompt: String, level: Long) {
     reformMinions(Leader(study.ent, Assessment.Study)) {
         reforms = formMinion {
             Assessment.ProductionResponse set response
             Assessment.Prompt set prompt
+            Assessment.Level set level
         }
     }
 }
