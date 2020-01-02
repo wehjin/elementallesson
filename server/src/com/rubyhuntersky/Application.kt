@@ -1,6 +1,7 @@
 package com.rubyhuntersky
 
 import com.rubyhuntersky.data.v2.*
+import com.rubyhuntersky.tomedb.Peer
 import com.rubyhuntersky.tomedb.tomicOf
 import io.ktor.application.Application
 import io.ktor.application.call
@@ -11,6 +12,7 @@ import io.ktor.features.DefaultHeaders
 import io.ktor.html.respondHtml
 import io.ktor.http.Parameters
 import io.ktor.request.receive
+import io.ktor.request.uri
 import io.ktor.response.respondRedirect
 import io.ktor.routing.get
 import io.ktor.routing.post
@@ -47,14 +49,13 @@ fun Application.module() {
         get("/") { call.respondRedirect("/user/only") }
         route("/user/{user}") {
             val learner = tomic.createLearner()
-            get { call.respondHtml { renderLearner(learner) } }
+            get {
+                call.respondHtml { renderLearner(learner, tomic.latest) }
+            }
             post {
                 val params: Parameters = call.receive()
                 log.trace("Parameters: $params")
-                params["add_plan"]?.let { tomic.createPlan(learner.ent, it) }
-                params["drop_plan"]?.toLongOrNull()?.let { tomic.deletePlan(learner.ent, it) }
-                params["add_study"]?.let { tomic.createStudy(learner.ent, it) }
-                params["drop_study"]?.toLongOrNull()?.let { tomic.deleteStudy(learner.ent, it) }
+                updateLearner(learner, params)
                 call.respondRedirect("/user/only")
             }
             route("plan/{plan}") {
@@ -72,16 +73,40 @@ fun Application.module() {
             }
             route("study/{study}") {
                 get {
-                    val maybeStudy = call.parameters["study"]?.toLongOrNull()?.let { ent ->
-                        tomic.readStudies(learner.ent).firstOrNull { it.ent == ent }
+                    val latest = tomic.latest
+                    call.parameters["study"]?.toLongOrNull()
+                        ?.let { ent -> latest.readStudies(learner.ent).firstOrNull { it.ent == ent } }
+                        ?.let { study ->
+                            val assessments = latest.readAssessments(study)
+                            call.respondHtml { renderStudy(call.request.uri, learner, study, assessments) }
+                        } ?: call.respondRedirect("/user/only")
+                }
+                post {
+                    tomic.latest.readStudy(
+                        owner = learner.ent,
+                        study = call.parameters["study"]?.toLongOrNull()
+                    )?.let { study ->
+                        val params: Parameters = call.receive()
+                        val productionResponse = params["production_response"]
+                        val prompt = params["prompt"]
+                        when {
+                            productionResponse != null && prompt != null -> {
+                                tomic.createProductionAssessment(study, productionResponse, prompt)
+                            }
+                        }
                     }
-                    maybeStudy?.let { study ->
-                        call.respondHtml { renderStudy(learner, study) }
-                    } ?: call.respondRedirect("/user/only")
+                    call.respondRedirect(call.request.uri)
                 }
             }
         }
     }
+}
+
+private fun updateLearner(learner: Peer<Learner.Name, String>, params: Parameters) {
+    params["add_plan"]?.let { tomic.createPlan(learner.ent, it) }
+    params["drop_plan"]?.toLongOrNull()?.let { tomic.deletePlan(learner.ent, it) }
+    params["add_study"]?.let { tomic.createStudy(learner.ent, it) }
+    params["drop_study"]?.toLongOrNull()?.let { tomic.deleteStudy(learner.ent, it) }
 }
 
 private fun updatePlan(plan: Long, params: Parameters) {

@@ -6,6 +6,7 @@ import com.rubyhuntersky.tomedb.attributes.AttributeInObject
 import com.rubyhuntersky.tomedb.attributes.EntScriber
 import com.rubyhuntersky.tomedb.attributes.StringScriber
 import com.rubyhuntersky.tomedb.basics.Ent
+import com.rubyhuntersky.tomedb.database.Database
 import com.rubyhuntersky.tomedb.minion.*
 
 object Study : AttributeGroup {
@@ -20,8 +21,19 @@ object Study : AttributeGroup {
     }
 }
 
-fun Tomic.deleteStudy(owner: Long, study: Long): Minion<Study.Owner>? {
-    return unformMinion(Leader(owner, Study.Owner), study)
+fun Tomic.createStudy(owner: Long, name: String): Minion<Study.Owner> {
+    val leader = Leader(owner, Study.Owner)
+    return formMinion(leader) { Study.Name set name }
+}
+
+fun Database.readStudies(owner: Long): Set<Minion<Study.Owner>> {
+    return minions(Leader(owner, Study.Owner))
+}
+
+fun Database.readStudy(owner: Long, study: Long?): Minion<Study.Owner>? {
+    return study?.let {
+        minionOrNull(Leader(owner, Study.Owner), study)
+    }
 }
 
 fun Tomic.updateStudy(
@@ -32,11 +44,6 @@ fun Tomic.updateStudy(
     return latest.minions(study.leader)
 }
 
-fun Tomic.readStudies(owner: Long): Set<Minion<Study.Owner>> {
-    return this.latest.minions(Leader(owner, Study.Owner))
-}
-
-fun Tomic.createStudy(owner: Long, name: String): Minion<Study.Owner> {
-    val leader = Leader(owner, Study.Owner)
-    return formMinion(leader) { Study.Name set name }
+fun Tomic.deleteStudy(owner: Long, study: Long): Minion<Study.Owner>? {
+    return unformMinion(Leader(owner, Study.Owner), study)
 }

@@ -3,18 +3,22 @@ package com.rubyhuntersky
 import com.rubyhuntersky.data.v2.*
 import com.rubyhuntersky.tomedb.Peer
 import com.rubyhuntersky.tomedb.attributes.Attribute2
+import com.rubyhuntersky.tomedb.database.Database
 import com.rubyhuntersky.tomedb.get
 import com.rubyhuntersky.tomedb.minion.Minion
 import kotlinx.html.*
 
-
-fun HTML.renderStudy(learner: Peer<Learner.Name, String>, study: Minion<Study.Owner>) = body {
-    val studyName = study[Study.Name].nullIfBlank() ?: "Untitled"
+fun HTML.renderStudy(
+    addAssessmentAction: String,
+    learner: Peer<Learner.Name, String>,
+    study: Minion<Study.Owner>,
+    assessments: Set<Minion<Assessment.Study>>
+) = body {
     h6 { a(href = "/user/only") { +" ${learner[Learner.Name]}" } }
     form(action = "/user/only", method = FormMethod.post) {
         +"[ Study / ${study.ent.toString(16)} ]"
         h1 {
-            +"$studyName "
+            +"${study[Study.Name].nullIfBlank() ?: "Untitled"} "
             hiddenInput {
                 name = "drop_study"
                 value = study.ent.toString()
@@ -22,16 +26,31 @@ fun HTML.renderStudy(learner: Peer<Learner.Name, String>, study: Minion<Study.Ow
             submitInput { value = "Drop" }
         }
     }
-    h2 { +"Lessons" }
+    h2 { +"Assessments" }
     ol {
-        form {
-            textInput(name = "produce") {
-                placeholder = "Produce"
-                required = true
+        assessments.mapNotNull { assessment ->
+            val productionResponse = assessment[Assessment.ProductionResponse]
+            when {
+                productionResponse != null -> {
+                    li {
+                        val prompt = assessment[Assessment.Prompt] ?: "No Prompt"
+                        +"($prompt) → $productionResponse"
+                    }
+                }
+                else -> null
             }
-            +" "
+        }
+    }
+    form(action = addAssessmentAction, method = FormMethod.post) {
+        h3 { +"Add Assessment" }
+        ul {
             textInput(name = "prompt") {
                 placeholder = "Prompt"
+                required = true
+            }
+            +" → "
+            textInput(name = "production_response") {
+                placeholder = "Produce"
                 required = true
             }
             +" "
@@ -101,7 +120,10 @@ fun HTML.renderPlan(learner: Peer<Learner.Name, String>, plan: Long) = body {
     }
 }
 
-fun HTML.renderLearner(learner: Peer<Learner.Name, String>) = body {
+fun HTML.renderLearner(
+    learner: Peer<Learner.Name, String>,
+    database: Database
+) = body {
     h1 { +" User / ${learner[Learner.Name]} " }
 
     form(action = "/user/only", method = FormMethod.post) {
@@ -112,7 +134,20 @@ fun HTML.renderLearner(learner: Peer<Learner.Name, String>) = body {
             submitInput { }
         }
     }
-    ul { render(tomic.readStudies(learner.ent), Study.Name, "/user/only/study") }
+    ul {
+        val studies = database.readStudies(learner.ent).sortedBy { it.displayName }
+        if (studies.isEmpty()) +"None"
+        else {
+            studies.map<Minion<*>, Unit> { study ->
+                li {
+                    +study.displayName
+                    +" [ "
+                    a(href = "${"/user/only/study"}/${study.ent}") { +"Edit" }
+                    +" ] "
+                }
+            }
+        }
+    }
 
     h2 {
         form(action = "/user/only", method = FormMethod.post) {
@@ -122,8 +157,17 @@ fun HTML.renderLearner(learner: Peer<Learner.Name, String>) = body {
             submitInput { }
         }
     }
-    ul { render(tomic.readPlans(learner.ent), Plan.Name, "/user/only/plan") }
+    ul {
+        render(
+            minions = tomic.readPlans(learner.ent),
+            nameAttr = Plan.Name,
+            path = "/user/only/plan"
+        )
+    }
 }
+
+private val Minion<*>.displayName: String
+    get() = this[Study.Name].nullIfBlank() ?: "Untitled"
 
 private fun UL.render(minions: Set<Minion<*>>, nameAttr: Attribute2<String>, path: String) {
     if (minions.isEmpty()) +"None"
