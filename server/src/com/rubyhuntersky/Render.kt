@@ -57,6 +57,7 @@ fun HTML.renderStudy(
             +" [ "
             textInput(name = "level") {
                 type = InputType.number
+                min = "0"
                 placeholder = "Level"
                 required = true
             }
