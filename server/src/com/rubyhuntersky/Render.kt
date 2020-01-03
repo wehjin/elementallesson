@@ -35,7 +35,7 @@ fun HTML.renderStudy(
                     li {
                         val prompt = assessment[Assessment.Prompt] ?: "No Prompt"
                         val level = assessment[Assessment.Level] ?: 0
-                        +"($prompt) → $productionResponse [ L$level ]"
+                        +"[L$level] ($prompt) → $productionResponse"
                     }
                 }
                 else -> null
@@ -45,26 +45,54 @@ fun HTML.renderStudy(
     form(action = addAssessmentAction, method = FormMethod.post) {
         h3 { +"Add Assessment" }
         ul {
-            textInput(name = "prompt") {
-                placeholder = "Prompt"
-                required = true
-            }
-            +" → "
-            textInput(name = "production_response") {
-                placeholder = "Produce"
-                required = true
-            }
-            +" [ "
-            textInput(name = "level") {
-                type = InputType.number
-                min = "0"
-                placeholder = "Level"
-                required = true
-            }
-            +" ] "
-            submitInput { value = "Add Production" }
+            li { renderAddProduction() }
+            li { renderAddListen() }
         }
     }
+}
+
+private fun LI.renderAddListen() {
+    +" ["
+    textInput(name = "listen_level") {
+        type = InputType.number
+        min = "0"
+        placeholder = "Level"
+        required = true
+    }
+    +"] "
+    textInput(name = "audio_prompt") {
+        placeholder = "Audio Prompt"
+        required = true
+    }
+    +" → "
+    textInput(name = "listen_response") {
+        placeholder = "Meaning"
+        required = true
+    }
+    +" "
+    submitInput { value = "Add Listen" }
+}
+
+private fun LI.renderAddProduction() {
+    +" ["
+    textInput(name = "level") {
+        type = InputType.number
+        min = "0"
+        placeholder = "Level"
+        required = true
+    }
+    +"] "
+    textInput(name = "prompt") {
+        placeholder = "Prompt"
+        required = true
+    }
+    +" → "
+    textInput(name = "production_response") {
+        placeholder = "Produce"
+        required = true
+    }
+    +" "
+    submitInput { value = "Add Production" }
 }
 
 fun HTML.renderPlan(learner: Peer<Learner.Name, String>, plan: Long) = body {
