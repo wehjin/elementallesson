@@ -30,12 +30,25 @@ fun HTML.renderStudy(
     ol {
         assessments.mapNotNull { assessment ->
             val productionResponse = assessment[Assessment.ProductionResponse]
+            val listenResponse = assessment[Assessment.ListenResponse]
             when {
                 productionResponse != null -> {
                     li {
                         val prompt = assessment[Assessment.Prompt] ?: "No Prompt"
                         val level = assessment[Assessment.Level] ?: 0
                         +"[ L$level ] ($prompt) → $productionResponse"
+                    }
+                }
+                listenResponse != null -> {
+                    li {
+                        val prompt = assessment[Assessment.ListenPrompt] ?: "何？"
+                        val level = assessment[Assessment.Level] ?: 0
+                        +"[ L$level ] ("
+                        a {
+                            href = "http://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&q=${prompt}&tl=ja"
+                            +prompt
+                        }
+                        +") → $listenResponse"
                     }
                 }
                 else -> null

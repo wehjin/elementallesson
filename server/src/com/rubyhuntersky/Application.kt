@@ -88,11 +88,16 @@ fun Application.module() {
                     )?.let { study ->
                         val params: Parameters = call.receive()
                         val productionResponse = params["production_response"]
-                        val prompt = params["prompt"]
+                        val listenResponse = params["listen_response"]
                         val level = params["level"]?.toLongOrNull() ?: 0
                         when {
-                            productionResponse != null && prompt != null -> {
+                            productionResponse != null -> {
+                                val prompt = params["prompt"] ?: "UNKNOWN"
                                 tomic.createProductionAssessment(study, productionResponse, prompt, level)
+                            }
+                            listenResponse != null -> {
+                                val listenPrompt = params["listen_prompt"] ?: "うわー"
+                                tomic.createListenAssessment(study, listenResponse, listenPrompt, level)
                             }
                         }
                     }

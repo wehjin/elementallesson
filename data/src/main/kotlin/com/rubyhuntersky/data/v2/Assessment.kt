@@ -16,6 +16,16 @@ object Assessment : AttributeGroup {
             EntScriber
     }
 
+    object ListenResponse : AttributeInObject<String>() {
+        override val description: String = "The learner should produce this response to pass a listen assessment."
+        override val scriber: Scriber<String> = StringScriber
+    }
+
+    object ListenPrompt : AttributeInObject<String>() {
+        override val description: String = "Describes the audio clip to play when starting a listen assessment."
+        override val scriber: Scriber<String> = StringScriber
+    }
+
     object ProductionResponse : AttributeInObject<String>() {
         override val description: String = "The learner must produce this response to pass an assessment."
         override val scriber: Scriber<String> =
@@ -31,6 +41,16 @@ object Assessment : AttributeGroup {
     object Level : AttributeInObject<Long>() {
         override val description: String = "The level of the assessment"
         override val scriber: Scriber<Long> = LongScriber
+    }
+}
+
+fun Tomic.createListenAssessment(study: Minion<Study.Owner>, response: String, prompt: String, level: Long) {
+    reformMinions(Leader(study.ent, Assessment.Study)) {
+        reforms = formMinion {
+            Assessment.ListenResponse set response
+            Assessment.ListenPrompt set prompt
+            Assessment.Level set level
+        }
     }
 }
 
