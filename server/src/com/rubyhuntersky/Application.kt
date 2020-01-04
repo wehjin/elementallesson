@@ -89,15 +89,22 @@ fun Application.module() {
                         val params: Parameters = call.receive()
                         val productionResponse = params["production_response"]
                         val listenResponse = params["listen_response"]
-                        val level = params["level"]?.toLongOrNull() ?: 0
+                        val clozeResponse = params["cloze_fill"]
                         when {
                             productionResponse != null -> {
                                 val prompt = params["prompt"] ?: "UNKNOWN"
+                                val level = params["level"]?.toLongOrNull() ?: 0
                                 tomic.createProductionAssessment(study, productionResponse, prompt, level)
                             }
                             listenResponse != null -> {
-                                val listenPrompt = params["listen_prompt"] ?: "うわー"
-                                tomic.createListenAssessment(study, listenResponse, listenPrompt, level)
+                                val prompt = params["listen_prompt"] ?: "うわー"
+                                val level = params["listen_level"]?.toLongOrNull() ?: 0
+                                tomic.createListenAssessment(study, listenResponse, prompt, level)
+                            }
+                            clozeResponse != null -> {
+                                val prompt = params["cloze_template"] ?: "{..}"
+                                val level = params["cloze_level"]?.toLongOrNull() ?: 0
+                                tomic.createClozeAssessment(study, clozeResponse, prompt, level)
                             }
                         }
                     }

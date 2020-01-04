@@ -7,6 +7,7 @@ import com.rubyhuntersky.tomedb.database.Database
 import com.rubyhuntersky.tomedb.get
 import com.rubyhuntersky.tomedb.minion.Minion
 import kotlinx.html.*
+import java.util.*
 
 fun HTML.renderStudy(
     addAssessmentAction: String,
@@ -28,37 +29,75 @@ fun HTML.renderStudy(
     }
     h2 { +"Assessments" }
     ol {
-        assessments.mapNotNull { assessment ->
-            val productionResponse = assessment[Assessment.ProductionResponse]
-            val listenResponse = assessment[Assessment.ListenResponse]
-            when {
-                productionResponse != null -> {
-                    li {
-                        val prompt = assessment[Assessment.Prompt] ?: "No Prompt"
-                        val level = assessment[Assessment.Level] ?: 0
-                        +"[ L$level ] ($prompt) → $productionResponse"
-                    }
-                }
-                listenResponse != null -> {
-                    li {
-                        val prompt = assessment[Assessment.ListenPrompt] ?: "何？"
-                        val level = assessment[Assessment.Level] ?: 0
-                        +"[ L$level ] ("
-                        a {
-                            href = "http://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&q=${prompt}&tl=ja"
-                            +prompt
-                        }
-                        +") → $listenResponse"
-                    }
-                }
-                else -> null
-            }
-        }
+        val past = Date(1000)
+        assessments.sortedBy { it[Assessment.Creation] ?: past }.mapNotNull { renderAssessment(it) }
     }
     h3 { +"Add Assessment" }
     ul {
         li { renderAddProduction(addAssessmentAction) }
         li { renderAddListen(addAssessmentAction) }
+        li { renderAddCloze(addAssessmentAction) }
+    }
+}
+
+private fun OL.renderAssessment(assessment: Minion<Assessment.Study>): Unit? {
+    val level = assessment[Assessment.Level] ?: 0
+    val productionResponse = assessment[Assessment.ProductionResponse]
+    val listenResponse = assessment[Assessment.ListenResponse]
+    val clozeFill = assessment[Assessment.ClozeFill]
+    return when {
+        productionResponse != null -> {
+            li {
+                val prompt = assessment[Assessment.Prompt] ?: "No Prompt"
+                +"[ L$level ] $prompt → $productionResponse"
+            }
+        }
+        listenResponse != null -> {
+            li {
+                val prompt = assessment[Assessment.ListenPrompt] ?: "何？"
+                +"[ L$level ] "
+                a {
+                    href = "http://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&q=${prompt}&tl=ja"
+                    +prompt
+                }
+                +" → $listenResponse"
+            }
+        }
+        clozeFill != null -> {
+            li {
+                val prompt = assessment[Assessment.ClozeTemplate] ?: "{..}".replace(pseudoEllipsis, "…")
+                +"[ L$level ] $prompt → $clozeFill"
+            }
+        }
+        else -> null
+    }
+}
+
+val pseudoEllipsis = Regex("[^.][.][.][^.]")
+
+
+private fun LI.renderAddCloze(addAssessmentAction: String) {
+    form(action = addAssessmentAction, method = FormMethod.post) {
+
+        +" ["
+        textInput(name = "cloze_level") {
+            type = InputType.number
+            min = "0"
+            placeholder = "Level"
+            required = true
+        }
+        +"] "
+        textInput(name = "cloze_template") {
+            placeholder = "Cloze"
+            required = true
+        }
+        +" → "
+        textInput(name = "cloze_fill") {
+            placeholder = "Fill"
+            required = true
+        }
+        +" "
+        submitInput { value = "Add Cloze" }
     }
 }
 
@@ -74,7 +113,7 @@ private fun LI.renderAddListen(addAssessmentAction: String) {
         }
         +"] "
         textInput(name = "listen_prompt") {
-            placeholder = "Audio Prompt"
+            placeholder = "Listen"
             required = true
         }
         +" → "
