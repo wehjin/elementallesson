@@ -9,14 +9,16 @@ import com.rubyhuntersky.tomedb.minion.Minion
 import kotlinx.html.*
 import java.util.*
 
+const val userUrl = "/user/only"
+
 fun HTML.renderStudy(
     addAssessmentAction: String,
     learner: Peer<Learner.Name, String>,
     study: Minion<Study.Owner>,
     assessments: Set<Minion<Assessment.Study>>
 ) = body {
-    h6 { a(href = "/user/only") { +" ${learner[Learner.Name]}" } }
-    form(action = "/user/only", method = FormMethod.post) {
+    h6 { a(userUrl) { +" ${learner[Learner.Name]}" } }
+    form(userUrl, method = FormMethod.post) {
         +"[ Study / ${study.ent.toString(16)} ]"
         h1 {
             +"${study[Study.Name].nullIfBlank() ?: "Untitled"} "
@@ -151,8 +153,8 @@ private fun LI.renderAddProduction(addAssessmentAction: String) {
 }
 
 fun HTML.renderPlan(learner: Peer<Learner.Name, String>, plan: Long) = body {
-    h6 { a(href = "/user/only") { +" ${learner[Learner.Name]}" } }
-    form(action = "/user/only", method = FormMethod.post) {
+    h6 { a(userUrl) { +" ${learner[Learner.Name]}" } }
+    form(userUrl, method = FormMethod.post) {
         h1 {
             +"Plan / ${plan.toString(16)} "
             hiddenInput {
@@ -170,7 +172,7 @@ fun HTML.renderPlan(learner: Peer<Learner.Name, String>, plan: Long) = body {
         } else {
             lessons.map { lesson ->
                 li {
-                    form("/user/only/plan/$plan", method = FormMethod.post) {
+                    form("$userUrl/plan/$plan", method = FormMethod.post) {
                         val prompt = lesson[Lesson.Prompt]
                         val response = lesson[Lesson.Response]
                         val level = lesson[Lesson.Level] ?: 1
@@ -186,7 +188,7 @@ fun HTML.renderPlan(learner: Peer<Learner.Name, String>, plan: Long) = body {
         }
     }
     h4 { +"Add Lesson" }
-    form("/user/only/plan/$plan", method = FormMethod.post) {
+    form("$userUrl/plan/$plan", method = FormMethod.post) {
         ul {
             p {
                 textInput {
@@ -217,7 +219,7 @@ fun HTML.renderLearner(
 ) = body {
     h1 { +" User / ${learner[Learner.Name]} " }
 
-    form(action = "/user/only", method = FormMethod.post) {
+    form(userUrl, method = FormMethod.post) {
         h2 {
             +" Studies "
             textInput { name = "add_study"; placeholder = "Name" }
@@ -231,9 +233,9 @@ fun HTML.renderLearner(
         else {
             studies.map<Minion<*>, Unit> { study ->
                 li {
-                    +study.displayName
+                    a("$userUrl/assess/${study.ent}") { +study.displayName }
                     +" [ "
-                    a(href = "${"/user/only/study"}/${study.ent}") { +"Edit" }
+                    a("$userUrl/study/${study.ent}") { +"Edit" }
                     +" ] "
                 }
             }
@@ -241,7 +243,7 @@ fun HTML.renderLearner(
     }
 
     h2 {
-        form(action = "/user/only", method = FormMethod.post) {
+        form(action = userUrl, method = FormMethod.post) {
             +"Plans "
             textInput { name = "add_plan"; placeholder = "Name" }
             +" "
@@ -252,7 +254,7 @@ fun HTML.renderLearner(
         render(
             minions = tomic.readPlans(learner.ent),
             nameAttr = Plan.Name,
-            path = "/user/only/plan"
+            path = "$userUrl/plan"
         )
     }
 }
