@@ -29,18 +29,18 @@ fun HTML.renderSession(
     }
     body {
         h6 { a(userUrl) { +" ${learner[Learner.Name]}" } }
-        h1 { +"${study[Study.Name].nullIfBlank() ?: "Untitled"} Session" }
+        h3 { +"${study[Study.Name].nullIfBlank() ?: "Untitled"} Session" }
         +"${assessmentList.size} remaining"
 
         val assessment = assessmentList.first()
         val producePrompt = assessment[Assessment.Prompt]
         if (producePrompt != null) {
-            h3 { +producePrompt }
+            h1 { +producePrompt }
             renderAnswerBlock(reportUrl) { +"${assessment[Assessment.ProductionResponse]}" }
         }
         val listenPrompt = assessment[Assessment.ListenPrompt]
         if (listenPrompt != null) {
-            h3 {
+            h1 {
                 audio {
                     autoPlay = true
                     controls = true
@@ -52,20 +52,21 @@ fun HTML.renderSession(
         }
         val clozePrompt = assessment[Assessment.ClozeTemplate]
         if (clozePrompt != null) {
-            h3 { +clozePrompt }
+            h1 { +clozePrompt }
             renderAnswerBlock(reportUrl) { +"${assessment[Assessment.ClozeFill]}" }
         }
     }
 }
 
-private fun BODY.renderAnswerBlock(reportUrl: String, answerBlock: P.() -> Unit) {
+private fun BODY.renderAnswerBlock(reportUrl: String, answerBlock: H1.() -> Unit) {
     button {
         id = "answerButton"
         onClick = "revealAnswer()"
         +"Check Answer"
     }
-    p("obscured") {
+    h1("obscured") {
         id = "answerP"
+        +"→\u2002"
         run(answerBlock)
     }
     form(reportUrl, method = FormMethod.post) {
