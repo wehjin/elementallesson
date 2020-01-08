@@ -2,6 +2,9 @@ package com.rubyhuntersky
 
 import com.rubyhuntersky.data.v2.*
 import com.rubyhuntersky.tomedb.Peer
+import com.rubyhuntersky.tomedb.get
+import com.rubyhuntersky.tomedb.minion.Leader
+import com.rubyhuntersky.tomedb.minion.visitMinions
 import com.rubyhuntersky.tomedb.tomicOf
 import io.ktor.application.Application
 import io.ktor.application.call
@@ -11,6 +14,8 @@ import io.ktor.features.CallLogging
 import io.ktor.features.DefaultHeaders
 import io.ktor.html.respondHtml
 import io.ktor.http.Parameters
+import io.ktor.http.content.resources
+import io.ktor.http.content.static
 import io.ktor.request.receive
 import io.ktor.request.uri
 import io.ktor.response.respondRedirect
@@ -46,6 +51,10 @@ fun Application.module() {
     install(CallLogging)
 
     routing {
+        static("/static") {
+            resources("static")
+        }
+
         get("/") { call.respondRedirect("/user/only") }
         route("/user/{user}") {
             val learner = tomic.createLearner()
@@ -58,28 +67,32 @@ fun Application.module() {
                 updateLearner(learner, params)
                 call.respondRedirect("/user/only")
             }
-            route("plan/{plan}") {
+            route("session/{study}") {
                 get {
-                    call.parameters["plan"]?.toLongOrNull()?.let { plan ->
-                        call.respondHtml { renderPlan(learner, plan) }
-                    } ?: call.respondRedirect("/user/only")
+                    val studyParam = call.parameters["study"]
+                    val db = tomic.latest
+                    val study = db.readStudy(learner.ent, studyParam?.toLongOrNull())
+                        ?: error("Invalid study parameter $studyParam")
+                    val assessmentList = db.visitMinions(Leader(study.ent, Assessment.Study)) {
+                        val untested = minionList.filter { 0L == it[Assessment.PassCount] ?: 0L }
+                        untested.shuffled().take(5)
+                    }
+                    call.respondHtml {
+                        renderSession(call.request.uri, learner, study, assessmentList)
+                    }
                 }
                 post {
-                    call.parameters["plan"]?.toLongOrNull()?.let { plan ->
-                        updatePlan(plan, call.receive())
-                        call.respondRedirect("/user/only/plan/$plan")
-                    } ?: call.respondRedirect("/user/only")
+                    call.respondRedirect(call.request.uri)
                 }
             }
             route("study/{study}") {
                 get {
-                    val latest = tomic.latest
-                    call.parameters["study"]?.toLongOrNull()
-                        ?.let { ent -> latest.readStudies(learner.ent).firstOrNull { it.ent == ent } }
-                        ?.let { study ->
-                            val assessments = latest.readAssessments(study)
-                            call.respondHtml { renderStudy(call.request.uri, learner, study, assessments) }
-                        } ?: call.respondRedirect("/user/only")
+                    val studyParam = call.parameters["study"]
+                    val db = tomic.latest
+                    val study = db.readStudy(learner.ent, studyParam?.toLongOrNull())
+                        ?: error("Invalid study parameter $studyParam")
+                    val assessments = db.readAssessments(study)
+                    call.respondHtml { renderStudy(call.request.uri, learner, study, assessments) }
                 }
                 post {
                     tomic.latest.readStudy(
@@ -109,6 +122,19 @@ fun Application.module() {
                         }
                     }
                     call.respondRedirect(call.request.uri)
+                }
+            }
+            route("plan/{plan}") {
+                get {
+                    call.parameters["plan"]?.toLongOrNull()?.let { plan ->
+                        call.respondHtml { renderPlan(learner, plan) }
+                    } ?: call.respondRedirect("/user/only")
+                }
+                post {
+                    call.parameters["plan"]?.toLongOrNull()?.let { plan ->
+                        updatePlan(plan, call.receive())
+                        call.respondRedirect("/user/only/plan/$plan")
+                    } ?: call.respondRedirect("/user/only")
                 }
             }
         }

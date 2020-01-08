@@ -4,13 +4,22 @@ import com.rubyhuntersky.tomedb.Tomic
 import com.rubyhuntersky.tomedb.attributes.*
 import com.rubyhuntersky.tomedb.basics.Ent
 import com.rubyhuntersky.tomedb.database.Database
-import com.rubyhuntersky.tomedb.minion.Leader
-import com.rubyhuntersky.tomedb.minion.Minion
-import com.rubyhuntersky.tomedb.minion.minions
-import com.rubyhuntersky.tomedb.minion.reformMinions
+import com.rubyhuntersky.tomedb.get
+import com.rubyhuntersky.tomedb.minion.*
 import java.util.*
 
 object Assessment : AttributeGroup {
+
+    object PassCount : AttributeInObject<Long>() {
+        override val description: String = "The number of times the assessment was passed"
+        override val scriber: Scriber<Long> = LongScriber
+    }
+
+    object RunTime : AttributeInObject<Date>() {
+        override val description: String = "A recent time at which the assessment was run"
+        override val scriber: Scriber<Date> = DateScriber
+    }
+
     object Study : AttributeInObject<Ent>() {
         override val description: String = "Each assessment belongs to a study."
         override val scriber: Scriber<Ent> = EntScriber
@@ -56,6 +65,13 @@ object Assessment : AttributeGroup {
     object Level : AttributeInObject<Long>() {
         override val description: String = "The level of the assessment"
         override val scriber: Scriber<Long> = LongScriber
+    }
+}
+
+fun Database.createAudit(study: Minion<Study.Owner>): List<Minion<Assessment.Study>> {
+    return visitMinions(Leader(study.ent, Assessment.Study)) {
+        val untested = minionList.filter { 0L == it[Assessment.PassCount] ?: 0L }
+        untested.shuffled().take(5)
     }
 }
 

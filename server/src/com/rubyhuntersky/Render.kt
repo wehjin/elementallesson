@@ -11,6 +11,83 @@ import java.util.*
 
 const val userUrl = "/user/only"
 
+fun HTML.renderSession(
+    reportUrl: String,
+    learner: Peer<Learner.Name, String>,
+    study: Minion<Study.Owner>,
+    assessmentList: List<Minion<Assessment.Study>>
+) {
+    head {
+        link {
+            rel = "stylesheet"
+            href = "/static/styles.css"
+        }
+        script {
+            type = "text/javascript"
+            src = "/static/session.js"
+        }
+    }
+    body {
+        h6 { a(userUrl) { +" ${learner[Learner.Name]}" } }
+        h1 { +"${study[Study.Name].nullIfBlank() ?: "Untitled"} Session" }
+        +"${assessmentList.size} remaining"
+
+        val assessment = assessmentList.first()
+        val producePrompt = assessment[Assessment.Prompt]
+        if (producePrompt != null) {
+            h3 { +producePrompt }
+            renderAnswerBlock(reportUrl) { +"${assessment[Assessment.ProductionResponse]}" }
+        }
+        val listenPrompt = assessment[Assessment.ListenPrompt]
+        if (listenPrompt != null) {
+            h3 {
+                audio {
+                    autoPlay = true
+                    controls = true
+                    autoBuffer = true
+                    src = listenUrl(listenPrompt)
+                }
+            }
+            renderAnswerBlock(reportUrl) { +"${assessment[Assessment.ListenResponse]}" }
+        }
+        val clozePrompt = assessment[Assessment.ClozeTemplate]
+        if (clozePrompt != null) {
+            h3 { +clozePrompt }
+            renderAnswerBlock(reportUrl) { +"${assessment[Assessment.ClozeFill]}" }
+        }
+    }
+}
+
+private fun BODY.renderAnswerBlock(reportUrl: String, answerBlock: P.() -> Unit) {
+    button {
+        id = "answerButton"
+        onClick = "revealAnswer()"
+        +"Check Answer"
+    }
+    p("obscured") {
+        id = "answerP"
+        run(answerBlock)
+    }
+    form(reportUrl, method = FormMethod.post) {
+        p("obscured") {
+            id = "reportP"
+            select {
+                name = "report_select"
+                option {
+                    value = "fail_assessment"
+                    +"Failed it!\u2003Repeat test."
+                }
+                option {
+                    value = "pass_assessment"
+                    +"Nailed it.\u2003Rest then retest."
+                }
+            }
+            +"\u2003"
+            submitInput { value = "Next" }
+        }
+    }
+}
+
 fun HTML.renderStudy(
     addAssessmentAction: String,
     learner: Peer<Learner.Name, String>,
@@ -59,7 +136,7 @@ private fun OL.renderAssessment(assessment: Minion<Assessment.Study>): Unit? {
                 val prompt = assessment[Assessment.ListenPrompt] ?: "何？"
                 +"[ L$level ] "
                 a {
-                    href = "http://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&q=${prompt}&tl=ja"
+                    href = listenUrl(prompt)
                     +prompt
                 }
                 +" → $listenResponse"
@@ -74,6 +151,9 @@ private fun OL.renderAssessment(assessment: Minion<Assessment.Study>): Unit? {
         else -> null
     }
 }
+
+private fun listenUrl(prompt: String) =
+    "http://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&q=${prompt}&tl=ja"
 
 val pseudoEllipsis = Regex("[^.][.][.][^.]")
 
@@ -233,7 +313,7 @@ fun HTML.renderLearner(
         else {
             studies.map<Minion<*>, Unit> { study ->
                 li {
-                    a("$userUrl/assess/${study.ent}") { +study.displayName }
+                    a("$userUrl/session/${study.ent}") { +study.displayName }
                     +" [ "
                     a("$userUrl/study/${study.ent}") { +"Edit" }
                     +" ] "
