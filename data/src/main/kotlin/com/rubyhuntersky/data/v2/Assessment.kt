@@ -97,7 +97,7 @@ fun Tomic.createListenAssessment(study: Minion<Study.Owner>, response: String, p
     }
 }
 
-fun Tomic.createProductionAssessment(study: Minion<Study.Owner>, response: String, prompt: String, level: Long) {
+fun Tomic.createProduceAssessment(study: Minion<Study.Owner>, response: String, prompt: String, level: Long) {
     reformMinions(Leader(study.ent, Assessment.Study)) {
         reforms = formMinion {
             Assessment.ProductionResponse set response

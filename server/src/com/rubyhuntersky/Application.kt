@@ -1,9 +1,14 @@
 package com.rubyhuntersky
 
 import com.rubyhuntersky.data.v2.*
+import com.rubyhuntersky.editstudy.editStudyAction
+import com.rubyhuntersky.editstudy.renderStudy
+import com.rubyhuntersky.editstudy.updateEditStudyModel
 import com.rubyhuntersky.tomedb.Peer
+import com.rubyhuntersky.tomedb.database.Database
 import com.rubyhuntersky.tomedb.get
 import com.rubyhuntersky.tomedb.minion.Leader
+import com.rubyhuntersky.tomedb.minion.Minion
 import com.rubyhuntersky.tomedb.minion.visitMinions
 import com.rubyhuntersky.tomedb.tomicOf
 import io.ktor.application.Application
@@ -85,7 +90,7 @@ fun Application.module() {
                 get {
                     val studyParam = call.parameters["study"]
                     val db = tomic.latest
-                    val study = db.readStudy(learner.ent, studyParam?.toLongOrNull())
+                    val study = db.readStudy(studyParam?.toLongOrNull(), learner.ent)
                         ?: error("Invalid study parameter $studyParam")
                     val assessmentList = db.visitMinions(Leader(study.ent, Assessment.Study)) {
                         val untested = minionList.filter { 0L == it[Assessment.PassCount] ?: 0L }
@@ -101,38 +106,23 @@ fun Application.module() {
             }
             route("study/{study}") {
                 get {
-                    val studyParam = call.parameters["study"]
                     val db = tomic.latest
-                    val study = db.readStudy(learner.ent, studyParam?.toLongOrNull())
-                        ?: error("Invalid study parameter $studyParam")
+                    val study = db.readStudy(call.parameters["study"], learner.ent)
                     val assessments = db.readAssessments(study)
                     call.respondHtml { renderStudy(call.request.uri, learner, study, assessments) }
                 }
                 post {
-                    tomic.latest.readStudy(
-                        owner = learner.ent,
-                        study = call.parameters["study"]?.toLongOrNull()
-                    )?.let { study ->
-                        val params: Parameters = call.receive()
-                        val productionResponse = params["production_response"]
-                        val listenResponse = params["listen_response"]
-                        val clozeResponse = params["cloze_fill"]
-                        when {
-                            productionResponse != null -> {
-                                val prompt = params["prompt"] ?: "UNKNOWN"
-                                val level = params["level"]?.toLongOrNull() ?: 0
-                                tomic.createProductionAssessment(study, productionResponse, prompt, level)
-                            }
-                            listenResponse != null -> {
-                                val prompt = params["listen_prompt"] ?: "うわー"
-                                val level = params["listen_level"]?.toLongOrNull() ?: 0
-                                tomic.createListenAssessment(study, listenResponse, prompt, level)
-                            }
-                            clozeResponse != null -> {
-                                val prompt = params["cloze_template"] ?: "{..}"
-                                val level = params["cloze_level"]?.toLongOrNull() ?: 0
-                                tomic.createClozeAssessment(study, clozeResponse, prompt, level)
-                            }
+                    call.parameters["study"]?.toLongOrNull()?.let { studyNumber ->
+                        val action = editStudyAction(
+                            call.receive(),
+                            studyNumber,
+                            learner.ent
+                        )
+                        action?.let {
+                            updateEditStudyModel(
+                                tomic,
+                                action
+                            )
                         }
                     }
                     call.respondRedirect(call.request.uri)
@@ -155,11 +145,15 @@ fun Application.module() {
     }
 }
 
+private fun Database.readStudy(studyParam: String?, learnerNumber: Long): Minion<Study.Owner> {
+    return readStudy(studyParam?.toLongOrNull(), learnerNumber) ?: error("Invalid study parameter $studyParam")
+}
+
 private fun updateLearner(learner: Peer<Learner.Name, String>, params: Parameters) {
     params["add_plan"]?.let { tomic.createPlan(learner.ent, it) }
     params["drop_plan"]?.toLongOrNull()?.let { tomic.deletePlan(learner.ent, it) }
-    params["add_study"]?.let { tomic.createStudy(learner.ent, it) }
-    params["drop_study"]?.toLongOrNull()?.let { tomic.deleteStudy(learner.ent, it) }
+    params["add_study"]?.let { tomic.createStudy(it, learner.ent) }
+    params["drop_study"]?.toLongOrNull()?.let { tomic.deleteStudy(it, learner.ent) }
 }
 
 private fun updatePlan(plan: Long, params: Parameters) {

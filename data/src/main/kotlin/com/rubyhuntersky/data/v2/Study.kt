@@ -21,7 +21,7 @@ object Study : AttributeGroup {
     }
 }
 
-fun Tomic.createStudy(owner: Long, name: String): Minion<Study.Owner> {
+fun Tomic.createStudy(name: String, owner: Long): Minion<Study.Owner> {
     val leader = Leader(owner, Study.Owner)
     return formMinion(leader) { Study.Name set name }
 }
@@ -30,7 +30,7 @@ fun Database.readStudies(owner: Long): Set<Minion<Study.Owner>> {
     return minions(Leader(owner, Study.Owner))
 }
 
-fun Database.readStudy(owner: Long, study: Long?): Minion<Study.Owner>? {
+fun Database.readStudy(study: Long?, owner: Long): Minion<Study.Owner>? {
     return study?.let {
         minionOrNull(Leader(owner, Study.Owner), study)
     }
@@ -44,6 +44,6 @@ fun Tomic.updateStudy(
     return latest.minions(study.leader)
 }
 
-fun Tomic.deleteStudy(owner: Long, study: Long): Minion<Study.Owner>? {
+fun Tomic.deleteStudy(study: Long, owner: Long): Minion<Study.Owner>? {
     return unformMinion(Leader(owner, Study.Owner), study)
 }
