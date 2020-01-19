@@ -24,6 +24,9 @@ import io.ktor.routing.post
 import io.ktor.routing.route
 import io.ktor.routing.routing
 import io.ktor.server.engine.ShutDownUrl
+import kotlinx.html.body
+import kotlinx.html.form
+import kotlinx.html.submitInput
 import java.io.File
 
 fun main(args: Array<String>) {
@@ -55,8 +58,19 @@ fun Application.module() {
             resources("static")
         }
 
-        get("/") { call.respondRedirect("/user/only") }
-        route("/user/{user}") {
+        get("/") { call.respondRedirect("/start") }
+
+        route("start") {
+            get {
+                call.respondHtml {
+                    body {
+                        form(action = "/user/only") { submitInput { value = "Sign In" } }
+                    }
+                }
+            }
+        }
+
+        route("user/{user}") {
             val learner = tomic.createLearner()
             get {
                 call.respondHtml { renderLearner(learner, tomic.latest) }
