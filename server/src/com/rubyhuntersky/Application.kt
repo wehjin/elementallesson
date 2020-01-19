@@ -108,17 +108,8 @@ fun Application.module() {
                 }
                 post {
                     call.parameters["study"]?.toLongOrNull()?.let { studyNumber ->
-                        val action = editStudyAction(
-                            call.receive(),
-                            studyNumber,
-                            learner.ent
-                        )
-                        action?.let {
-                            updateEditStudyModel(
-                                tomic,
-                                action
-                            )
-                        }
+                        val action = editStudyAction(call.receive(), studyNumber, learner.ent)
+                        action?.let { updateEditStudyModel(tomic, action) }
                     }
                     call.respondRedirect(call.request.uri)
                 }

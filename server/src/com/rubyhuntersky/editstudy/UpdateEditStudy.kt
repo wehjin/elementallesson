@@ -61,35 +61,17 @@ fun editStudyAction(params: Parameters, studyNumber: Long, learnerNumber: Long):
         productionResponse != null -> {
             val prompt = params["prompt"] ?: "UNKNOWN"
             val level = params["level"]?.toLongOrNull() ?: 0
-            CreateProduceAssessment(
-                studyNumber,
-                learnerNumber,
-                prompt,
-                productionResponse,
-                level
-            )
+            CreateProduceAssessment(studyNumber, learnerNumber, prompt, productionResponse, level)
         }
         listenResponse != null -> {
             val prompt = params["listen_prompt"] ?: "うわー"
             val level = params["listen_level"]?.toLongOrNull() ?: 0
-            CreateListenAssessment(
-                studyNumber,
-                learnerNumber,
-                listenResponse,
-                prompt,
-                level
-            )
+            CreateListenAssessment(studyNumber, learnerNumber, listenResponse, prompt, level)
         }
         clozeResponse != null -> {
             val prompt = params["cloze_template"] ?: "{..}"
             val level = params["cloze_level"]?.toLongOrNull() ?: 0
-            CreateClozeAssessment(
-                studyNumber,
-                learnerNumber,
-                clozeResponse,
-                prompt,
-                level
-            )
+            CreateClozeAssessment(studyNumber, learnerNumber, clozeResponse, prompt, level)
         }
         else -> null
     }

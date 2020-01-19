@@ -12,7 +12,7 @@ import kotlinx.html.*
 import java.util.*
 
 fun HTML.renderStudy(
-    addAssessmentAction: String,
+    actionUrl: String,
     learner: Peer<Learner.Name, String>,
     study: Minion<Study.Owner>,
     assessments: Set<Minion<Assessment.Study>>
@@ -36,9 +36,10 @@ fun HTML.renderStudy(
     }
     h3 { +"Add Assessment" }
     ul {
-        li { renderAddProduction(addAssessmentAction) }
-        li { renderAddListen(addAssessmentAction) }
-        li { renderAddCloze(addAssessmentAction) }
+        li { renderAddProduction(actionUrl) }
+        li { renderAddListen(actionUrl) }
+        li { renderAddCloze(actionUrl) }
+        li { renderImportJson(actionUrl) }
     }
 }
 
@@ -75,14 +76,19 @@ fun OL.renderAssessment(assessment: Minion<Assessment.Study>): Unit? {
     }
 }
 
-fun listenUrl(prompt: String) =
-    "http://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&q=${prompt}&tl=ja"
-
-val pseudoEllipsis = Regex("[^.][.][.][^.]")
+private fun LI.renderImportJson(actionUrl: String) {
+    form(action = actionUrl, method = FormMethod.post, encType = FormEncType.multipartFormData) {
+        fileInput(name = "import_filepath") {
+            multiple = false
+            accept = ".json"
+            required = true
+        }
+        submitInput { value = "Import" }
+    }
+}
 
 private fun LI.renderAddCloze(addAssessmentAction: String) {
     form(action = addAssessmentAction, method = FormMethod.post) {
-
         +" ["
         textInput(name = "cloze_level") {
             type = InputType.number
@@ -107,7 +113,6 @@ private fun LI.renderAddCloze(addAssessmentAction: String) {
 
 private fun LI.renderAddListen(addAssessmentAction: String) {
     form(action = addAssessmentAction, method = FormMethod.post) {
-
         +" ["
         textInput(name = "listen_level") {
             type = InputType.number
@@ -153,3 +158,8 @@ private fun LI.renderAddProduction(addAssessmentAction: String) {
         submitInput { value = "Add Production" }
     }
 }
+
+fun listenUrl(prompt: String) =
+    "http://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&q=${prompt}&tl=ja"
+
+val pseudoEllipsis = Regex("[^.][.][.][^.]")
