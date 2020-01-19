@@ -11,10 +11,7 @@ import com.rubyhuntersky.tomedb.minion.Leader
 import com.rubyhuntersky.tomedb.minion.Minion
 import com.rubyhuntersky.tomedb.minion.visitMinions
 import com.rubyhuntersky.tomedb.tomicOf
-import io.ktor.application.Application
-import io.ktor.application.call
-import io.ktor.application.install
-import io.ktor.application.log
+import io.ktor.application.*
 import io.ktor.features.CallLogging
 import io.ktor.features.DefaultHeaders
 import io.ktor.html.respondHtml
@@ -88,10 +85,8 @@ fun Application.module() {
             }
             route("session/{study}") {
                 get {
-                    val studyParam = call.parameters["study"]
                     val db = tomic.latest
-                    val study = db.readStudy(studyParam?.toLongOrNull(), learner.ent)
-                        ?: error("Invalid study parameter $studyParam")
+                    val study = db.readStudy(call, learner.ent)
                     val assessmentList = db.visitMinions(Leader(study.ent, Assessment.Study)) {
                         val untested = minionList.filter { 0L == it[Assessment.PassCount] ?: 0L }
                         untested.shuffled().take(5)
@@ -107,9 +102,9 @@ fun Application.module() {
             route("study/{study}") {
                 get {
                     val db = tomic.latest
-                    val study = db.readStudy(call.parameters["study"], learner.ent)
+                    val study = db.readStudy(call, learner.ent)
                     val assessments = db.readAssessments(study)
-                    call.respondHtml { renderStudy(call.request.uri, learner, study, assessments) }
+                    this.call.respondHtml { renderStudy(call.request.uri, learner, study, assessments) }
                 }
                 post {
                     call.parameters["study"]?.toLongOrNull()?.let { studyNumber ->
@@ -145,8 +140,9 @@ fun Application.module() {
     }
 }
 
-private fun Database.readStudy(studyParam: String?, learnerNumber: Long): Minion<Study.Owner> {
-    return readStudy(studyParam?.toLongOrNull(), learnerNumber) ?: error("Invalid study parameter $studyParam")
+private fun Database.readStudy(call: ApplicationCall, learnerNumber: Long): Minion<Study.Owner> {
+    return readStudy(call.parameters["study"]?.toLongOrNull(), learnerNumber)
+        ?: error("Invalid study parameter ${call.parameters["study"]}")
 }
 
 private fun updateLearner(learner: Peer<Learner.Name, String>, params: Parameters) {
