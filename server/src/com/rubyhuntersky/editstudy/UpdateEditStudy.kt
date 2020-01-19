@@ -1,5 +1,6 @@
 package com.rubyhuntersky.editstudy
 
+import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.rubyhuntersky.data.v2.createClozeAssessment
 import com.rubyhuntersky.data.v2.createListenAssessment
@@ -44,6 +45,12 @@ data class CreateClozeAssessment(
     val level: Long
 ) : EditStudyAction()
 
+data class ImportJsonAssessments(
+    override val studyNumber: Long,
+    override val learnerNumber: Long,
+    val jsonObject: JsonObject
+) : EditStudyAction()
+
 fun updateEditStudyModel(tomic: Tomic, action: EditStudyAction) {
     val study = tomic.latest.readStudy(action.studyNumber, action.learnerNumber)
     study?.let {
@@ -56,6 +63,9 @@ fun updateEditStudyModel(tomic: Tomic, action: EditStudyAction) {
             }
             is CreateClozeAssessment -> {
                 tomic.createClozeAssessment(it, action.fill, action.template, action.level)
+            }
+            is ImportJsonAssessments -> {
+                println("JSON-ASSESSMENTS: ${action.jsonObject}")
             }
         }
     }
@@ -86,29 +96,24 @@ fun editStudyAction(params: Parameters, studyNumber: Long, learnerNumber: Long):
 }
 
 suspend fun editStudyAction(call: ApplicationCall, learnerNumber: Long): EditStudyAction? {
-    val studyNumber = call.parameters["study"]?.toLongOrNull()
-    return studyNumber?.let {
+    return call.parameters["study"]?.toLongOrNull()?.let { studyNumber ->
         if (call.request.isMultipart()) {
+            var element: JsonObject? = null
             call.receiveMultipart().forEachPart { part ->
-                when (part) {
-                    is PartData.FormItem -> TODO()
-                    is PartData.FileItem -> {
-                        val originalName = part.originalFileName ?: error("No original file name: $part")
-                        println("ORIGINAL NAME: $originalName")
-                        part.streamProvider().use { inputStream ->
-                            val element = JsonParser().parse(inputStream.bufferedReader()).asJsonObject
-                            println("ELEMENT: $element")
-                            val level = element["level"].asLong
-                            println("LEVEL: $level")
+                if (element == null) {
+                    when (part) {
+                        is PartData.FileItem -> part.streamProvider().use {
+                            element = JsonParser().parse(it.bufferedReader()).asJsonObject
                         }
+                        is PartData.FormItem -> error("Multipart form items are not supported")
+                        is PartData.BinaryItem -> error("Multipart binary items are not supported")
                     }
-                    is PartData.BinaryItem -> TODO()
                 }
                 part.dispose()
             }
-            null
+            element?.let { ImportJsonAssessments(studyNumber, learnerNumber, it) }
         } else {
-            editStudyAction(call.receive(), it, learnerNumber)
+            editStudyAction(call.receive(), studyNumber, learnerNumber)
         }
     }
 }
