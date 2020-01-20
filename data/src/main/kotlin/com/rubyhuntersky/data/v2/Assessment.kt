@@ -66,6 +66,11 @@ object Assessment : AttributeGroup {
         override val description: String = "The level of the assessment"
         override val scriber: Scriber<Long> = LongScriber
     }
+
+    object Source : AttributeInObject<String>() {
+        override val description: String = "The source of the assessment"
+        override val scriber: Scriber<String> = StringScriber
+    }
 }
 
 fun Database.createAudit(study: Minion<Study.Owner>): List<Minion<Assessment.Study>> {

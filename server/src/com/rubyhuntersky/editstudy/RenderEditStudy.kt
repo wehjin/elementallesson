@@ -32,7 +32,10 @@ fun HTML.renderStudy(
     h2 { +"Assessments" }
     ol {
         val past = Date(1000)
-        assessments.sortedBy { it[Assessment.Creation] ?: past }.mapNotNull { renderAssessment(it) }
+        assessments.sortedBy { it[Assessment.Creation] ?: past }
+            .forEach {
+                renderAssessment(it)
+            }
     }
     h3 { +"Add Assessment" }
     ul {
@@ -43,7 +46,7 @@ fun HTML.renderStudy(
     }
 }
 
-fun OL.renderAssessment(assessment: Minion<Assessment.Study>): Unit? {
+fun OL.renderAssessment(assessment: Minion<Assessment.Study>) {
     val level = assessment[Assessment.Level] ?: 0
     val productionResponse = assessment[Assessment.ProductionResponse]
     val listenResponse = assessment[Assessment.ListenResponse]
@@ -72,7 +75,7 @@ fun OL.renderAssessment(assessment: Minion<Assessment.Study>): Unit? {
                 +"[ L$level ] $prompt → $clozeFill"
             }
         }
-        else -> null
+        else -> Unit
     }
 }
 
