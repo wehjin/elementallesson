@@ -77,8 +77,44 @@ private fun Tomic.importJsonAssessments(study: Minion<Study.Owner>, jsonObject: 
     val assessments = latest.readAssessments(study)
     val level = jsonObject["level"].asLong
     reformMinions(Leader(study.ent, Assessment.Study)) {
-        val produceListen = jsonObject["produce-listen"].asJsonArray
-        val listenReforms = Unit.let {
+        val clozeReforms = jsonObject["cloze"].asJsonArray?.let { cloze ->
+            val existingCloze = assessments
+                .filter {
+                    (it[Assessment.Level] ?: -1L) == level
+                            && it[Assessment.Source] == "import"
+                            && it[Assessment.ClozeTemplate] != null
+                }
+                .associateBy {
+                    val template = it[Assessment.ClozeTemplate] ?: "no-template"
+                    val fill = it[Assessment.ClozeFill] ?: "no-fill"
+                    ClozeKey(template, fill, level)
+                }
+            val byClozeKey = cloze.associateBy {
+                ClozeKey(clozeTemplate(it), clozeFill(it), level)
+            }
+            val addsAndUpdates = byClozeKey.entries.map { (key, _) ->
+                val exists = existingCloze[key]
+                if (exists == null) {
+                    formMinion {
+                        Assessment.ClozeTemplate set key.template
+                        Assessment.ClozeFill set key.fill
+                        Assessment.Level set level
+                        Assessment.Creation set Date()
+                        Assessment.Source set "import"
+                    }
+                } else {
+                    reformMinion(exists.ent) {
+                        if (minion[Assessment.ClozeTemplate] != key.template) Assessment.ProductionResponse set key.template
+                        if (minion[Assessment.ClozeFill] != key.fill) Assessment.Prompt set key.fill
+                    }
+                }
+            }.flatten()
+            val removes = existingCloze.filter { (key, _) -> !byClozeKey.contains(key) }
+                .map { (_, minion) -> unform(minion) }
+                .flatten()
+            addsAndUpdates + removes
+        } ?: emptyList()
+        val listenReforms = jsonObject["produce-listen"].asJsonArray?.let { produceListen ->
             val existingListen = assessments
                 .filter {
                     (it[Assessment.Level] ?: -1L) == level
@@ -110,12 +146,12 @@ private fun Tomic.importJsonAssessments(study: Minion<Study.Owner>, jsonObject: 
                     }
                 }
             }.flatten()
-            val removes = existingListen.filter { (key, _) -> !byListenKey.keys.contains(key) }
+            val removes = existingListen.filter { (key, _) -> !byListenKey.contains(key) }
                 .map { (_, minion) -> unform(minion) }
                 .flatten()
             addsAndUpdates + removes
-        }
-        val produceReforms = Unit.let {
+        } ?: emptyList()
+        val produceReforms = jsonObject["produce-listen"].asJsonArray?.let { produceListen ->
             val existingProduce = assessments
                 .filter {
                     (it[Assessment.Level] ?: -1L) == level
@@ -145,14 +181,17 @@ private fun Tomic.importJsonAssessments(study: Minion<Study.Owner>, jsonObject: 
                     }
                 }
             }.flatten()
-            val removes = existingProduce.filter { (key, _) -> !byProduceKey.keys.contains(key) }
+            val removes = existingProduce.filter { (key, _) -> !byProduceKey.contains(key) }
                 .map { (_, minion) -> unform(minion) }
                 .flatten()
             addsAndUpdates + removes
-        }
-        reforms = produceReforms + listenReforms
+        } ?: emptyList()
+        reforms = produceReforms + listenReforms + clozeReforms
     }
 }
+
+private fun clozeTemplate(it: JsonElement?): String = (it as JsonObject)["from"].asString
+private fun clozeFill(it: JsonElement?): String = (it as JsonObject)["to"].asJsonArray.first().asString
 
 private fun producePrompt(it: JsonElement?): String = (it as JsonObject)["from"].asString
 private fun produceResponse(it: JsonElement?): String = (it as JsonObject)["to"].asString
@@ -178,6 +217,12 @@ data class ProduceKey(
 data class ListenKey(
     val search: String,
     val response: String,
+    val level: Long
+)
+
+data class ClozeKey(
+    val template: String,
+    val fill: String,
     val level: Long
 )
 
