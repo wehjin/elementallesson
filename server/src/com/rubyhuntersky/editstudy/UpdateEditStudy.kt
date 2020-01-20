@@ -78,19 +78,56 @@ private fun Tomic.importJsonAssessments(study: Minion<Study.Owner>, jsonObject: 
     val level = jsonObject["level"].asLong
     reformMinions(Leader(study.ent, Assessment.Study)) {
         val produceListen = jsonObject["produce-listen"].asJsonArray
+        val listenReforms = Unit.let {
+            val existingListen = assessments
+                .filter {
+                    (it[Assessment.Level] ?: -1L) == level
+                            && it[Assessment.Source] == "import"
+                            && it[Assessment.ListenPrompt] != null
+                }
+                .associateBy {
+                    val search = it[Assessment.ListenPrompt] ?: "no-search"
+                    val response = it[Assessment.ListenResponse] ?: "no-response"
+                    ListenKey(search, response, level)
+                }
+            val byListenKey = produceListen.associateBy {
+                ListenKey(listenSearch(it), listenResponse(it), level)
+            }
+            val addsAndUpdates = byListenKey.entries.map { (key, _) ->
+                val exists = existingListen[key]
+                if (exists == null) {
+                    formMinion {
+                        Assessment.ListenResponse set key.response
+                        Assessment.ListenPrompt set key.search
+                        Assessment.Level set level
+                        Assessment.Creation set Date()
+                        Assessment.Source set "import"
+                    }
+                } else {
+                    reformMinion(exists.ent) {
+                        if (minion[Assessment.ListenResponse] != key.response) Assessment.ProductionResponse set key.response
+                        if (minion[Assessment.ListenPrompt] != key.search) Assessment.Prompt set key.search
+                    }
+                }
+            }.flatten()
+            val removes = existingListen.filter { (key, _) -> !byListenKey.keys.contains(key) }
+                .map { (_, minion) -> unform(minion) }
+                .flatten()
+            addsAndUpdates + removes
+        }
         val produceReforms = Unit.let {
             val existingProduce = assessments
                 .filter {
                     (it[Assessment.Level] ?: -1L) == level
-                            && it[Assessment.Prompt] != null
                             && it[Assessment.Source] == "import"
+                            && it[Assessment.Prompt] != null
                 }
                 .associateBy {
                     val prompt = it[Assessment.Prompt] ?: "Untitled"
                     val response = it[Assessment.ProductionResponse] ?: "Unanswered"
                     ProduceKey(prompt, response, level)
                 }
-            val byProduceKey = produceListen.associateBy { ProduceKey(fromField(it), toField(it), level) }
+            val byProduceKey = produceListen.associateBy { ProduceKey(producePrompt(it), produceResponse(it), level) }
             val addsAndUpdates = byProduceKey.entries.map { (key, _) ->
                 val exists = existingProduce[key]
                 if (exists == null) {
@@ -109,21 +146,37 @@ private fun Tomic.importJsonAssessments(study: Minion<Study.Owner>, jsonObject: 
                 }
             }.flatten()
             val removes = existingProduce.filter { (key, _) -> !byProduceKey.keys.contains(key) }
-                .map { (_, minion) ->
-                    unform(minion)
-                }
+                .map { (_, minion) -> unform(minion) }
                 .flatten()
             addsAndUpdates + removes
         }
-        reforms = produceReforms
+        reforms = produceReforms + listenReforms
     }
 }
 
-private fun toField(it: JsonElement?): String = (it as JsonObject)["to"].asString
-private fun fromField(it: JsonElement?): String = (it as JsonObject)["from"].asString
+private fun producePrompt(it: JsonElement?): String = (it as JsonObject)["from"].asString
+private fun produceResponse(it: JsonElement?): String = (it as JsonObject)["to"].asString
+
+private fun listenSearch(jsonElement: JsonElement?): String {
+    val jsonObject = jsonElement as JsonObject
+    return when {
+        jsonObject.has("to-search") -> jsonObject["to-search"].asString
+        jsonObject.has("to") -> jsonObject["to"].asString
+        else -> "no-search"
+    }
+}
+
+private fun listenResponse(jsonElement: JsonElement?): String = (jsonElement as JsonObject)["from"].asString
+
 
 data class ProduceKey(
     val prompt: String,
+    val response: String,
+    val level: Long
+)
+
+data class ListenKey(
+    val search: String,
     val response: String,
     val level: Long
 )
