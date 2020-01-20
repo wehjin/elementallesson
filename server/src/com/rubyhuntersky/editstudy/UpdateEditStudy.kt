@@ -7,6 +7,7 @@ import com.rubyhuntersky.data.v2.*
 import com.rubyhuntersky.tomedb.Tomic
 import com.rubyhuntersky.tomedb.get
 import com.rubyhuntersky.tomedb.minion.Leader
+import com.rubyhuntersky.tomedb.minion.Minion
 import com.rubyhuntersky.tomedb.minion.reformMinions
 import com.rubyhuntersky.tomedb.minion.unform
 import io.ktor.application.ApplicationCall
@@ -67,51 +68,54 @@ fun updateEditStudyModel(tomic: Tomic, action: EditStudyAction) {
             is CreateClozeAssessment -> {
                 tomic.createClozeAssessment(study, action.fill, action.template, action.level)
             }
-            is ImportJsonAssessments -> {
-                val db = tomic.latest
-                val assessments = db.readAssessments(study)
-                val level = action.jsonObject["level"].asLong
-                val existingProduce = assessments
-                    .filter {
-                        (it[Assessment.Level] ?: -1L) == level
-                                && it[Assessment.Prompt] != null
-                                && it[Assessment.Source] == "import"
-                    }
-                    .associateBy {
-                        val prompt = it[Assessment.Prompt] ?: "Untitled"
-                        val response = it[Assessment.ProductionResponse] ?: "Unanswered"
-                        ProduceKey(prompt, response, level)
-                    }
-                tomic.reformMinions(Leader(study.ent, Assessment.Study)) {
-                    val produceListen = action.jsonObject["produce-listen"].asJsonArray
-                    val byProduceKey = produceListen.associateBy { ProduceKey(fromField(it), toField(it), level) }
-                    val addsAndUpdates = byProduceKey.entries.map { (key, _) ->
-                        val exists = existingProduce[key]
-                        if (exists == null) {
-                            formMinion {
-                                Assessment.ProductionResponse set key.response
-                                Assessment.Prompt set key.prompt
-                                Assessment.Level set level
-                                Assessment.Creation set Date()
-                                Assessment.Source set "import"
-                            }
-                        } else {
-                            reformMinion(exists.ent) {
-                                if (minion[Assessment.ProductionResponse] != key.response) Assessment.ProductionResponse set key.response
-                                if (minion[Assessment.ProductionResponse] != key.prompt) Assessment.Prompt set key.prompt
-                            }
-                        }
-                    }.flatten()
-                    val removes = existingProduce.filter { (key, _) -> !byProduceKey.keys.contains(key) }
-                        .map { (_, minion) ->
-                            unform(minion)
-                        }
-                        .flatten()
-                    reforms = addsAndUpdates + removes
-                }
-                println("JSON-ASSESSMENTS: ${action.jsonObject}")
-            }
+            is ImportJsonAssessments -> tomic.importJsonAssessments(study, action.jsonObject)
         }
+    }
+}
+
+private fun Tomic.importJsonAssessments(study: Minion<Study.Owner>, jsonObject: JsonObject) {
+    val assessments = latest.readAssessments(study)
+    val level = jsonObject["level"].asLong
+    reformMinions(Leader(study.ent, Assessment.Study)) {
+        val produceListen = jsonObject["produce-listen"].asJsonArray
+        val produceReforms = Unit.let {
+            val existingProduce = assessments
+                .filter {
+                    (it[Assessment.Level] ?: -1L) == level
+                            && it[Assessment.Prompt] != null
+                            && it[Assessment.Source] == "import"
+                }
+                .associateBy {
+                    val prompt = it[Assessment.Prompt] ?: "Untitled"
+                    val response = it[Assessment.ProductionResponse] ?: "Unanswered"
+                    ProduceKey(prompt, response, level)
+                }
+            val byProduceKey = produceListen.associateBy { ProduceKey(fromField(it), toField(it), level) }
+            val addsAndUpdates = byProduceKey.entries.map { (key, _) ->
+                val exists = existingProduce[key]
+                if (exists == null) {
+                    formMinion {
+                        Assessment.ProductionResponse set key.response
+                        Assessment.Prompt set key.prompt
+                        Assessment.Level set level
+                        Assessment.Creation set Date()
+                        Assessment.Source set "import"
+                    }
+                } else {
+                    reformMinion(exists.ent) {
+                        if (minion[Assessment.ProductionResponse] != key.response) Assessment.ProductionResponse set key.response
+                        if (minion[Assessment.ProductionResponse] != key.prompt) Assessment.Prompt set key.prompt
+                    }
+                }
+            }.flatten()
+            val removes = existingProduce.filter { (key, _) -> !byProduceKey.keys.contains(key) }
+                .map { (_, minion) ->
+                    unform(minion)
+                }
+                .flatten()
+            addsAndUpdates + removes
+        }
+        reforms = produceReforms
     }
 }
 
