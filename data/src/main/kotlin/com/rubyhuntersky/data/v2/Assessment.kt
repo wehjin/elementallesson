@@ -15,7 +15,7 @@ object Assessment : AttributeGroup {
         override val scriber: Scriber<Long> = LongScriber
     }
 
-    object RunTime : AttributeInObject<Date>() {
+    object PassTime : AttributeInObject<Date>() {
         override val description: String = "A recent time at which the assessment was run"
         override val scriber: Scriber<Date> = DateScriber
     }
