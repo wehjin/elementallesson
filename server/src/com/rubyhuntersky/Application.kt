@@ -1,15 +1,13 @@
 package com.rubyhuntersky
 
 import com.rubyhuntersky.data.v2.*
+import com.rubyhuntersky.dostudy.*
 import com.rubyhuntersky.editstudy.editStudyAction
 import com.rubyhuntersky.editstudy.renderStudy
 import com.rubyhuntersky.editstudy.updateEditStudyModel
 import com.rubyhuntersky.tomedb.Peer
 import com.rubyhuntersky.tomedb.database.Database
-import com.rubyhuntersky.tomedb.get
-import com.rubyhuntersky.tomedb.minion.Leader
 import com.rubyhuntersky.tomedb.minion.Minion
-import com.rubyhuntersky.tomedb.minion.visitMinions
 import com.rubyhuntersky.tomedb.tomicOf
 import io.ktor.application.*
 import io.ktor.features.CallLogging
@@ -21,25 +19,35 @@ import io.ktor.http.content.static
 import io.ktor.request.receive
 import io.ktor.request.uri
 import io.ktor.response.respondRedirect
+import io.ktor.response.respondText
 import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.route
 import io.ktor.routing.routing
 import io.ktor.server.engine.ShutDownUrl
+import io.ktor.util.pipeline.PipelineContext
 import kotlinx.html.body
 import kotlinx.html.form
 import kotlinx.html.submitInput
 import java.io.File
+import java.util.*
+import kotlin.time.ExperimentalTime
 
 fun main(args: Array<String>) {
     io.ktor.server.netty.EngineMain.main(args)
 }
 
 private val homeDir = System.getenv("HOME")
+@Suppress("SpellCheckingInspection")
 private val appDir = File(homeDir, ".studycatastrophe")
 private val tomeDir = File(appDir, "tome")
 val tomic = tomicOf(tomeDir) { emptyList() }
 
+interface StudyNumberScope {
+    val studyNumber: Long
+}
+
+@ExperimentalTime
 @Suppress("unused") // Referenced in application.conf
 fun Application.module() {
     install(DefaultHeaders) {
@@ -84,19 +92,24 @@ fun Application.module() {
                 call.respondRedirect("/user/only")
             }
             route("session/{study}") {
+                fun PipelineContext<Unit, ApplicationCall>.doStudyVision(): DoStudyVision {
+                    val studyNumber = call.parameters["study"]?.toLongOrNull() ?: error("Unspecified study")
+                    return doStudyScope(learner) { initDoStudy(studyNumber, Date()) }
+                }
                 get {
-                    val db = tomic.latest
-                    val study = db.readStudy(call, learner.ent)
-                    val assessmentList = db.visitMinions(Leader(study.ent, Assessment.Study)) {
-                        val untested = minionList.filter { 0L == it[Assessment.PassCount] ?: 0L }
-                        untested.shuffled().take(5)
-                    }
-                    call.respondHtml {
-                        renderSession(call.request.uri, learner, study, assessmentList)
-                    }
+                    val vision = doStudyVision()
+                    call.respondHtml { renderDoStudy(call.request.uri, vision) }
                 }
                 post {
-                    call.respondRedirect(call.request.uri)
+                    val vision = doStudyVision()
+                    val params = call.receive<Parameters>()
+                    val action = when (params["actionType"]) {
+                        StartStudy::class.java.simpleName -> StartStudy()
+                        else -> error("No actionType in parameters: ${call.parameters}")
+                    }
+                    val newVision = doStudyScope(learner) { updateDoStudy(vision, action) }
+                    call.respondText("$newVision")
+                    //call.respondRedirect(call.request.uri)
                 }
             }
             route("study/{study}") {

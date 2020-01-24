@@ -1,55 +1,64 @@
 package com.rubyhuntersky.dostudy
 
-import com.rubyhuntersky.data.v2.Assessment
-import com.rubyhuntersky.data.v2.readAssessments
-import com.rubyhuntersky.data.v2.readStudy
+import com.rubyhuntersky.data.v2.*
 import com.rubyhuntersky.fillQuota
-import com.rubyhuntersky.tomedb.database.Database
+import com.rubyhuntersky.tomedb.Peer
+import com.rubyhuntersky.tomedb.Tomic
 import com.rubyhuntersky.tomedb.get
 import com.rubyhuntersky.tomedb.minion.Leader
 import com.rubyhuntersky.tomedb.minion.Minion
 import com.rubyhuntersky.tomedb.minion.minionOrNull
 import com.rubyhuntersky.tomedb.minion.reformMinion
-import com.rubyhuntersky.tomic
 import java.util.*
 import kotlin.math.pow
 import kotlin.time.ExperimentalTime
 import kotlin.time.days
 
-sealed class DoStudyVision {
-    abstract val learnerNumber: Long
-    abstract val studyNumber: Long
+fun <T> doStudyScope(learner: Peer<Learner.Name, String>, init: DoStudyScope.() -> T): T {
+    val scope = object : DoStudyScope {
+        override val tomic: Tomic = com.rubyhuntersky.tomic
+        override val learner: Peer<Learner.Name, String> = learner
+    }
+    return scope.init()
 }
 
-data class ReadyToStudy(
-    override val learnerNumber: Long,
-    override val studyNumber: Long,
-    val reviewCount: Int,
-    val newCount: Int,
-    val completed: List<Long>
-) : DoStudyVision()
-
-data class Studying(
-    override val learnerNumber: Long,
-    override val studyNumber: Long,
-    val assessmentVision: AssessmentVision,
-    val todo: List<Long>,
-    val done: List<Long>
-) : DoStudyVision()
-
-sealed class DoStudyAction
-data class StartStudy(val count: Int = 20, val split: Float = 0.5f) : DoStudyAction()
-data class RecordAssessment(val passed: Boolean) : DoStudyAction()
+interface DoStudyScope {
+    val tomic: Tomic
+    val learner: Peer<Learner.Name, String>
+}
 
 @ExperimentalTime
-fun updateDoStudy(vision: DoStudyVision, action: DoStudyAction): DoStudyVision {
+fun DoStudyScope.initDoStudy(
+    studyNumber: Long,
+    now: Date,
+    completed: List<Long>? = null
+): DoStudyVision {
+    val db = tomic.latest
+    val study = db.readStudy(studyNumber, learner.ent) ?: error("Study not found: $studyNumber")
+    val assessments = db.readAssessments(study)
+    val (new, awake, resting) = assessments.newAwakeResting(now)
+    return ReadyToStudy(
+        learnerNumber = learner.ent,
+        learnerName = learner[Learner.Name],
+        studyNumber = studyNumber,
+        studyName = study[Study.Name],
+        newCount = new.size,
+        awakeCount = awake.size,
+        restCount = resting.size,
+        completed = completed ?: emptyList()
+    )
+}
+
+@ExperimentalTime
+fun DoStudyScope.updateDoStudy(vision: DoStudyVision, action: DoStudyAction): DoStudyVision {
     val db = tomic.latest
     return when {
         vision is ReadyToStudy && action is StartStudy -> {
             val now = Date()
-            val assessments =
-                assessments(vision.studyNumber, vision.learnerNumber, db)
-            val (new, awake) = assessments.newAndAwake(now)
+            val study = db.readStudy(vision.studyNumber, vision.learnerNumber)
+                ?: error("Study not found: ${vision.studyNumber}")
+            val assessments = db.readAssessments(study)
+            val (new, awake) = assessments.newAwakeResting(now)
             val (newQuota, awakeQuota) = fillQuota(
                 action.count,
                 action.split,
@@ -61,7 +70,9 @@ fun updateDoStudy(vision: DoStudyVision, action: DoStudyAction): DoStudyVision {
             if (first == null) vision
             else Studying(
                 learnerNumber = vision.learnerNumber,
+                learnerName = vision.learnerName,
                 studyNumber = vision.studyNumber,
+                studyName = vision.studyName,
                 assessmentVision = vision(first),
                 todo = combined.mapNotNull { if (it.ent == first.ent) null else it.ent },
                 done = emptyList()
@@ -81,16 +92,13 @@ fun updateDoStudy(vision: DoStudyVision, action: DoStudyAction): DoStudyVision {
             val next = vision.todo.firstOrNull()
                 ?.let { tomic.latest.minionOrNull(Leader(vision.studyNumber, Assessment.Study), it) }
             if (next == null) {
-                initDoStudy(
-                    vision.studyNumber,
-                    vision.learnerNumber,
-                    Date(),
-                    done
-                )
+                initDoStudy(vision.studyNumber, Date(), done)
             } else {
                 Studying(
                     learnerNumber = vision.learnerNumber,
+                    learnerName = vision.learnerName,
                     studyNumber = vision.studyNumber,
+                    studyName = vision.studyName,
                     assessmentVision = vision(next),
                     todo = vision.todo.drop(1),
                     done = done
@@ -103,24 +111,10 @@ fun updateDoStudy(vision: DoStudyVision, action: DoStudyAction): DoStudyVision {
 
 
 @ExperimentalTime
-fun initDoStudy(studyNumber: Long, learnerNumber: Long, now: Date, completed: List<Long>? = null): DoStudyVision {
-    val db = tomic.latest
-    val assessments = assessments(studyNumber, learnerNumber, db)
-    val (new, awake) = assessments.newAndAwake(now)
-    return ReadyToStudy(
-        learnerNumber,
-        studyNumber,
-        awake.size,
-        new.size,
-        completed ?: emptyList()
-    )
-}
-
-@ExperimentalTime
-private fun Set<Minion<Assessment.Study>>.newAndAwake(now: Date): Pair<List<Minion<Assessment.Study>>, List<Minion<Assessment.Study>>> {
+private fun Set<Minion<Assessment.Study>>.newAwakeResting(now: Date): Triple<List<Minion<Assessment.Study>>, List<Minion<Assessment.Study>>, List<Minion<Assessment.Study>>> {
     val (new, passed) = this.partition { passCount(it) == 0L }
-    val (awake, _) = passed.partition { wakeTime(it).before(now) }
-    return Pair(new, awake)
+    val (awake, resting) = passed.partition { wakeTime(it).before(now) }
+    return Triple(new, awake, resting)
 }
 
 @ExperimentalTime
@@ -162,9 +156,4 @@ private fun passCount(assessment: Minion<Assessment.Study>): Long = assessment[A
 private fun shuffleLevels(assessments: List<Minion<Assessment.Study>>): List<Minion<Assessment.Study>> {
     val byLevel = assessments.groupBy { it[Assessment.Level] ?: 0L }
     return byLevel.keys.sorted().mapNotNull { byLevel[it]?.shuffled() }.flatten()
-}
-
-private fun assessments(studyNumber: Long, learnerNumber: Long, db: Database): Set<Minion<Assessment.Study>> {
-    val study = db.readStudy(studyNumber, learnerNumber) ?: error("Study not found: $studyNumber")
-    return db.readAssessments(study)
 }

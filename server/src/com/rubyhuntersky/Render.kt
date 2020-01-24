@@ -1,7 +1,6 @@
 package com.rubyhuntersky
 
 import com.rubyhuntersky.data.v2.*
-import com.rubyhuntersky.editstudy.listenUrl
 import com.rubyhuntersky.tomedb.Peer
 import com.rubyhuntersky.tomedb.attributes.Attribute2
 import com.rubyhuntersky.tomedb.database.Database
@@ -10,53 +9,6 @@ import com.rubyhuntersky.tomedb.minion.Minion
 import kotlinx.html.*
 
 const val userUrl = "/user/only"
-
-fun HTML.renderSession(
-    reportUrl: String,
-    learner: Peer<Learner.Name, String>,
-    study: Minion<Study.Owner>,
-    assessmentList: List<Minion<Assessment.Study>>
-) {
-    head {
-        link {
-            rel = "stylesheet"
-            href = "/static/styles.css"
-        }
-        script {
-            type = "text/javascript"
-            src = "/static/session.js"
-        }
-    }
-    body {
-        h6 { a(userUrl) { +" ${learner[Learner.Name]}" } }
-        h3 { +"${study[Study.Name].nullIfBlank() ?: "Untitled"} Session" }
-        +"${assessmentList.size} remaining"
-
-        val assessment = assessmentList.first()
-        val producePrompt = assessment[Assessment.Prompt]
-        if (producePrompt != null) {
-            h1 { +producePrompt }
-            renderAnswerBlock(reportUrl) { +"${assessment[Assessment.ProductionResponse]}" }
-        }
-        val listenPrompt = assessment[Assessment.ListenPrompt]
-        if (listenPrompt != null) {
-            h1 {
-                audio {
-                    autoPlay = true
-                    controls = true
-                    autoBuffer = true
-                    src = listenUrl(listenPrompt)
-                }
-            }
-            renderAnswerBlock(reportUrl) { +"${assessment[Assessment.ListenResponse]}" }
-        }
-        val clozePrompt = assessment[Assessment.ClozeTemplate]
-        if (clozePrompt != null) {
-            h1 { +clozePrompt }
-            renderAnswerBlock(reportUrl) { +"${assessment[Assessment.ClozeFill]}" }
-        }
-    }
-}
 
 private fun BODY.renderAnswerBlock(reportUrl: String, answerBlock: H1.() -> Unit) {
     button {

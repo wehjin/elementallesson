@@ -55,5 +55,12 @@ dependencies {
     implementation "com.github.wehjin:tomedb:$tomedb_version"
     implementation project(':data')
     testCompile "io.ktor:ktor-server-tests:$ktor_version"
+    testImplementation('org.junit.jupiter:junit-jupiter:5.6.0')
 }
 
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
