@@ -3,6 +3,7 @@ package com.rubyhuntersky.dostudy
 import com.rubyhuntersky.editstudy.listenUrl
 import com.rubyhuntersky.nullIfBlank
 import com.rubyhuntersky.userUrl
+import io.ktor.http.Parameters
 import kotlinx.html.*
 
 fun HTML.renderDoStudy(actionUrl: String, vision: DoStudyVision) {
@@ -63,6 +64,13 @@ fun HTML.renderDoStudy(actionUrl: String, vision: DoStudyVision) {
     }
 }
 
+val Parameters.doStudyAction: DoStudyAction
+    get() = when (this["actionType"]) {
+        StartStudy::class.java.simpleName -> StartStudy()
+        RecordAssessment::class.java.simpleName -> RecordAssessment(this["passedFailed"] == "passed")
+        else -> error("No actionType in parameters: ${this}")
+    }
+
 private fun BODY.renderAnswerBlock(reportUrl: String, answerBlock: H1.() -> Unit) {
     button {
         id = "answerButton"
@@ -75,16 +83,17 @@ private fun BODY.renderAnswerBlock(reportUrl: String, answerBlock: H1.() -> Unit
         run(answerBlock)
     }
     form(reportUrl, method = FormMethod.post) {
+        hiddenInput { name = "actionType"; value = RecordAssessment::class.java.simpleName }
         p("obscured") {
             id = "reportP"
             select {
-                name = "report_select"
+                name = "passedFailed"
                 option {
-                    value = "fail_assessment"
+                    value = "failed"
                     +"Failed it!\u2003Repeat test."
                 }
                 option {
-                    value = "pass_assessment"
+                    value = "passed"
                     +"Nailed it.\u2003Rest then retest."
                 }
             }

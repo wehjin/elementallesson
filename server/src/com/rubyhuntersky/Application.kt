@@ -125,13 +125,7 @@ fun Application.module() {
                 post {
                     val story = call.sessions.get<StudySession>()?.let { doStudyStories[it.storyNumber] }
                     story?.let {
-                        val action = call.receive<Parameters>().let { params ->
-                            when (params["actionType"]) {
-                                StartStudy::class.java.simpleName -> StartStudy()
-                                else -> error("No DoStudyAction in parameters: ${call.parameters}")
-                            }
-                        }
-                        story.messages.send(ActionRender(action, null))
+                        story.messages.send(ActionRender(call.receive<Parameters>().doStudyAction, null))
                         call.respondRedirect(call.request.uri)
                     } ?: call.respondRedirect(learnerUrl)
                 }

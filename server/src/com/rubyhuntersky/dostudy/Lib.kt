@@ -87,30 +87,43 @@ fun LearnerScope.updateDoStudy(vision: DoStudyVision, action: DoStudyAction): Do
         vision is ReadyToStudy && action is StartStudy -> startStudy(vision, action)
         vision is Studying && action is RecordAssessment -> {
             val previous = vision.assessmentVision
-            tomic.reformMinion(Leader(vision.studyNumber, Assessment.Study), previous.assessmentNumber) {
+            val reformed = tomic.reformMinion(Leader(vision.studyNumber, Assessment.Study), previous.assessmentNumber) {
                 if (action.passed) {
                     Assessment.PassCount set (previous.passCount + 1)
                     Assessment.PassTime set Date()
                 } else {
                     Assessment.PassCount set 0
+
                 }
             }
-            val done = vision.done + previous.assessmentNumber
-            val next = vision.todo.firstOrNull()
-                ?.let { tomic.latest.minionOrNull(Leader(vision.studyNumber, Assessment.Study), it) }
-            if (next == null) {
-                initDoStudy(vision.studyNumber, Date(), done)
+            val (done, next, todo) = if (action.passed) {
+                val done = vision.done + previous.assessmentNumber
+                val next = vision.todo.firstOrNull()?.let {
+                    tomic.latest.minionOrNull(Leader(vision.studyNumber, Assessment.Study), it)
+                }
+                val todo = vision.todo.drop(1)
+                Triple(done, next, todo)
             } else {
+                val nominalNext = vision.todo.firstOrNull()?.let {
+                    tomic.latest.minionOrNull(Leader(vision.studyNumber, Assessment.Study), it)
+                }
+                if (nominalNext == null) {
+                    Triple(vision.done, reformed, vision.todo)
+                } else {
+                    Triple(vision.done, nominalNext, vision.todo.drop(1) + previous.assessmentNumber)
+                }
+            }
+            next?.let {
                 Studying(
                     learnerNumber = vision.learnerNumber,
                     learnerName = vision.learnerName,
                     studyNumber = vision.studyNumber,
                     studyName = vision.studyName,
                     assessmentVision = vision(next),
-                    todo = vision.todo.drop(1),
+                    todo = todo,
                     done = done
                 )
-            }
+            } ?: initDoStudy(vision.studyNumber, Date(), done)
         }
         else -> error("Not implemented: $action $vision")
     }
