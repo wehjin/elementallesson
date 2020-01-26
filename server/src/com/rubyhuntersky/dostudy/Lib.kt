@@ -3,36 +3,68 @@ package com.rubyhuntersky.dostudy
 import com.rubyhuntersky.data.v2.*
 import com.rubyhuntersky.fillQuota
 import com.rubyhuntersky.tomedb.Peer
-import com.rubyhuntersky.tomedb.Tomic
 import com.rubyhuntersky.tomedb.get
 import com.rubyhuntersky.tomedb.minion.Leader
 import com.rubyhuntersky.tomedb.minion.Minion
 import com.rubyhuntersky.tomedb.minion.minionOrNull
 import com.rubyhuntersky.tomedb.minion.reformMinion
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.math.pow
+import kotlin.random.Random
 import kotlin.time.ExperimentalTime
 import kotlin.time.days
 
-fun <T> doStudyScope(learner: Peer<Learner.Name, String>, init: DoStudyScope.() -> T): T {
-    val scope = object : DoStudyScope {
-        override val tomic: Tomic = com.rubyhuntersky.tomic
-        override val learner: Peer<Learner.Name, String> = learner
-    }
-    return scope.init()
-}
+data class ActionRender(
+    val action: DoStudyAction?,
+    val render: Channel<DoStudyVision?>?
+)
 
-interface DoStudyScope {
-    val tomic: Tomic
-    val learner: Peer<Learner.Name, String>
+data class DoStudyStory(
+    val number: Int,
+    val messages: Channel<ActionRender>
+)
+
+@ExperimentalTime
+fun doStudy(
+    studyNumber: Long,
+    learner: Peer<Learner.Name, String>,
+    firstRender: Channel<DoStudyVision?>
+): DoStudyStory {
+    val messages = Channel<ActionRender>(10)
+    suspend fun receiveActionRender(oldVision: DoStudyVision?): Pair<DoStudyAction, Channel<DoStudyVision?>?> {
+        while (true) {
+            val (action, render) = messages.receive()
+            if (action == null) {
+                render?.send(oldVision)
+            } else {
+                return Pair(action, render)
+            }
+        }
+    }
+    GlobalScope.launch {
+        var vision: DoStudyVision? = learnerScope(learner) {
+            initDoStudy(studyNumber, Date())
+        }.also { firstRender.send(it) }
+        while (vision != null) {
+            val oldVision = vision
+            val (action, render) = receiveActionRender(oldVision)
+            vision = learnerScope(learner) {
+                updateDoStudy(oldVision, action)
+            }.also { render?.send(it) }
+        }
+    }
+    return DoStudyStory(Random.nextInt(), messages)
 }
 
 @ExperimentalTime
-fun DoStudyScope.initDoStudy(
+fun LearnerScope.initDoStudy(
     studyNumber: Long,
     now: Date,
     completed: List<Long>? = null
-): DoStudyVision {
+): ReadyToStudy {
     val db = tomic.latest
     val study = db.readStudy(studyNumber, learner.ent) ?: error("Study not found: $studyNumber")
     val assessments = db.readAssessments(study)
@@ -50,34 +82,9 @@ fun DoStudyScope.initDoStudy(
 }
 
 @ExperimentalTime
-fun DoStudyScope.updateDoStudy(vision: DoStudyVision, action: DoStudyAction): DoStudyVision {
-    val db = tomic.latest
+fun LearnerScope.updateDoStudy(vision: DoStudyVision, action: DoStudyAction): DoStudyVision {
     return when {
-        vision is ReadyToStudy && action is StartStudy -> {
-            val now = Date()
-            val study = db.readStudy(vision.studyNumber, vision.learnerNumber)
-                ?: error("Study not found: ${vision.studyNumber}")
-            val assessments = db.readAssessments(study)
-            val (new, awake) = assessments.newAwakeResting(now)
-            val (newQuota, awakeQuota) = fillQuota(
-                action.count,
-                action.split,
-                shuffleLevels(new),
-                awake
-            )
-            val combined = (newQuota + awakeQuota).shuffled()
-            val first = combined.firstOrNull()
-            if (first == null) vision
-            else Studying(
-                learnerNumber = vision.learnerNumber,
-                learnerName = vision.learnerName,
-                studyNumber = vision.studyNumber,
-                studyName = vision.studyName,
-                assessmentVision = vision(first),
-                todo = combined.mapNotNull { if (it.ent == first.ent) null else it.ent },
-                done = emptyList()
-            )
-        }
+        vision is ReadyToStudy && action is StartStudy -> startStudy(vision, action)
         vision is Studying && action is RecordAssessment -> {
             val previous = vision.assessmentVision
             tomic.reformMinion(Leader(vision.studyNumber, Assessment.Study), previous.assessmentNumber) {
@@ -107,6 +114,29 @@ fun DoStudyScope.updateDoStudy(vision: DoStudyVision, action: DoStudyAction): Do
         }
         else -> error("Not implemented: $action $vision")
     }
+}
+
+@ExperimentalTime
+private fun LearnerScope.startStudy(vision: DoStudyVision, action: StartStudy): DoStudyVision {
+    val db = tomic.latest
+    val now = Date()
+    val study = db.readStudy(vision.studyNumber, vision.learnerNumber)
+        ?: error("Study not found: ${vision.studyNumber}")
+    val assessments = db.readAssessments(study)
+    val (new, awake) = assessments.newAwakeResting(now)
+    val (newQuota, awakeQuota) = fillQuota(action.count, action.split, shuffleLevels(new), awake)
+    val combined = (newQuota + awakeQuota).shuffled()
+    val first = combined.firstOrNull()
+    return if (first == null) vision
+    else Studying(
+        learnerNumber = vision.learnerNumber,
+        learnerName = vision.learnerName,
+        studyNumber = vision.studyNumber,
+        studyName = vision.studyName,
+        assessmentVision = vision(first),
+        todo = combined.mapNotNull { if (it.ent == first.ent) null else it.ent },
+        done = emptyList()
+    )
 }
 
 

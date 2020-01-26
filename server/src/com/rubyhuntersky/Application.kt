@@ -19,23 +19,26 @@ import io.ktor.http.content.static
 import io.ktor.request.receive
 import io.ktor.request.uri
 import io.ktor.response.respondRedirect
-import io.ktor.response.respondText
 import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.route
 import io.ktor.routing.routing
 import io.ktor.server.engine.ShutDownUrl
-import io.ktor.util.pipeline.PipelineContext
+import io.ktor.sessions.*
+import kotlinx.coroutines.channels.Channel
 import kotlinx.html.body
 import kotlinx.html.form
 import kotlinx.html.submitInput
 import java.io.File
-import java.util.*
 import kotlin.time.ExperimentalTime
 
 fun main(args: Array<String>) {
     io.ktor.server.netty.EngineMain.main(args)
 }
+
+data class StudySession(
+    val storyNumber: Int
+)
 
 private val homeDir = System.getenv("HOME")
 @Suppress("SpellCheckingInspection")
@@ -43,9 +46,7 @@ private val appDir = File(homeDir, ".studycatastrophe")
 private val tomeDir = File(appDir, "tome")
 val tomic = tomicOf(tomeDir) { emptyList() }
 
-interface StudyNumberScope {
-    val studyNumber: Long
-}
+val doStudyStories = mutableMapOf<Int, DoStudyStory>()
 
 @ExperimentalTime
 @Suppress("unused") // Referenced in application.conf
@@ -62,6 +63,12 @@ fun Application.module() {
     }
 
     install(CallLogging)
+
+    install(Sessions) {
+        cookie<StudySession>("STUDY_SESSION_ID", SessionStorageMemory()) {
+            cookie.path = "/"
+        }
+    }
 
     routing {
         static("/static") {
@@ -82,6 +89,7 @@ fun Application.module() {
 
         route("user/{user}") {
             val learner = tomic.createLearner()
+            val learnerUrl = "/user/${learner.ent}"
             get {
                 call.respondHtml { renderLearner(learner, tomic.latest) }
             }
@@ -92,24 +100,40 @@ fun Application.module() {
                 call.respondRedirect("/user/only")
             }
             route("session/{study}") {
-                fun PipelineContext<Unit, ApplicationCall>.doStudyVision(): DoStudyVision {
-                    val studyNumber = call.parameters["study"]?.toLongOrNull() ?: error("Unspecified study")
-                    return doStudyScope(learner) { initDoStudy(studyNumber, Date()) }
-                }
                 get {
-                    val vision = doStudyVision()
-                    call.respondHtml { renderDoStudy(call.request.uri, vision) }
+                    val render = Channel<DoStudyVision?>(1)
+                    val sessionStory = call.sessions.get<StudySession>()?.let { doStudyStories[it.storyNumber] }
+                    val story = if (sessionStory == null) {
+                        val newStory = doStudy(
+                            studyNumber = call.parameters["study"]?.toLongOrNull() ?: error("Unspecified study"),
+                            learner = learner,
+                            firstRender = render
+                        )
+                        newStory.also {
+                            doStudyStories[newStory.number] = it
+                            call.sessions.set(StudySession(it.number))
+                        }
+                    } else {
+                        sessionStory.also {
+                            it.messages.send(ActionRender(null, render))
+                        }
+                    }
+                    render.receive()?.let { vision ->
+                        call.respondHtml { renderDoStudy(call.request.uri, vision) }
+                    } ?: call.respondRedirect(learnerUrl).also { doStudyStories.remove(story.number) }
                 }
                 post {
-                    val vision = doStudyVision()
-                    val params = call.receive<Parameters>()
-                    val action = when (params["actionType"]) {
-                        StartStudy::class.java.simpleName -> StartStudy()
-                        else -> error("No actionType in parameters: ${call.parameters}")
-                    }
-                    val newVision = doStudyScope(learner) { updateDoStudy(vision, action) }
-                    call.respondText("$newVision")
-                    //call.respondRedirect(call.request.uri)
+                    val story = call.sessions.get<StudySession>()?.let { doStudyStories[it.storyNumber] }
+                    story?.let {
+                        val action = call.receive<Parameters>().let { params ->
+                            when (params["actionType"]) {
+                                StartStudy::class.java.simpleName -> StartStudy()
+                                else -> error("No action in parameters: ${call.parameters}")
+                            }
+                        }
+                        story.messages.send(ActionRender(action, null))
+                        call.respondRedirect(call.request.uri)
+                    } ?: call.respondRedirect(learnerUrl)
                 }
             }
             route("study/{study}") {
