@@ -128,7 +128,7 @@ fun Application.module() {
                         val action = call.receive<Parameters>().let { params ->
                             when (params["actionType"]) {
                                 StartStudy::class.java.simpleName -> StartStudy()
-                                else -> error("No action in parameters: ${call.parameters}")
+                                else -> error("No DoStudyAction in parameters: ${call.parameters}")
                             }
                         }
                         story.messages.send(ActionRender(action, null))

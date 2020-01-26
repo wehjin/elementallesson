@@ -10,37 +10,6 @@ import kotlinx.html.*
 
 const val userUrl = "/user/only"
 
-private fun BODY.renderAnswerBlock(reportUrl: String, answerBlock: H1.() -> Unit) {
-    button {
-        id = "answerButton"
-        onClick = "revealAnswer()"
-        +"Check Answer"
-    }
-    h1("obscured") {
-        id = "answerP"
-        +"→\u2002"
-        run(answerBlock)
-    }
-    form(reportUrl, method = FormMethod.post) {
-        p("obscured") {
-            id = "reportP"
-            select {
-                name = "report_select"
-                option {
-                    value = "fail_assessment"
-                    +"Failed it!\u2003Repeat test."
-                }
-                option {
-                    value = "pass_assessment"
-                    +"Nailed it.\u2003Rest then retest."
-                }
-            }
-            +"\u2003"
-            submitInput { value = "Next" }
-        }
-    }
-}
-
 fun HTML.renderPlan(learner: Peer<Learner.Name, String>, plan: Long) = body {
     h6 { a(userUrl) { +" ${learner[Learner.Name]}" } }
     form(userUrl, method = FormMethod.post) {
