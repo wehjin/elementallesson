@@ -101,17 +101,27 @@ fun Application.module() {
             }
             route("session/{study}") {
                 get {
+                    val studyNumber = call.parameters["study"]?.toLongOrNull() ?: error("Unspecified study")
                     val render = Channel<DoStudyVision?>(1)
-                    val sessionStory = call.sessions.get<StudySession>()?.let { doStudyStories[it.storyNumber] }
+                    val sessionStory = call.sessions.get<StudySession>()?.let { studySession ->
+                        doStudyStories[studySession.storyNumber]?.let {
+                            if (it.learnerNumber == learner.ent && it.studyNumber == studyNumber) {
+                                it
+                            } else {
+                                doStudyStories.remove(studySession.storyNumber)
+                                null
+                            }
+                        }
+                    }
                     val story = if (sessionStory == null) {
                         val newStory = doStudy(
-                            studyNumber = call.parameters["study"]?.toLongOrNull() ?: error("Unspecified study"),
+                            studyNumber = studyNumber,
                             learner = learner,
                             firstRender = render
                         )
                         newStory.also {
-                            doStudyStories[newStory.number] = it
-                            call.sessions.set(StudySession(it.number))
+                            doStudyStories[newStory.storyNumber] = it
+                            call.sessions.set(StudySession(it.storyNumber))
                         }
                     } else {
                         sessionStory.also {
@@ -120,7 +130,7 @@ fun Application.module() {
                     }
                     render.receive()?.let { vision ->
                         call.respondHtml { renderDoStudy(call.request.uri, vision) }
-                    } ?: call.respondRedirect(learnerUrl).also { doStudyStories.remove(story.number) }
+                    } ?: call.respondRedirect(learnerUrl).also { doStudyStories.remove(story.storyNumber) }
                 }
                 post {
                     val story = call.sessions.get<StudySession>()?.let { doStudyStories[it.storyNumber] }

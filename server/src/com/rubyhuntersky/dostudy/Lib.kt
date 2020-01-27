@@ -23,7 +23,9 @@ data class ActionRender(
 )
 
 data class DoStudyStory(
-    val number: Int,
+    val learnerNumber: Long,
+    val studyNumber: Long,
+    val storyNumber: Int,
     val messages: Channel<ActionRender>
 )
 
@@ -56,7 +58,12 @@ fun doStudy(
             }.also { render?.send(it) }
         }
     }
-    return DoStudyStory(Random.nextInt(), messages)
+    return DoStudyStory(
+        learnerNumber = learner.ent,
+        studyNumber = studyNumber,
+        storyNumber = Random.nextInt(),
+        messages = messages
+    )
 }
 
 @ExperimentalTime

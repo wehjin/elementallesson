@@ -77,6 +77,7 @@ private fun Tomic.importJsonAssessments(study: Minion<Study.Owner>, jsonObject: 
     val assessments = latest.readAssessments(study)
     val level = jsonObject["level"].asLong
     reformMinions(Leader(study.ent, Assessment.Study)) {
+        val enableRemove = false
         val clozeReforms = jsonObject["cloze"].asJsonArray?.let { cloze ->
             val existingCloze = assessments
                 .filter {
@@ -109,10 +110,14 @@ private fun Tomic.importJsonAssessments(study: Minion<Study.Owner>, jsonObject: 
                     }
                 }
             }.flatten()
-            val removes = existingCloze.filter { (key, _) -> !byClozeKey.contains(key) }
-                .map { (_, minion) -> unform(minion) }
-                .flatten()
-            addsAndUpdates + removes
+            if (enableRemove) {
+                val removes = existingCloze.filter { (key, _) -> !byClozeKey.contains(key) }
+                    .map { (_, minion) -> unform(minion) }
+                    .flatten()
+                addsAndUpdates + removes
+            } else {
+                addsAndUpdates
+            }
         } ?: emptyList()
         val listenReforms = jsonObject["produce-listen"].asJsonArray?.let { produceListen ->
             val existingListen = assessments
@@ -146,10 +151,12 @@ private fun Tomic.importJsonAssessments(study: Minion<Study.Owner>, jsonObject: 
                     }
                 }
             }.flatten()
-            val removes = existingListen.filter { (key, _) -> !byListenKey.contains(key) }
-                .map { (_, minion) -> unform(minion) }
-                .flatten()
-            addsAndUpdates + removes
+            if (enableRemove) {
+                val removes = existingListen.filter { (key, _) -> !byListenKey.contains(key) }
+                    .map { (_, minion) -> unform(minion) }
+                    .flatten()
+                addsAndUpdates + removes
+            } else addsAndUpdates
         } ?: emptyList()
         val produceReforms = jsonObject["produce-listen"].asJsonArray?.let { produceListen ->
             val existingProduce = assessments
@@ -181,10 +188,12 @@ private fun Tomic.importJsonAssessments(study: Minion<Study.Owner>, jsonObject: 
                     }
                 }
             }.flatten()
-            val removes = existingProduce.filter { (key, _) -> !byProduceKey.contains(key) }
-                .map { (_, minion) -> unform(minion) }
-                .flatten()
-            addsAndUpdates + removes
+            if (enableRemove) {
+                val removes = existingProduce.filter { (key, _) -> !byProduceKey.contains(key) }
+                    .map { (_, minion) -> unform(minion) }
+                    .flatten()
+                addsAndUpdates + removes
+            } else addsAndUpdates
         } ?: emptyList()
         reforms = produceReforms + listenReforms + clozeReforms
     }
